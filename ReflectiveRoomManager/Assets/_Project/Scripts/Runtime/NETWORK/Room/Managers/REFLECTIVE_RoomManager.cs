@@ -11,10 +11,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     public class REFLECTIVE_RoomManager : REFLECTIVE_BaseRoomManager
     {
         [ServerCallback]
-        public override void CreateRoom(NetworkConnection conn = null, REFLECTIVE_RoomInfo reflectiveRoomInfo = default)
+        public override void CreateRoom(NetworkConnection conn = null, REFLECTIVE_RoomInfo roomInfo = default)
         {
-            var roomName = reflectiveRoomInfo.Name;
-            var maxPlayers = reflectiveRoomInfo.MaxPlayers;
+            var roomName = roomInfo.Name;
+            var maxPlayers = roomInfo.MaxPlayers;
 
             if (m_rooms.Any(room => room.RoomName == roomName)) return;
 
@@ -29,18 +29,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             {
                 SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Created);
 
-                REFLECTIVE_SceneManager.LoadScene(reflectiveRoomInfo.SceneName, LoadSceneMode.Additive,
+                REFLECTIVE_SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Additive,
                     scene =>
                     {
                         room.Scene = scene;
                         JoinRoom(conn.identity.connectionToClient, roomName);
                     });
-
-                return;
             }
-
-            REFLECTIVE_SceneManager.LoadScene(reflectiveRoomInfo.SceneName, LoadSceneMode.Additive,
-                scene => room.Scene = scene);
+            else
+                REFLECTIVE_SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Additive,
+                    scene => room.Scene = scene);
+            
+            Invoke_OnServerCreatedRoom(roomInfo);
         }
 
         [ServerCallback]

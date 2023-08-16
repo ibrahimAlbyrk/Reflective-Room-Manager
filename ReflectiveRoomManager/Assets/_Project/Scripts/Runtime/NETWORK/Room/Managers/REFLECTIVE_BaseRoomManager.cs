@@ -39,7 +39,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         #region Events
 
         //Server Side
-        public static event System.Action<REFLECTIVE_RoomListInfo, REFLECTIVE_RoomListInfo> OnServerCreatedRoom;
+        public static event System.Action<REFLECTIVE_RoomListInfo, REFLECTIVE_RoomListInfo> OnServerRoomListChanged;
+        public static event System.Action<REFLECTIVE_RoomInfo> OnServerCreatedRoom;
         public static event System.Action<NetworkConnectionToClient> OnServerJoinedRoom;
         public static event System.Action<NetworkConnectionToClient> OnServerExitedRoom;
         public static event System.Action<NetworkConnection> OnServerDisconnectedRoom;
@@ -55,8 +56,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Event Caller Methods
         
-        protected static void Invoke_OnServerCreatedRoom(REFLECTIVE_RoomListInfo oldRoomInfo,
-            REFLECTIVE_RoomListInfo newRoomInfo) => OnServerCreatedRoom?.Invoke(oldRoomInfo, newRoomInfo);
+        protected static void Invoke_OnServerCreatedRoom(REFLECTIVE_RoomInfo roomInfo) => OnServerCreatedRoom?.Invoke(roomInfo);
 
         protected static void Invoke_OnServerJoinedClient(NetworkConnectionToClient conn) =>
             OnServerJoinedRoom?.Invoke(conn);
@@ -105,6 +105,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Request Methods
 
+        /// <summary>
+        /// Sends a request to the server for room creation with the specified information
+        /// </summary>
+        /// <param name="reflectiveRoomInfo"></param>
         [ClientCallback]
         public static void RequestCreateRoom(REFLECTIVE_RoomInfo reflectiveRoomInfo)
         {
@@ -114,6 +118,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             NetworkClient.Send(serverRoomMessage);
         }
 
+        /// <summary>
+        /// Sends a request to join the specified room
+        /// </summary>
+        /// <param name="roomName"></param>
         [ClientCallback]
         public static void RequestJoinRoom(string roomName)
         {
@@ -124,6 +132,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             NetworkClient.Send(serverRoomMessage);
         }
 
+        /// <summary>
+        /// Sends a request to the server to exit the client's room
+        /// </summary>
+        /// <param name="isDisconnected"></param>
         [ClientCallback]
         public static void RequestExitRoom(bool isDisconnected = false)
         {
@@ -137,19 +149,43 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Room Methods
 
+        /// <summary>
+        /// Performs room creation with the room information sent.
+        /// If the client's connection information is null, it creates the room as belonging to the server.
+        /// If the connection is not null, it creates it as belonging to the client.
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="roomInfo"></param>
         [ServerCallback]
         public abstract void CreateRoom(NetworkConnection conn = null,
-            REFLECTIVE_RoomInfo reflectiveRoomInfo = default);
+            REFLECTIVE_RoomInfo roomInfo = default);
 
+        /// <summary>
+        /// Joins the client into the room with the specified room' name
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="roomName"></param>
         [ServerCallback]
         public abstract void JoinRoom(NetworkConnectionToClient conn, string roomName);
 
+        /// <summary>
+        /// It works on the server side. Deletes all rooms and removes all customers from the rooms.
+        /// </summary>
         [ServerCallback]
         public abstract void RemoveAllRoom();
 
+        /// <summary>
+        /// It works on the server side. It deletes the specified Room and removes all customers from the room.
+        /// </summary>
+        /// <param name="roomName"></param>
         [ServerCallback]
         public abstract void RemoveRoom(string roomName);
 
+        /// <summary>
+        /// It works on the server side. It performs the process of a client exiting from the server.
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="isDisconnected"></param>
         [ServerCallback]
         public abstract void ExitRoom(NetworkConnection conn, bool isDisconnected);
 
@@ -157,6 +193,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Recieve Message Methods
 
+        /// <summary>
+        /// This function is triggered by an event from the "client". It performs various operations based on the incoming event.
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="msg"></param>
         [ServerCallback]
         private void OnReceivedRoomMessageViaServer(NetworkConnectionToClient conn,
             REFLECTIVE_ServerRoomMessage msg)
@@ -177,6 +218,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
+        /// <summary>
+        /// This function is triggered by an event from the "server". It performs various operations based on the incoming event.
+        /// </summary>
+        /// <param name="msg"></param>
         [ClientCallback]
         private static void OnReceivedRoomMessageViaClient(REFLECTIVE_ClientRoomMessage msg)
         {
@@ -210,7 +255,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             REFLECTIVE_RoomListInfo oldInfo,
             REFLECTIVE_RoomListInfo newInfo)
         {
-            OnServerCreatedRoom?.Invoke(oldInfo, newInfo);
+            OnServerRoomListChanged?.Invoke(oldInfo, newInfo);
         }
 
         #endregion
