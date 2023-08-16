@@ -1,0 +1,125 @@
+﻿using Mirror;
+using System.Linq;
+using UnityEngine.SceneManagement;
+
+namespace REFLECTIVE.Runtime.NETWORK.Room
+{
+    using Enums;
+    using Structs;
+    using SceneManagement;
+    
+    public class REFLECTIVE_RoomManager : REFLECTIVE_BaseRoomManager
+    {
+        [ServerCallback]
+        public override void CreateRoom(NetworkConnection conn = null, REFLECTIVE_RoomInfo reflectiveRoomInfo = default)
+        {
+            var roomName = reflectiveRoomInfo.Name;
+            var maxPlayers = reflectiveRoomInfo.MaxPlayers;
+
+            if (m_rooms.Any(room => room.RoomName == roomName)) return;
+
+            var onServer = conn is null;
+
+            var room = new REFLECTIVE_Room(roomName, maxPlayers, onServer);
+            
+            AddToList(room);
+
+            //If it is a client, add in to the room
+            if (!onServer)
+            {
+                SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Created);
+
+                REFLECTIVE_SceneManager.LoadScene(reflectiveRoomInfo.SceneName, LoadSceneMode.Additive,
+                    scene =>
+                    {
+                        room.Scene = scene;
+                        JoinRoom(conn.identity.connectionToClient, roomName);
+                    });
+
+                return;
+            }
+
+            REFLECTIVE_SceneManager.LoadScene(reflectiveRoomInfo.SceneName, LoadSceneMode.Additive,
+                scene => room.Scene = scene);
+        }
+
+        [ServerCallback]
+        public override void JoinRoom(NetworkConnectionToClient conn, string roomName)
+        {
+            var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
+
+            if (string.IsNullOrEmpty(room.RoomName)) // Handle room not found.
+            {
+                SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Fail);
+                return;
+            }
+
+            if (room.MaxPlayers <= room.CurrentPlayers) // Handle room is full.
+            {
+                SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Fail);
+                return;
+            }
+
+            room.AddConnection(conn);
+            
+            UpdateRoomInfo(room);
+
+            Invoke_OnServerJoinedClient(conn);
+
+            SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Joined);
+        }
+
+        [ServerCallback]
+        public override void RemoveAllRoom()
+        {
+            foreach (var room in m_rooms.ToList())
+            {
+                RemoveRoom(room.RoomName);
+            }
+        }
+
+        [ServerCallback]
+        public override void RemoveRoom(string roomName)
+        {
+            var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
+
+            if (string.IsNullOrEmpty(room.RoomName)) return;
+
+            var removedConnections = room.RemoveAllConnections();
+
+            if (room.IsServer) return;
+
+            RemoveToList(room);
+
+            var roomScene = room.Scene;
+
+            REFLECTIVE_SceneManager.UnLoadScene(roomScene);
+
+            removedConnections.ForEach(connection => SendRoomMessage(connection, REFLECTIVE_ClientRoomState.Removed));
+        }
+
+        [ServerCallback]
+        public override void ExitRoom(NetworkConnection conn, bool isDisconnected)
+        {
+            var exitedRoom = m_rooms.FirstOrDefault(room => room.RemoveConnection(conn));
+
+            if (string.IsNullOrEmpty(exitedRoom.RoomName))
+            {
+                // Handle exit failed (user not in any room).
+                return;
+            }
+            
+            if (exitedRoom.CurrentPlayers < 1)
+                RemoveRoom(exitedRoom.RoomName);
+            else
+                UpdateRoomInfo(exitedRoom);
+
+            if(!isDisconnected)
+                Invoke_OnServerExitedClient(conn.identity?.connectionToClient);
+            else
+                Invoke_OnServerDisconnectedClient(conn);
+            
+            SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Exited);
+        }
+    }
+}
