@@ -156,7 +156,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="roomInfo"></param>
-        [ServerCallback]
         public abstract void CreateRoom(NetworkConnection conn = null,
             REFLECTIVE_RoomInfo roomInfo = default);
 
@@ -165,20 +164,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="roomName"></param>
-        [ServerCallback]
         public abstract void JoinRoom(NetworkConnectionToClient conn, string roomName);
 
         /// <summary>
         /// It works on the server side. Deletes all rooms and removes all customers from the rooms.
         /// </summary>
-        [ServerCallback]
         public abstract void RemoveAllRoom();
 
         /// <summary>
         /// It works on the server side. It deletes the specified Room and removes all customers from the room.
         /// </summary>
         /// <param name="roomName"></param>
-        [ServerCallback]
         public abstract void RemoveRoom(string roomName);
 
         /// <summary>
@@ -186,7 +182,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="isDisconnected"></param>
-        [ServerCallback]
         public abstract void ExitRoom(NetworkConnection conn, bool isDisconnected);
 
         #endregion
