@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using System.Linq;
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -8,7 +9,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Enums;
     using Structs;
     using Behaviour;
-
+    using Utilities;
+    
     public abstract class REFLECTIVE_BaseRoomManager : REFLECTIVE_NetBehaviour
     {
         //TODO: To be revised
@@ -27,6 +29,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                     if (instance == null)
                     {
                         instance = FindObjectOfType<REFLECTIVE_BaseRoomManager>();
+
+                        if (instance == null)
+                        {
+                            var roomManagerPrefab = Resources.LoadAll<REFLECTIVE_BaseRoomManager>("SpawnablePrefabs/Managers").FirstOrDefault();
+
+                            if (roomManagerPrefab == null) return null;
+                            
+                            var instantObj = REFLECTIVE_NetworkSpawnUtilities.SpawnObject(roomManagerPrefab.gameObject);
+                            
+                            DontDestroyOnLoad(instantObj);
+                        }
                     }
                 }
 

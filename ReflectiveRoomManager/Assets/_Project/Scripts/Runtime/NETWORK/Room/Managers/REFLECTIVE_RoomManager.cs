@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -8,6 +9,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Structs;
     using SceneManagement;
     
+    [AddComponentMenu("REFLECTIVE/Room Manager")]
     public class REFLECTIVE_RoomManager : REFLECTIVE_BaseRoomManager
     {
         [ServerCallback]
