@@ -13,7 +13,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     
     public abstract class REFLECTIVE_BaseRoomManager : REFLECTIVE_NetBehaviour
     {
-        //TODO: To be revised
         #region Singleton
 
         private static readonly object padlock = new();
