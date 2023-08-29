@@ -9,8 +9,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Structs;
     using SceneManagement;
     
-    [AddComponentMenu("REFLECTIVE/Room Manager")]
-    public class REFLECTIVE_RoomManager : REFLECTIVE_BaseRoomManager
+    [AddComponentMenu("REFLECTIVE/Network Room Manager")]
+    public class REFLECTIVE_SimpleRoomManager : REFLECTIVE_BaseRoomManager
     {
         [ServerCallback]
         public override void CreateRoom(NetworkConnection conn = null, REFLECTIVE_RoomInfo roomInfo = default)
