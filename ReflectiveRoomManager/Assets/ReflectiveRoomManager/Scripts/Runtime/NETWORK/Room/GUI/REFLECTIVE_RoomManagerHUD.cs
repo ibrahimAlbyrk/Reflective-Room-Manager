@@ -11,8 +11,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         private static string _roomNameField = "Room Name";
         private static string _maxPlayers = "Max Player";
         
-        #region GUI
-
         protected virtual void OnGUI()
         {
             if (!NetworkClient.isConnected || !NetworkClient.active) return;
@@ -84,7 +82,5 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
             GUILayout.EndArea();
         }
-
-        #endregion
     }
 }
