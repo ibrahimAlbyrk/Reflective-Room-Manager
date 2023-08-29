@@ -10,12 +10,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Structs;
     using Behaviour;
     using Utilities;
-    
+
     public abstract class REFLECTIVE_BaseRoomManager : REFLECTIVE_NetBehaviour
     {
+        //TODO: To be revised
         #region Singleton
-
-        private static readonly object padlock = new();
 
         private static REFLECTIVE_BaseRoomManager instance;
 
@@ -23,22 +22,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             get
             {
-                lock (padlock)
+                if (instance == null)
                 {
+                    instance = FindObjectOfType<REFLECTIVE_BaseRoomManager>();
+
                     if (instance == null)
                     {
                         instance = FindObjectOfType<REFLECTIVE_BaseRoomManager>();
+                        
+                        var roomManagerPrefab = Resources.LoadAll<REFLECTIVE_BaseRoomManager>("SpawnablePrefabs/Managers").FirstOrDefault();
 
-                        if (instance == null)
-                        {
-                            var roomManagerPrefab = Resources.LoadAll<REFLECTIVE_BaseRoomManager>("SpawnablePrefabs/Managers").FirstOrDefault();
+                        if (roomManagerPrefab == null) return null;
+                            
+                        var instantObj = REFLECTIVE_NetworkSpawnUtilities.SpawnObject(roomManagerPrefab.gameObject);
+                            
+                        DontDestroyOnLoad(instantObj);
 
-                            if (roomManagerPrefab == null) return null;
-                            
-                            var instantObj = REFLECTIVE_NetworkSpawnUtilities.SpawnObject(roomManagerPrefab.gameObject);
-                            
-                            DontDestroyOnLoad(instantObj);
-                        }
                     }
                 }
 
@@ -81,8 +80,39 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #endregion
 
+        #region Serialize Variables
+
+        #endregion
+        
+        #region Public Variables
+
+        public bool AllPlayersReady
+        {
+            get => _allPlayersReady;
+            set
+            {
+                var wasReady = _allPlayersReady;
+                var nowReady = value;
+
+                if (wasReady == nowReady) return;
+
+                _allPlayersReady = value;
+
+                if (nowReady)
+                    OnRoomServerPlayersReady();
+                else
+                    OnRoomServerPlayersNotReady();
+            }
+        }
+
+        public bool IsStarted { get; protected set; }
+
+        #endregion
+        
         #region Private Variables
 
+        private bool _allPlayersReady;
+        
         protected readonly List<REFLECTIVE_Room> m_rooms = new();
 
         protected readonly SyncList<REFLECTIVE_RoomListInfo> m_roomInfos = new();
@@ -258,6 +288,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Callback Methods
 
+        /// <summary>
+        /// This is called on the server when all the players in the room are ready.
+        /// </summary>
+        protected virtual void OnRoomServerPlayersReady() { }
+        
+        /// <summary>
+        /// This is called on the server when CheckReadyToBegin finds that players are not ready
+        /// </summary>
+        protected virtual void OnRoomServerPlayersNotReady() {}
+        
         private static void OnRoomListChanged(SyncList<REFLECTIVE_RoomListInfo>.Operation operation,int index,
             REFLECTIVE_RoomListInfo oldInfo,
             REFLECTIVE_RoomListInfo newInfo)
@@ -275,6 +315,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             NetworkServer.RegisterHandler<REFLECTIVE_ServerRoomMessage>(OnReceivedRoomMessageViaServer);
 
             m_roomInfos.Callback += OnRoomListChanged;
+            
+            print("OnStartedServer");
         }
 
         [ClientCallback]
