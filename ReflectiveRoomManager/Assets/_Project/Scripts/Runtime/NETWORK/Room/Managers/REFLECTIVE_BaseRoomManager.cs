@@ -327,8 +327,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #endregion
 
+        //TODO: Split into a different scripts
         #region Utilities
-
+        
         [ServerCallback]
         protected void UpdateRoomInfo(REFLECTIVE_Room reflectiveRoom)
         {
