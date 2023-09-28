@@ -15,16 +15,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         {
             if (!NetworkClient.isConnected || !NetworkClient.active) return;
 
-            var roomManager = REFLECTIVE_BaseRoomManager.Instance;
+            var roomManager = REFLECTIVE_BaseRoomManager.singleton;
 
             if (!roomManager) return;
             
-            if (roomManager.IsStarted)
-            {
-                var currentRoom = roomManager.GetRoomOfPlayer(NetworkClient.connection);
-
-                if (string.IsNullOrEmpty(currentRoom.RoomName)) return;
+            var currentRoom = roomManager.GetRoomOfPlayer(NetworkClient.connection);
             
+            if (currentRoom != null)
+            {
                 ShowCurrentRoom(currentRoom);
                 return;
             }
@@ -38,7 +36,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
             GUILayout.BeginVertical();
             
-            
             _roomNameField = GUILayout.TextField(_roomNameField,
                 GUILayout.MinWidth(20));
             _maxPlayers = GUILayout.TextField(_maxPlayers,
@@ -51,7 +48,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 var roomInfo = new REFLECTIVE_RoomInfo
                 {
                     Name = _roomNameField,
-                    MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2 
+                    SceneName = "Game_Scene",
+                    MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2
                 };
                 
                 REFLECTIVE_BaseRoomManager.RequestCreateRoom(roomInfo);

@@ -1,28 +1,35 @@
-﻿using Mirror;
+﻿using System;
+using Mirror;
 using System.Linq;
 using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Manager
 {
-    using Room;
-    
     [AddComponentMenu("REFLECTIVE/Reflective Network Manager")]
     public class REFLECTIVE_NetworkManager : NetworkManager
     {
+        #region Events
+
+        public static Action OnStartedServer;
+        
+        public static Action OnStartedClient;
+
+        #endregion
+        
         #region Start & Stop Callbacks
 
         public override void OnStartServer()
         {
-            REFLECTIVE_BaseRoomManager.Instance.OnStartedServer();
-            
             SetSpawnablePrefabs();
+            
+            OnStartedServer?.Invoke();
         }
 
         public override void OnStartClient()
         {
-            REFLECTIVE_BaseRoomManager.Instance?.OnStartedClient();
-            
             SetSpawnablePrefabs();
+            
+            OnStartedClient?.Invoke();
         }
 
         #endregion

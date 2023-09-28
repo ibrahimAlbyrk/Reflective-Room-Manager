@@ -1,4 +1,5 @@
-﻿using Mirror;
+﻿using System;
+using Mirror;
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
@@ -8,60 +9,24 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Enums;
     using Structs;
-    using Behaviour;
-    using Utilities;
+    using Manager;
 
-    public abstract class REFLECTIVE_BaseRoomManager : REFLECTIVE_NetBehaviour
+    public abstract class REFLECTIVE_BaseRoomManager : MonoBehaviour
     {
-        //TODO: To be revised
-        #region Singleton
-
-        private static REFLECTIVE_BaseRoomManager instance;
-
-        public static REFLECTIVE_BaseRoomManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = FindObjectOfType<REFLECTIVE_BaseRoomManager>();
-
-                    if (instance == null)
-                    {
-                        instance = FindObjectOfType<REFLECTIVE_BaseRoomManager>();
-                        
-                        var roomManagerPrefab = Resources.LoadAll<REFLECTIVE_BaseRoomManager>("SpawnablePrefabs/Managers").FirstOrDefault();
-
-                        if (roomManagerPrefab == null) return null;
-                            
-                        var instantObj = REFLECTIVE_NetworkSpawnUtilities.SpawnObject(roomManagerPrefab.gameObject);
-                            
-                        DontDestroyOnLoad(instantObj);
-
-                    }
-                }
-
-                return instance;
-            }
-        }
-
-        #endregion
-
         #region Events
 
         //Server Side
-        public static event System.Action<REFLECTIVE_RoomListInfo, REFLECTIVE_RoomListInfo> OnServerRoomListChanged;
-        public static event System.Action<REFLECTIVE_RoomInfo> OnServerCreatedRoom;
-        public static event System.Action<NetworkConnectionToClient> OnServerJoinedRoom;
-        public static event System.Action<NetworkConnectionToClient> OnServerExitedRoom;
-        public static event System.Action<NetworkConnection> OnServerDisconnectedRoom;
+        public static event Action<REFLECTIVE_RoomInfo> OnServerCreatedRoom;
+        public static event Action<NetworkConnectionToClient> OnServerJoinedRoom;
+        public static event Action<NetworkConnectionToClient> OnServerExitedRoom;
+        public static event Action<NetworkConnection> OnServerDisconnectedRoom;
 
         //Client Side
-        public static event System.Action OnClientCreatedRoom;
-        public static event System.Action OnClientJoinedRoom;
-        public static event System.Action OnClientRemovedRoom;
-        public static event System.Action OnClientExitedRoom;
-        public static event System.Action OnClientFailedRoom;
+        public static event Action OnClientCreatedRoom;
+        public static event Action OnClientJoinedRoom;
+        public static event Action OnClientRemovedRoom;
+        public static event Action OnClientExitedRoom;
+        public static event Action OnClientFailedRoom;
 
         #endregion
 
@@ -82,30 +47,36 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Serialize Variables
 
+        [Header("Configuration")]
+        [SerializeField] private bool _dontDestroyOnLoad = true;
+        
         #endregion
         
         #region Public Variables
+        
+        /// <summary>The one and only NetworkManager</summary>
+        public static REFLECTIVE_BaseRoomManager singleton { get; internal set; }
 
-        public bool AllPlayersReady
-        {
-            get => _allPlayersReady;
-            set
-            {
-                var wasReady = _allPlayersReady;
-                var nowReady = value;
-
-                if (wasReady == nowReady) return;
-
-                _allPlayersReady = value;
-
-                if (nowReady)
-                    OnRoomServerPlayersReady();
-                else
-                    OnRoomServerPlayersNotReady();
-            }
-        }
-
-        public bool IsStarted { get; protected set; }
+        // public bool AllPlayersReady
+        // {
+        //     get => _allPlayersReady;
+        //     set
+        //     {
+        //         var wasReady = _allPlayersReady;
+        //         var nowReady = value;
+        //
+        //         if (wasReady == nowReady) return;
+        //
+        //         _allPlayersReady = value;
+        //
+        //         if (nowReady)
+        //             OnRoomServerPlayersReady();
+        //         else
+        //             OnRoomServerPlayersNotReady();
+        //     }
+        // }
+        //
+        // public bool IsStarted { get; protected set; }
 
         #endregion
         
@@ -113,15 +84,49 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private bool _allPlayersReady;
         
-        protected readonly List<REFLECTIVE_Room> m_rooms = new();
+        protected List<REFLECTIVE_Room> m_rooms = new();
+        private readonly List<REFLECTIVE_RoomInfo> m_roomListInfos = new();
 
-        protected readonly SyncList<REFLECTIVE_RoomListInfo> m_roomInfos = new();
+        #endregion
+
+        #region Initialize Methods
+
+        private bool InitializeSingleton()
+        {
+            if (singleton != null && singleton == this)
+                return true;
+
+            if (!_dontDestroyOnLoad)
+            {
+                singleton = this;
+                return true;
+            }
+            
+            if (singleton != null)
+            {
+                Debug.LogWarning("Multiple RoomManagers detected in the scene. Only one RoomManager can exist at a time. The duplicate RoomManager will be destroyed.");
+                Destroy(gameObject);
+
+                // Return false to not allow collision-destroyed second instance to continue.
+                return false;
+            }
+                
+            singleton = this;
+            if (!Application.isPlaying) return true;
+                
+            // Force the object to scene root, in case user made it a child of something
+            // in the scene since DDOL is only allowed for scene root objects
+            transform.SetParent(null);
+            DontDestroyOnLoad(gameObject);
+
+            return true;
+        }
 
         #endregion
 
         #region Get Room Methods
 
-        public List<REFLECTIVE_RoomListInfo> GetRooms() => m_roomInfos.ToList();
+        public List<REFLECTIVE_Room> GetRooms() => m_rooms;
 
         /// <summary>
         /// The function return information about the room where the "connection" is located
@@ -130,6 +135,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <returns>Information about the room where the "connection" is located.</returns>
         public REFLECTIVE_Room GetRoomOfPlayer(NetworkConnection conn)
         {
+            print(m_rooms.Count);
+            
             return m_rooms.FirstOrDefault(room => room.Connections.Any(connection => connection == conn));
         }
 
@@ -151,7 +158,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// Sends a request to the server for room creation with the specified information
         /// </summary>
         /// <param name="reflectiveRoomInfo"></param>
-        [ClientCallback]
         public static void RequestCreateRoom(REFLECTIVE_RoomInfo reflectiveRoomInfo)
         {
             var serverRoomMessage =
@@ -164,7 +170,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// Sends a request to join the specified room
         /// </summary>
         /// <param name="roomName"></param>
-        [ClientCallback]
         public static void RequestJoinRoom(string roomName)
         {
             var roomInfo = new REFLECTIVE_RoomInfo { Name = roomName };
@@ -178,7 +183,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// Sends a request to the server to exit the client's room
         /// </summary>
         /// <param name="isDisconnected"></param>
-        [ClientCallback]
         public static void RequestExitRoom(bool isDisconnected = false)
         {
             var serverRoomMessage =
@@ -235,7 +239,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="msg"></param>
-        [ServerCallback]
         private void OnReceivedRoomMessageViaServer(NetworkConnectionToClient conn,
             REFLECTIVE_ServerRoomMessage msg)
         {
@@ -259,7 +262,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// This function is triggered by an event from the "server". It performs various operations based on the incoming event.
         /// </summary>
         /// <param name="msg"></param>
-        [ClientCallback]
         private static void OnReceivedRoomMessageViaClient(REFLECTIVE_ClientRoomMessage msg)
         {
             switch (msg.ClientRoomState)
@@ -288,90 +290,62 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Callback Methods
 
-        /// <summary>
-        /// This is called on the server when all the players in the room are ready.
-        /// </summary>
-        protected virtual void OnRoomServerPlayersReady() { }
+        // /// <summary>
+        // /// This is called on the server when all the players in the room are ready.
+        // /// </summary>
+        // protected virtual void OnRoomServerPlayersReady() { }
+        //
+        // /// <summary>
+        // /// This is called on the server when CheckReadyToBegin finds that players are not ready
+        // /// </summary>
+        // protected virtual void OnRoomServerPlayersNotReady() {}
         
-        /// <summary>
-        /// This is called on the server when CheckReadyToBegin finds that players are not ready
-        /// </summary>
-        protected virtual void OnRoomServerPlayersNotReady() {}
-        
-        private static void OnRoomListChanged(SyncList<REFLECTIVE_RoomListInfo>.Operation operation,int index,
-            REFLECTIVE_RoomListInfo oldInfo,
-            REFLECTIVE_RoomListInfo newInfo)
+        private void OnRoomListChanged(REFLECTIVE_RoomListChangeMessage msg)
         {
-            OnServerRoomListChanged?.Invoke(oldInfo, newInfo);
+           switch (msg.State)
+            {
+                case REFLECTIVE_RoomMessageState.Add:
+                    m_roomListInfos.Add(msg.RoomInfo);
+                    break;
+                case REFLECTIVE_RoomMessageState.Update:
+                    var room = m_roomListInfos.FirstOrDefault(info => info.Name == msg.RoomInfo.Name);
+                    var index = m_roomListInfos.IndexOf(room);
+                    if (index < 0) break;
+                    m_roomListInfos[index] = msg.RoomInfo;
+                    break;
+                case REFLECTIVE_RoomMessageState.Remove:
+                    m_roomListInfos.Remove(msg.RoomInfo);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         #endregion
 
         #region Base Server Methods
-
-        [ServerCallback]
-        public virtual void OnStartedServer()
+        
+        protected virtual void OnStartServer()
         {
             NetworkServer.RegisterHandler<REFLECTIVE_ServerRoomMessage>(OnReceivedRoomMessageViaServer);
-
-            m_roomInfos.Callback += OnRoomListChanged;
-            
-            print("OnStartedServer");
         }
-
-        [ClientCallback]
-        public virtual void OnStartedClient()
+        
+        protected virtual void OnStartClient()
         {
             NetworkClient.RegisterHandler<REFLECTIVE_ClientRoomMessage>(OnReceivedRoomMessageViaClient);
+            NetworkClient.RegisterHandler<REFLECTIVE_RoomListChangeMessage>(OnRoomListChanged);
         }
 
         #endregion
 
-        #region Utilities
+        #region Base Methods
 
-        [ServerCallback]
-        protected void UpdateRoomInfo(REFLECTIVE_Room reflectiveRoom)
+        private void Awake()
         {
-            var index = m_roomInfos.FindIndex(info => info.Name == reflectiveRoom.RoomName);
+            if(!InitializeSingleton()) return;
 
-            var roomInfo = new REFLECTIVE_RoomListInfo
-            (
-                reflectiveRoom.RoomName,
-                reflectiveRoom.MaxPlayers,
-                reflectiveRoom.CurrentPlayers
-            );
-            
-            m_roomInfos[index] = roomInfo;
-        }
-        
-        [ServerCallback]
-        protected void AddToList(REFLECTIVE_Room reflectiveRoom)
-        {
-            m_rooms.Add(reflectiveRoom);
-
-            var roomListInfo = new REFLECTIVE_RoomListInfo
-            (
-                reflectiveRoom.RoomName,
-                reflectiveRoom.MaxPlayers,
-                reflectiveRoom.CurrentPlayers
-            );
-            
-            m_roomInfos.Add(roomListInfo);
-        }
-
-        [ServerCallback]
-        protected void RemoveToList(REFLECTIVE_Room reflectiveRoom)
-        {
-            m_rooms.Remove(reflectiveRoom);
-            m_roomInfos.RemoveAll(info => info.Name == reflectiveRoom.RoomName);
-        }
-
-        [ServerCallback]
-        protected static void SendRoomMessage(NetworkConnection conn, REFLECTIVE_ClientRoomState state)
-        {
-            var roomMessage = new REFLECTIVE_ClientRoomMessage(state, conn.connectionId);
-
-            conn.Send(roomMessage);
+            REFLECTIVE_NetworkManager.OnStartedServer += OnStartServer;
+            REFLECTIVE_NetworkManager.OnStartedClient += OnStartClient;
         }
 
         #endregion

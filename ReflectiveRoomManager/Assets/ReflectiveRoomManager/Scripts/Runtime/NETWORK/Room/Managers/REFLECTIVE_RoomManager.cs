@@ -7,12 +7,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Enums;
     using Structs;
+    using Utilities;
     using SceneManagement;
     
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
-    public class REFLECTIVE_SimpleRoomManager : REFLECTIVE_BaseRoomManager
+    public class REFLECTIVE_RoomManager : REFLECTIVE_BaseRoomManager
     {
-        [ServerCallback]
         public override void CreateRoom(NetworkConnection conn = null, REFLECTIVE_RoomInfo roomInfo = default)
         {
             var roomName = roomInfo.Name;
@@ -24,12 +24,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             var room = new REFLECTIVE_Room(roomName, maxPlayers, onServer);
             
-            AddToList(room);
+            REFLECTIVE_RoomListUtility.AddRoomToList(ref m_rooms, room);
 
             //If it is a client, add in to the room
             if (!onServer)
             {
-                SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Created);
+                REFLECTIVE_RoomMessageUtility.SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Created);
 
                 REFLECTIVE_SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Additive,
                     scene =>
@@ -45,33 +45,35 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             Invoke_OnServerCreatedRoom(roomInfo);
         }
 
-        [ServerCallback]
         public override void JoinRoom(NetworkConnectionToClient conn, string roomName)
         {
             var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
 
-            if (string.IsNullOrEmpty(room.RoomName)) // Handle room not found.
+            if (room == null)
             {
-                SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Fail);
+                Debug.LogWarning($"There is no such room");
+                
+                REFLECTIVE_RoomMessageUtility.SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Fail);
+                
                 return;
             }
-
+            
             if (room.MaxPlayers <= room.CurrentPlayers) // Handle room is full.
             {
-                SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Fail);
+                REFLECTIVE_RoomMessageUtility.SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Fail);
                 return;
             }
 
             room.AddConnection(conn);
             
-            UpdateRoomInfo(room);
+            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(
+                REFLECTIVE_RoomListUtility.ConvertToRoomList(room), REFLECTIVE_RoomMessageState.Update);
 
             Invoke_OnServerJoinedClient(conn);
 
-            SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Joined);
+            REFLECTIVE_RoomMessageUtility.SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Joined);
         }
 
-        [ServerCallback]
         public override void RemoveAllRoom()
         {
             foreach (var room in m_rooms.ToList())
@@ -80,48 +82,54 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
-        [ServerCallback]
         public override void RemoveRoom(string roomName)
         {
             var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
-
-            if (string.IsNullOrEmpty(room.RoomName)) return;
+            
+            if (room == null)
+            {
+                Debug.LogWarning($"There is no such room");
+                
+                return;
+            }
 
             var removedConnections = room.RemoveAllConnections();
 
             if (room.IsServer) return;
 
-            RemoveToList(room);
+            REFLECTIVE_RoomListUtility.RemoveRoomToList(ref m_rooms, room);
 
             var roomScene = room.Scene;
 
             REFLECTIVE_SceneManager.UnLoadScene(roomScene);
 
-            removedConnections.ForEach(connection => SendRoomMessage(connection, REFLECTIVE_ClientRoomState.Removed));
+            removedConnections.ForEach(connection => REFLECTIVE_RoomMessageUtility.SendRoomMessage(connection, REFLECTIVE_ClientRoomState.Removed));
         }
 
-        [ServerCallback]
         public override void ExitRoom(NetworkConnection conn, bool isDisconnected)
         {
             var exitedRoom = m_rooms.FirstOrDefault(room => room.RemoveConnection(conn));
-
-            if (string.IsNullOrEmpty(exitedRoom.RoomName))
+            
+            if (exitedRoom == null)
             {
                 // Handle exit failed (user not in any room).
+                
+                Debug.LogWarning($"There is no such room");
+                
                 return;
             }
             
             if (exitedRoom.CurrentPlayers < 1)
                 RemoveRoom(exitedRoom.RoomName);
             else
-                UpdateRoomInfo(exitedRoom);
+                REFLECTIVE_RoomListUtility.UpdateRoomToList(ref m_rooms, exitedRoom);
 
             if(!isDisconnected)
                 Invoke_OnServerExitedClient(conn.identity?.connectionToClient);
             else
                 Invoke_OnServerDisconnectedClient(conn);
             
-            SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Exited);
+            REFLECTIVE_RoomMessageUtility.SendRoomMessage(conn, REFLECTIVE_ClientRoomState.Exited);
         }
     }
 }

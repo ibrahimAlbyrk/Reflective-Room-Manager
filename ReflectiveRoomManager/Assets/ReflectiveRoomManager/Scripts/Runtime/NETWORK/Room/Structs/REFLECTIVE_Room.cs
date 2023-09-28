@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
     [System.Serializable]
-    public struct REFLECTIVE_Room
+    public class REFLECTIVE_Room
     {
         public bool IsServer;
         
@@ -17,8 +17,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         public int MaxPlayers;
         public int CurrentPlayers;
 
-        public readonly List<NetworkConnection> Connections;
-
+        public List<NetworkConnection> Connections;
+        
         public REFLECTIVE_Room(string roomName, int maxPlayers, bool isServer)
         {
             IsServer = isServer;
