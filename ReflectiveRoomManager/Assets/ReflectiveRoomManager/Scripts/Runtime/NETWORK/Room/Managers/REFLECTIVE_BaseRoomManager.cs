@@ -74,7 +74,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected List<REFLECTIVE_Room> m_rooms = new();
         
         private static REFLECTIVE_BaseRoomManager _singleton;
-        private List<REFLECTIVE_RoomInfo> m_roomListInfos = new();
+        private readonly List<REFLECTIVE_RoomInfo> m_roomListInfos = new();
 
         #endregion
 
