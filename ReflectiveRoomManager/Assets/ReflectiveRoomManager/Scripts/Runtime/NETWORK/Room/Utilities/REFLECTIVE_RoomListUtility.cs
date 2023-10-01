@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
 {
@@ -9,7 +10,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
     {
         public static REFLECTIVE_RoomInfo ConvertToRoomList(REFLECTIVE_Room room)
         {
-            return new REFLECTIVE_RoomInfo(room.RoomName, room.MaxPlayers, room.CurrentPlayers);
+            return new REFLECTIVE_RoomInfo(room.RoomName, room.MaxPlayers, room.CurrentPlayers, room.Connections.Select(conn => conn.connectionId).ToList());
         }
         
         public static void UpdateRoomToList(ref List<REFLECTIVE_Room> rooms, REFLECTIVE_Room reflectiveRoom)
@@ -18,21 +19,27 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             
             rooms[index] = reflectiveRoom;
             
-            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(ConvertToRoomList(reflectiveRoom), REFLECTIVE_RoomMessageState.Update);
+            var roomList = ConvertToRoomList(reflectiveRoom);
+            
+            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(roomList, REFLECTIVE_RoomMessageState.Update);
         }
         
         public static void AddRoomToList(ref List<REFLECTIVE_Room> rooms, REFLECTIVE_Room reflectiveRoom)
         {
             rooms.Add(reflectiveRoom);
+            
+            var roomList = ConvertToRoomList(reflectiveRoom);
 
-            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(ConvertToRoomList(reflectiveRoom), REFLECTIVE_RoomMessageState.Add);
+            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(roomList, REFLECTIVE_RoomMessageState.Add);
         }
         
         public static void RemoveRoomToList(ref List<REFLECTIVE_Room> rooms, REFLECTIVE_Room reflectiveRoom)
         {
             if (!rooms.Remove(reflectiveRoom)) return;
-            
-            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(ConvertToRoomList(reflectiveRoom), REFLECTIVE_RoomMessageState.Remove);
+
+            var roomList = ConvertToRoomList(reflectiveRoom);
+
+            REFLECTIVE_RoomMessageUtility.SenRoomUpdateMessage(roomList, REFLECTIVE_RoomMessageState.Remove);
         }
     }
 }

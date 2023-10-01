@@ -11,12 +11,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
         #region Events
 
         public static Action OnStartedServer;
+        public static Action OnStoppedServer;
+        public static Action<NetworkConnection> OnServerConnected;
         
         public static Action OnStartedClient;
+        public static Action OnClientDisconnected;
 
         #endregion
         
         #region Start & Stop Callbacks
+
+        public override void OnServerConnect(NetworkConnectionToClient conn)
+        {
+            OnServerConnected?.Invoke(conn);
+        }
 
         public override void OnStartServer()
         {
@@ -30,6 +38,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
             SetSpawnablePrefabs();
             
             OnStartedClient?.Invoke();
+        }
+
+        public override void OnStopServer()
+        {
+            OnStoppedServer?.Invoke();
+        }
+
+        public override void OnClientDisconnect()
+        {
+            OnClientDisconnected?.Invoke();
         }
 
         #endregion

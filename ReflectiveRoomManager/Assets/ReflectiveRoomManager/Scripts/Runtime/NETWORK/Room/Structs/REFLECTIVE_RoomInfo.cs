@@ -1,4 +1,6 @@
-﻿namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
+﻿using System.Collections.Generic;
+
+namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
     [System.Serializable]
     public struct REFLECTIVE_RoomInfo
@@ -9,12 +11,16 @@
         public int MaxPlayers;
         public int CurrentPlayers;
 
-        public REFLECTIVE_RoomInfo(string name, int maxPlayers, int currentPlayers)
+        public List<int> ConnectionIds;
+        
+        public REFLECTIVE_RoomInfo(string name, int maxPlayers, int currentPlayers, List<int> connectionIds = default)
         {
             Name = name;
             SceneName = default;
             MaxPlayers = maxPlayers;
             CurrentPlayers = currentPlayers;
+
+            ConnectionIds = connectionIds;
         }
     }
 }
