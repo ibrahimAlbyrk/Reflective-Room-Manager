@@ -3,7 +3,6 @@ using Mirror;
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
-using REFLECTIVE.Runtime.NETWORK.Room.Utilities;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -12,6 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Service;
     using Structs;
     using Manager;
+    using Utilities;
 
     public abstract class REFLECTIVE_BaseRoomManager : MonoBehaviour
     {
@@ -74,7 +74,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected List<REFLECTIVE_Room> m_rooms = new();
         
         private static REFLECTIVE_BaseRoomManager _singleton;
-        private readonly List<REFLECTIVE_RoomInfo> m_roomListInfos = new();
+        private List<REFLECTIVE_RoomInfo> m_roomListInfos = new();
 
         #endregion
 
@@ -142,11 +142,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// The function return information about the room where the "connection ID" is located
         /// </summary>
-        /// <param name="connectionID"></param>
         /// <returns>Information about the room where the "connection ID" is located.</returns>
-        public REFLECTIVE_RoomInfo GetRoomOfPlayer(int connectionID)
+        public REFLECTIVE_RoomInfo GetRoomOfClient()
         {
-            return m_roomListInfos.FirstOrDefault(room => room.ConnectionIds.Any(id => id == connectionID));
+            return m_roomListInfos.FirstOrDefault(room => room.ConnectionIds.Any(id => id == REFLECTIVE_RoomClient.ID));
         }
 
         /// <summary>
@@ -245,6 +244,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Recieve Message Methods
 
+        private static void OnReceivedConnectionMessageViaClient(REFLECTIVE_ClientConnectionMessage msg)
+        {
+            REFLECTIVE_RoomClient.ID = msg.ConnectionID;
+        }
+        
         /// <summary>
         /// This function is triggered by an event from the "client". It performs various operations based on the incoming event.
         /// </summary>
@@ -301,6 +305,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Callback Methods
 
+        private static void SendConnectionMessageToClient(NetworkConnection conn)
+        {
+            conn.Send(new REFLECTIVE_ClientConnectionMessage
+            {
+                ConnectionID = conn.connectionId
+            });
+        }
+        
         private void UpdateRoomListForClient(NetworkConnection conn)
         {
             foreach (var message in m_rooms.Select(room => 
@@ -317,19 +329,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
            switch (msg.State)
             {
                 case REFLECTIVE_RoomMessageState.Add:
-                    print("roomInfo added");
                     m_roomListInfos.Add(msg.RoomInfo);
                     break;
                 case REFLECTIVE_RoomMessageState.Update:
-                    print("roomInfo updated");
                     var room = m_roomListInfos.FirstOrDefault(info => info.Name == msg.RoomInfo.Name);
                     var index = m_roomListInfos.IndexOf(room);
                     if (index < 0) break;
                     m_roomListInfos[index] = msg.RoomInfo;
                     break;
                 case REFLECTIVE_RoomMessageState.Remove:
-                    var count = m_roomListInfos.RemoveAll(roomInfo => roomInfo.Name == msg.RoomInfo.Name);
-                    print($"{count} roomInfo removed");
+                    m_roomListInfos.RemoveAll(roomInfo => roomInfo.Name == msg.RoomInfo.Name);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -349,22 +358,23 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             NetworkClient.RegisterHandler<REFLECTIVE_ClientRoomMessage>(OnReceivedRoomMessageViaClient);
             NetworkClient.RegisterHandler<REFLECTIVE_RoomListChangeMessage>(OnRoomListChangeForClient);
+            NetworkClient.RegisterHandler<REFLECTIVE_ClientConnectionMessage>(OnReceivedConnectionMessageViaClient);
         }
         
         protected virtual void OnServerConnect(NetworkConnection conn)
         {
             UpdateRoomListForClient(conn);
+
+            SendConnectionMessageToClient(conn);
         }
         
         protected virtual void OnStopServer()
         {
-            print("OnStopServer");
             REFLECTIVE_RoomServer.RemoveAllRoom(forced:true);
         }
 
         protected virtual void OnClientDisconnect()
         {
-            print("OnClientDisconnect");
             REFLECTIVE_RoomClient.ExitRoom();
         }
 

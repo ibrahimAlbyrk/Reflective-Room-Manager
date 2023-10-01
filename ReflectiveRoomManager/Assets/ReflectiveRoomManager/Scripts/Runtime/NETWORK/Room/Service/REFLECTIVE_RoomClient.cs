@@ -4,6 +4,17 @@
     
     public static class REFLECTIVE_RoomClient
     {
+        #region ID
+
+        public static int ID;
+
+        public static void ListenConnectionID(int id)
+        {
+            ID = id;
+        }
+
+        #endregion
+        
         #region Transaction Methods
 
         public static void CreateRoom(REFLECTIVE_RoomInfo reflectiveRoomInfo)

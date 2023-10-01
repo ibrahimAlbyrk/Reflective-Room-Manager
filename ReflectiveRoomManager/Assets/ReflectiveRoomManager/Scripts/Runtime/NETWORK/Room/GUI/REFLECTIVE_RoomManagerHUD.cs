@@ -26,8 +26,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
             if (!_isServer)
             {
-                var currentRoom = roomManager.GetRoomOfPlayer(NetworkClient.connection.connectionId);
-
+                var currentRoom = roomManager.GetRoomOfClient();
+                
                 if (!string.IsNullOrEmpty(currentRoom.Name))
                 {
                     ShowCurrentRoom(currentRoom);
