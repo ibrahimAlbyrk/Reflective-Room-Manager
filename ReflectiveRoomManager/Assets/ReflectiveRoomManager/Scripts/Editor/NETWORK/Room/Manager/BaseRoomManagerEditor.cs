@@ -6,8 +6,8 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 {
     using Runtime.NETWORK.Room;
 
-    [CustomEditor(typeof(REFLECTIVE_BaseRoomManager), true)]
-    public class REFLECTIVE_BaseRoomManagerEditor : UnityEditor.Editor
+    [CustomEditor(typeof(BaseRoomManager), true)]
+    public class BaseRoomManagerEditor : UnityEditor.Editor
     {
         private GUIStyle roomInfoStyle;
         private GUIStyle foldoutStyle;
@@ -28,7 +28,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 
             SetStyles();
 
-            var roomManager = (REFLECTIVE_BaseRoomManager)target;
+            var roomManager = (BaseRoomManager)target;
             var rooms = roomManager.GetRooms().ToArray();
 
             if (roomFoldouts == null || roomFoldouts.Length != rooms.Length)

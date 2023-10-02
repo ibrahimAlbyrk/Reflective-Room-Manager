@@ -7,7 +7,7 @@ using UnityEngine;
 namespace REFLECTIVE.Runtime.NETWORK.Manager
 {
     [AddComponentMenu("REFLECTIVE/Reflective Network Manager")]
-    public class REFLECTIVE_NetworkManager : NetworkManager
+    public class NetworkManager : Mirror.NetworkManager
     {
         #region Events
 
@@ -29,14 +29,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnStartServer()
         {
-            spawnPrefabs = REFLECTIVE_NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
             OnStartedServer?.Invoke();
         }
 
         public override void OnStartClient()
         {
-            spawnPrefabs = REFLECTIVE_NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
             OnStartedClient?.Invoke();
         }

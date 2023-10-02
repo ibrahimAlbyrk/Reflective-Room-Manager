@@ -1,7 +1,7 @@
 ﻿namespace REFLECTIVE.Runtime.NETWORK.Room.Enums
 {
     [System.Serializable]
-    public enum REFLECTIVE_ServerRoomState : byte
+    public enum ServerRoomState : byte
     {
         Create,
         Join,

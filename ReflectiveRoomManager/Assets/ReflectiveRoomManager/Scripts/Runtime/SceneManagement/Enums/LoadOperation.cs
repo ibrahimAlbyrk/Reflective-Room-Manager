@@ -1,6 +1,6 @@
 ﻿namespace REFLECTIVE.Runtime.SceneManagement.Enums
 {
-    public enum REFLECTIVE_LoadOperation
+    public enum LoadOperation
     {
         Load,
         UnLoad

@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
     using Structs;
     
     [AddComponentMenu("REFLECTIVE/Network Room Manager HUD")]
-    public class REFLECTIVE_RoomManagerHUD : MonoBehaviour
+    public class RoomManagerHUD : MonoBehaviour
     {
         private static string _roomNameField = "Room Name";
         private static string _maxPlayers = "Max Player";
@@ -27,7 +27,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
             _isServer = !NetworkClient.isConnected && NetworkServer.active;
             
-            var roomManager = REFLECTIVE_BaseRoomManager.Singleton;
+            var roomManager = BaseRoomManager.Singleton;
             
             if (!roomManager) return;
 
@@ -66,7 +66,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
             if (GUILayout.Button("Create Room"))
             {
-                var roomInfo = new REFLECTIVE_RoomInfo
+                var roomInfo = new RoomInfo
                 {
                     Name = _roomNameField,
                     SceneName = "Game_Scene",
@@ -74,16 +74,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 };
                 
                 if(_isServer)
-                    REFLECTIVE_RoomServer.CreateRoom(roomInfo);
+                    RoomServer.CreateRoom(roomInfo);
                 else
-                    REFLECTIVE_RoomClient.CreateRoom(roomInfo);
+                    RoomClient.CreateRoom(roomInfo);
             }
 
             if (!_isServer)
             {
                 if (GUILayout.Button("Join Room"))
                 {
-                    REFLECTIVE_RoomClient.JoinRoom(_roomNameField);
+                    RoomClient.JoinRoom(_roomNameField);
                 }
                 
                 GUILayout.EndHorizontal();
@@ -108,7 +108,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             GUILayout.EndArea();
         }
 
-        private static void ShowCurrentRoom(REFLECTIVE_RoomInfo roomInfo)
+        private static void ShowCurrentRoom(RoomInfo roomInfo)
         {
             GUILayout.BeginArea(new Rect(Screen.width - 230f, 30, 200f, 200f));
             
@@ -118,7 +118,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
             if (GUILayout.Button("Exit Room"))
             {
-                REFLECTIVE_RoomClient.ExitRoom();
+                RoomClient.ExitRoom();
             }
             
             GUILayout.EndArea();
@@ -144,7 +144,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             //TODO: room list for client
             if (_isServer)
             {
-                var rooms = REFLECTIVE_BaseRoomManager.Singleton.GetRooms().ToList();
+                var rooms = BaseRoomManager.Singleton.GetRooms().ToList();
             
                 var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
             
@@ -153,12 +153,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
                 foreach (var room in rooms.Where(room => GUILayout.Button($"{room.RoomName} - {room.CurrentPlayers}/{room.MaxPlayers}")))
                 {
-                    REFLECTIVE_RoomServer.RemoveRoom(room.RoomName, forced:true);
+                    RoomServer.RemoveRoom(room.RoomName, forced:true);
                 }
             }
             else
             {
-                var rooms = REFLECTIVE_BaseRoomManager.Singleton.GetRoomInfos().ToList();
+                var rooms = BaseRoomManager.Singleton.GetRoomInfos().ToList();
             
                 var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
             
@@ -167,7 +167,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
                 foreach (var room in rooms.Where(room => GUILayout.Button($"{room.Name} - {room.CurrentPlayers}/{room.MaxPlayers}")))
                 {
-                    REFLECTIVE_RoomClient.JoinRoom(room.Name);
+                    RoomClient.JoinRoom(room.Name);
                 } 
             }
             

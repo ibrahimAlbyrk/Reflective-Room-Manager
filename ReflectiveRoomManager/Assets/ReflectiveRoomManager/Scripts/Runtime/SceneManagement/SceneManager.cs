@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.SceneManagement
 {
-    public static class REFLECTIVE_SceneManager
+    public static class SceneManager
     {
         public static event Action<Scene> OnSceneLoaded;
         public static event Action<Scene> OnSceneUnloading;
@@ -13,7 +13,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
 
         private static readonly List<Scene> LoadedScenes = new();
         
-        private static REFLECTIVE_SceneLoader _loader;
+        private static SceneLoader _loader;
 
         public static int GetLoadedSceneCount() => LoadedScenes.Count;
 
@@ -50,7 +50,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
             OnSceneLoaded += KeepLoadedScene;
             OnSceneUnloaded += DiscardLoadedScene;
 
-            _loader = new REFLECTIVE_SceneLoader();
+            _loader = new SceneLoader();
         }
     }
 }

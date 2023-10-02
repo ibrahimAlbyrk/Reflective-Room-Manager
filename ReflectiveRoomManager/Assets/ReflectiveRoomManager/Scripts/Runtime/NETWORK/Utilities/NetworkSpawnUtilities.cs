@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Utilities
 {
-    public static class REFLECTIVE_NetworkSpawnUtilities
+    public static class NetworkSpawnUtilities
     {
         public static GameObject SpawnObject(GameObject obj, Vector3 position = default, Quaternion rotation = default)
         {

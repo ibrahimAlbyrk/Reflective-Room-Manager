@@ -2,7 +2,7 @@
 {
     using Structs;
     
-    public static class REFLECTIVE_RoomClient
+    public static class RoomClient
     {
         #region Public Variables
 
@@ -12,19 +12,19 @@
         
         #region Transaction Methods
 
-        public static void CreateRoom(REFLECTIVE_RoomInfo reflectiveRoomInfo)
+        public static void CreateRoom(RoomInfo roomInfo)
         {
-            REFLECTIVE_BaseRoomManager.RequestCreateRoom(reflectiveRoomInfo);
+            BaseRoomManager.RequestCreateRoom(roomInfo);
         }
 
         public static void JoinRoom(string roomName)
         {
-            REFLECTIVE_BaseRoomManager.RequestJoinRoom(roomName);
+            BaseRoomManager.RequestJoinRoom(roomName);
         }
 
         public static void ExitRoom()
         {
-            REFLECTIVE_BaseRoomManager.RequestExitRoom();
+            BaseRoomManager.RequestExitRoom();
         }
 
         #endregion

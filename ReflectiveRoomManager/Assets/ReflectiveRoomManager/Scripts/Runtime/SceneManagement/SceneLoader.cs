@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
 {
     using Enums;
     
-    public class REFLECTIVE_SceneLoader
+    public class SceneLoader
     {
         private event Action<Scene> OnUnloading;
         
@@ -25,14 +25,14 @@ namespace REFLECTIVE.Runtime.SceneManagement
         public struct SceneTask
         {
             public Scene Scene;
-            public REFLECTIVE_LoadOperation reflectiveLoadOperation;
+            public LoadOperation loadOperation;
 
             public readonly GameObject[] RootGameObjects;
 
-            public SceneTask(Scene scene = default, REFLECTIVE_LoadOperation reflectiveLoadOperation = REFLECTIVE_LoadOperation.Load, GameObject[] rootGameObjects = null)
+            public SceneTask(Scene scene = default, LoadOperation loadOperation = LoadOperation.Load, GameObject[] rootGameObjects = null)
             {
                 Scene = scene;
-                this.reflectiveLoadOperation = reflectiveLoadOperation;
+                this.loadOperation = loadOperation;
                 
                 RootGameObjects = rootGameObjects;
             }
@@ -43,24 +43,24 @@ namespace REFLECTIVE.Runtime.SceneManagement
             public readonly string SceneName;
             public readonly Action<Scene> OnTaskCompletedAction;
 
-            public readonly REFLECTIVE_LoadOperation reflectiveLoadOperation;
+            public readonly LoadOperation loadOperation;
             public readonly LoadSceneMode LoadMode;
             
             public readonly Scene Scene;
 
-            public SceneLoadingTask(string sceneName, REFLECTIVE_LoadOperation reflectiveLoadOperation, LoadSceneMode loadMode, Action<Scene> onTaskCompleted)
+            public SceneLoadingTask(string sceneName, LoadOperation loadOperation, LoadSceneMode loadMode, Action<Scene> onTaskCompleted)
             {
                 SceneName = sceneName;
                 OnTaskCompletedAction = onTaskCompleted;
-                this.reflectiveLoadOperation = reflectiveLoadOperation;
+                this.loadOperation = loadOperation;
                 LoadMode = loadMode;
             }
             
-            public SceneLoadingTask(Scene scene, REFLECTIVE_LoadOperation reflectiveLoadOperation, Action<Scene> onTaskCompleted)
+            public SceneLoadingTask(Scene scene, LoadOperation loadOperation, Action<Scene> onTaskCompleted)
             {
                 Scene = scene;
                 OnTaskCompletedAction = onTaskCompleted;
-                this.reflectiveLoadOperation = reflectiveLoadOperation;
+                this.loadOperation = loadOperation;
             }
         }
 
@@ -68,7 +68,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
         {
             Init();
 
-            _scenes.Enqueue(new SceneLoadingTask(sceneName, REFLECTIVE_LoadOperation.Load, loadMode, onCompleted));
+            _scenes.Enqueue(new SceneLoadingTask(sceneName, LoadOperation.Load, loadMode, onCompleted));
 
             if (_isCurrentlyLoading) return;
 
@@ -81,7 +81,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
 
             OnUnloading += onUnloading;
 
-            _scenes.Enqueue(new SceneLoadingTask(scene, REFLECTIVE_LoadOperation.UnLoad, onCompleted));
+            _scenes.Enqueue(new SceneLoadingTask(scene, LoadOperation.UnLoad, onCompleted));
 
             if (_isCurrentlyLoading) return;
 
@@ -95,30 +95,30 @@ namespace REFLECTIVE.Runtime.SceneManagement
                 _isCurrentlyLoading = true;
 
                 //The reason I add one is that the first scene is the menu scene and it will stay open all the time.
-                var sceneIndex = REFLECTIVE_SceneManager.GetLoadedSceneCount() + 1;
+                var sceneIndex = SceneManager.GetLoadedSceneCount() + 1;
                 
                 var task = _scenes.Dequeue();
 
                 Scene scene = default;
                 
                 //If the scene is unloading, we need to get the scene info without deleting it
-                if (task.reflectiveLoadOperation == REFLECTIVE_LoadOperation.UnLoad)
+                if (task.loadOperation == LoadOperation.UnLoad)
                 {
                     OnUnloading?.Invoke(task.Scene);
                     OnUnloading = null;
                     scene = task.Scene;
                 }
 
-                yield return task.reflectiveLoadOperation switch
+                yield return task.loadOperation switch
                 {
-                    REFLECTIVE_LoadOperation.Load => StartAsyncSceneLoad(task),
-                    REFLECTIVE_LoadOperation.UnLoad => StartAsyncSceneUnload(task),
+                    LoadOperation.Load => StartAsyncSceneLoad(task),
+                    LoadOperation.UnLoad => StartAsyncSceneUnload(task),
                     _ => throw new ArgumentOutOfRangeException($"SceneLoader", "Load Operation is undefined")
                 };
                 
                 //If the scene is loading, the scene information comes after loaded
-                if (task.reflectiveLoadOperation == REFLECTIVE_LoadOperation.Load)
-                    scene = SceneManager.GetSceneAt(sceneIndex);
+                if (task.loadOperation == LoadOperation.Load)
+                    scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(sceneIndex);
 
                 task.OnTaskCompletedAction?.Invoke(scene);
             }
@@ -134,7 +134,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
                 localPhysicsMode = LocalPhysicsMode.Physics3D
             };
             
-            var asyncOperation = SceneManager.LoadSceneAsync(task.SceneName, sceneParameters);
+            var asyncOperation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(task.SceneName, sceneParameters);
 
             return asyncOperation;
         }
@@ -142,7 +142,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
         private AsyncOperation StartAsyncSceneUnload(SceneLoadingTask task)
         {
             var asyncOperation =
-                SceneManager.UnloadSceneAsync(task.Scene, UnloadSceneOptions.None);
+                UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(task.Scene, UnloadSceneOptions.None);
 
             return asyncOperation;
         }

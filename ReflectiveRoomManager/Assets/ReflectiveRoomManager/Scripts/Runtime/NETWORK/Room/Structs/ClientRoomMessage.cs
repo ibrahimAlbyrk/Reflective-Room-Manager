@@ -3,22 +3,22 @@
     using Enums;
     
     [System.Serializable]
-    public struct REFLECTIVE_ClientRoomMessage : Mirror.NetworkMessage
+    public struct ClientRoomMessage : Mirror.NetworkMessage
     {
         public int ConnectionId;
         
         public string SceneName;
         
-        public readonly REFLECTIVE_ClientRoomState ClientRoomState;
+        public readonly ClientRoomState ClientRoomState;
 
-        public REFLECTIVE_ClientRoomMessage(string sceneName, REFLECTIVE_ClientRoomState clientRoomState, int connectionId)
+        public ClientRoomMessage(string sceneName, ClientRoomState clientRoomState, int connectionId)
         {
             SceneName = sceneName;
             ClientRoomState = clientRoomState;
             ConnectionId = connectionId;
         }
         
-        public REFLECTIVE_ClientRoomMessage(REFLECTIVE_ClientRoomState clientRoomState, int connectionId)
+        public ClientRoomMessage(ClientRoomState clientRoomState, int connectionId)
         {
             SceneName = null;
             ClientRoomState = clientRoomState;

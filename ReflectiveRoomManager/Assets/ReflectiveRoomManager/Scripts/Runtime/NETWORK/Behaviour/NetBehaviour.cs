@@ -4,7 +4,7 @@ using UnityEngine;
 namespace REFLECTIVE.Runtime.NETWORK.Behaviour
 {
     [RequireComponent(typeof(NetworkIdentity))]
-    public class REFLECTIVE_NetBehaviour : NetworkBehaviour
+    public class NetBehaviour : NetworkBehaviour
     {
     }
 }

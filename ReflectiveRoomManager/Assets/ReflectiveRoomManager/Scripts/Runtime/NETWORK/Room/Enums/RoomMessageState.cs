@@ -1,6 +1,6 @@
 ﻿namespace REFLECTIVE.Runtime.NETWORK.Room.Enums
 {
-    public enum REFLECTIVE_RoomMessageState
+    public enum RoomMessageState
     {
         Add,
         Update,

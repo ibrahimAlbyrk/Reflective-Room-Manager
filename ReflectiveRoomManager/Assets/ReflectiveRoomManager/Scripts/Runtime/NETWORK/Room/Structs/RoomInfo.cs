@@ -3,7 +3,7 @@
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
     [System.Serializable]
-    public struct REFLECTIVE_RoomInfo
+    public struct RoomInfo
     {
         public string Name;
         public string SceneName;
@@ -13,7 +13,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 
         public List<int> ConnectionIds;
         
-        public REFLECTIVE_RoomInfo(string name, int maxPlayers, int currentPlayers, List<int> connectionIds = default)
+        public RoomInfo(string name, int maxPlayers, int currentPlayers, List<int> connectionIds = default)
         {
             Name = name;
             SceneName = default;
