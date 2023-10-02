@@ -4,14 +4,9 @@
     
     public static class REFLECTIVE_RoomClient
     {
-        #region ID
+        #region Public Variables
 
         public static int ID;
-
-        public static void ListenConnectionID(int id)
-        {
-            ID = id;
-        }
 
         #endregion
         

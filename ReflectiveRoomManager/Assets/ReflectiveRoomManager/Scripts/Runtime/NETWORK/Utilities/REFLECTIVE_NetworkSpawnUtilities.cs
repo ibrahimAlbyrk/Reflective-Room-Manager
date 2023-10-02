@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Utilities
@@ -26,6 +27,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             SceneManager.MoveGameObjectToScene(spawnedObj, scene);
 
             return spawnedObj;
+        }
+        
+        public static IEnumerable<GameObject>  GetSpawnablePrefabs()
+        {
+            var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs");
+
+            return spawnablePrefabs;
         }
     }
 }

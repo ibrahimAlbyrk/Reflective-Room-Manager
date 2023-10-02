@@ -34,7 +34,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Event Caller Methods
         
-        protected static void Invoke_OnServerCreatedRoom(REFLECTIVE_RoomInfo roomInfo) => OnServerCreatedRoom?.Invoke(roomInfo);
+        protected static void Invoke_OnServerCreatedRoom(REFLECTIVE_RoomInfo roomInfo) =>
+            OnServerCreatedRoom?.Invoke(roomInfo);
 
         protected static void Invoke_OnServerJoinedClient(NetworkConnectionToClient conn) =>
             OnServerJoinedRoom?.Invoke(conn);
@@ -93,7 +94,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             if (_singleton != null)
             {
-                Debug.LogWarning("Multiple RoomManagers detected in the scene. Only one RoomManager can exist at a time. The duplicate RoomManager will be destroyed.");
+                Debug.LogWarning("Multiple RoomManagers detected in the scene. Only one RoomManager can exist at a time.The duplicate RoomManager will be destroyed.");
                 Destroy(gameObject);
 
                 // Return false to not allow collision-destroyed second instance to continue.
@@ -120,13 +121,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <remarks>Only works on server</remarks>
         /// <returns></returns>
-        public List<REFLECTIVE_Room> GetRooms() => m_rooms;
+        public IEnumerable<REFLECTIVE_Room> GetRooms() => m_rooms;
         
         /// <summary>
         /// Returns a list of all room infos
         /// </summary>
+        /// <remarks>Only works on client</remarks>
         /// <returns></returns>
-        public List<REFLECTIVE_RoomInfo> GetRoomInfos() => m_roomListInfos;
+        public IEnumerable<REFLECTIVE_RoomInfo> GetRoomInfos() => m_roomListInfos;
 
         /// <summary>
         /// The function return information about the room where the "connection" is located
@@ -142,6 +144,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// The function return information about the room where the "connection ID" is located
         /// </summary>
+        /// <remarks>Only works on client</remarks>
         /// <returns>Information about the room where the "connection ID" is located.</returns>
         public REFLECTIVE_RoomInfo GetRoomOfClient()
         {
@@ -160,7 +163,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
-
+        
         #region Request Methods
 
         /// <summary>
@@ -244,6 +247,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Recieve Message Methods
 
+        /// <summary>
+        /// Gets the connection information of the client connecting to the server
+        /// </summary>
+        /// <param name="msg"></param>
         private static void OnReceivedConnectionMessageViaClient(REFLECTIVE_ClientConnectionMessage msg)
         {
             REFLECTIVE_RoomClient.ID = msg.ConnectionID;
@@ -354,11 +361,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             NetworkServer.RegisterHandler<REFLECTIVE_ServerRoomMessage>(OnReceivedRoomMessageViaServer);
         }
         
+        protected virtual void OnStopServer()
+        {
+            REFLECTIVE_RoomServer.RemoveAllRoom(forced:true);
+        }
+        
         protected virtual void OnStartClient()
         {
             NetworkClient.RegisterHandler<REFLECTIVE_ClientRoomMessage>(OnReceivedRoomMessageViaClient);
             NetworkClient.RegisterHandler<REFLECTIVE_RoomListChangeMessage>(OnRoomListChangeForClient);
             NetworkClient.RegisterHandler<REFLECTIVE_ClientConnectionMessage>(OnReceivedConnectionMessageViaClient);
+        }
+
+        protected virtual void OnStopClient()
+        {
         }
         
         protected virtual void OnServerConnect(NetworkConnection conn)
@@ -367,12 +383,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             SendConnectionMessageToClient(conn);
         }
-        
-        protected virtual void OnStopServer()
+
+        protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)
         {
-            REFLECTIVE_RoomServer.RemoveAllRoom(forced:true);
+            
         }
 
+        protected virtual void OnClientConnect()
+        {
+        }
+        
         protected virtual void OnClientDisconnect()
         {
             REFLECTIVE_RoomClient.ExitRoom();
@@ -386,12 +406,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             if(!InitializeSingleton()) return;
 
+            //Server Side
             REFLECTIVE_NetworkManager.OnStartedServer += OnStartServer;
             REFLECTIVE_NetworkManager.OnStoppedServer += OnStopServer;
             REFLECTIVE_NetworkManager.OnServerConnected += OnServerConnect;
+            REFLECTIVE_NetworkManager.OnServerDisconnected += OnServerDisconnect;
             
-            
+            //Client Side
             REFLECTIVE_NetworkManager.OnStartedClient += OnStartClient;
+            REFLECTIVE_NetworkManager.OnStoppedClient += OnStopClient;
+            REFLECTIVE_NetworkManager.OnClientConnected += OnClientConnect;
             REFLECTIVE_NetworkManager.OnClientDisconnected += OnClientDisconnect;
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using Mirror;
 using System.Linq;
+using REFLECTIVE.Runtime.NETWORK.Utilities;
 using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Manager
@@ -10,32 +11,32 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
     {
         #region Events
 
-        public static Action OnStartedServer;
-        public static Action OnStoppedServer;
-        public static Action<NetworkConnection> OnServerConnected;
+        //Server Side
+        public static event Action OnStartedServer;
+        public static event Action OnStoppedServer;
+        public static event Action<NetworkConnection> OnServerConnected;
+        public static event Action<NetworkConnectionToClient> OnServerDisconnected;
         
-        public static Action OnStartedClient;
-        public static Action OnClientDisconnected;
+        //Client Side
+        public static event Action OnStartedClient;
+        public static event Action OnStoppedClient;
+        public static event Action OnClientConnected;
+        public static event Action OnClientDisconnected;
 
         #endregion
         
         #region Start & Stop Callbacks
 
-        public override void OnServerConnect(NetworkConnectionToClient conn)
-        {
-            OnServerConnected?.Invoke(conn);
-        }
-
         public override void OnStartServer()
         {
-            SetSpawnablePrefabs();
+            spawnPrefabs = REFLECTIVE_NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
             OnStartedServer?.Invoke();
         }
 
         public override void OnStartClient()
         {
-            SetSpawnablePrefabs();
+            spawnPrefabs = REFLECTIVE_NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
             OnStartedClient?.Invoke();
         }
@@ -45,21 +46,33 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
             OnStoppedServer?.Invoke();
         }
 
-        public override void OnClientDisconnect()
+        public override void OnStopClient()
         {
-            OnClientDisconnected?.Invoke();
+            OnStoppedClient?.Invoke();
         }
 
         #endregion
 
-        #region Utilities
+        #region Connection Callbacks
 
-        private void SetSpawnablePrefabs()
+        public override void OnServerConnect(NetworkConnectionToClient conn)
         {
-            spawnPrefabs.Clear();
-            var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs");
+            OnServerConnected?.Invoke(conn);
+        }
 
-            spawnPrefabs = spawnablePrefabs.ToList();
+        public override void OnServerDisconnect(NetworkConnectionToClient conn)
+        {
+            OnServerDisconnected?.Invoke(conn);
+        }
+
+        public override void OnClientConnect()
+        {
+            OnClientConnected?.Invoke();
+        }
+
+        public override void OnClientDisconnect()
+        {
+            OnClientDisconnected?.Invoke();
         }
 
         #endregion

@@ -1,3 +1,17 @@
 {
-	"name": "ReflectiveRM.Editor"
+    "name": "ReflectiveRM.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0e77855435c857846a4751641a9aecaf",
+        "GUID:30817c1a0e6d646d99c048fc403f5979"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
