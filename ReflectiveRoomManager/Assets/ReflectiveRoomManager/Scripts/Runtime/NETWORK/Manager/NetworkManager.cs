@@ -47,16 +47,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
         {
+            base.OnServerDisconnect(conn);
+            
             ConnectionManager.networkConnections.OnServerDisconnected?.Invoke(conn);
         }
 
         public override void OnClientConnect()
         {
+            base.OnClientConnect();
+            
             ConnectionManager.networkConnections.OnClientConnected?.Invoke();
         }
 
         public override void OnClientDisconnect()
         {
+            base.OnClientDisconnect();
+            
             ConnectionManager.networkConnections.OnClientDisconnected?.Invoke();
         }
 
