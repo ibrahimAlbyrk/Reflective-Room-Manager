@@ -16,7 +16,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
         
         public static void SendRoomMessage(NetworkConnection conn, ClientRoomState state)
         {
-            var roomMessage = new ClientRoomMessage(state, conn.connectionId);
+            var roomMessage = new ClientRoomMessage(state);
 
             conn.Send(roomMessage);
         }

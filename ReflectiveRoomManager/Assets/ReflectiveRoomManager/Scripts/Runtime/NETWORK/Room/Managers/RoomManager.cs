@@ -30,7 +30,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             var room = new Room(roomName, maxPlayers, isServer);
             
             RoomListUtility.AddRoomToList(ref m_rooms, room);
-
+            
             //If it is a client, add in to the room
             if (!isServer)
             {

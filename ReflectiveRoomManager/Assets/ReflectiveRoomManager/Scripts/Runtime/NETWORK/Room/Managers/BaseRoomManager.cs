@@ -240,7 +240,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Callback Methods
 
-        private static void ConnectionMessageForClient(int connectionID) => RoomClient.ID = connectionID;
+        private static void GetConnectionMessageForClient(int connectionID) => RoomClient.ID = connectionID;
 
         private static void SendConnectionMessageToClient(NetworkConnection conn)
         {
@@ -250,7 +250,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             });
         }
         
-        private void UpdateRoomListForClient(NetworkConnection conn)
+        private void SendUpdateRoomListForClient(NetworkConnection conn)
         {
             foreach (var message in m_rooms.Select(room => 
                          new RoomListChangeMessage(
@@ -307,7 +307,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         protected virtual void OnServerConnect(NetworkConnection conn)
         {
-            UpdateRoomListForClient(conn);
+            SendUpdateRoomListForClient(conn);
 
             SendConnectionMessageToClient(conn);
         }
@@ -352,7 +352,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             ConnectionManager.roomConnections.OnClientRoomListAdd += AddRoomList;
             ConnectionManager.roomConnections.OnClientRoomListUpdate += UpdateRoomList;
             ConnectionManager.roomConnections.OnClientRoomListRemove += RemoveRoomList;
-            ConnectionManager.roomConnections.OnClientConnectionMessage += ConnectionMessageForClient;
+            ConnectionManager.roomConnections.OnClientConnectionMessage += GetConnectionMessageForClient;
         }
 
         #endregion
