@@ -10,8 +10,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Enums;
     using Service;
     using Structs;
-    using Manager;
     using Utilities;
+    using Connection.Manager;
 
     public abstract class BaseRoomManager : MonoBehaviour
     {
@@ -22,13 +22,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public static event Action<NetworkConnectionToClient> OnServerJoinedRoom;
         public static event Action<NetworkConnectionToClient> OnServerExitedRoom;
         public static event Action<NetworkConnection> OnServerDisconnectedRoom;
-
-        //Client Side
-        public static event Action OnClientCreatedRoom;
-        public static event Action OnClientJoinedRoom;
-        public static event Action OnClientRemovedRoom;
-        public static event Action OnClientExitedRoom;
-        public static event Action OnClientFailedRoom;
 
         #endregion
 
@@ -169,7 +162,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// Sends a request to the server for room creation with the specified information
         /// </summary>
-        /// <param name="roomInfo"></param>
+        /// <param name="roomInfo">The <see cref="RoomInfo"/> instance that contains the room's </param>
         public static void RequestCreateRoom(RoomInfo roomInfo)
         {
             var serverRoomMessage =
@@ -245,72 +238,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #endregion
 
-        #region Recieve Message Methods
-
-        /// <summary>
-        /// Gets the connection information of the client connecting to the server
-        /// </summary>
-        /// <param name="msg"></param>
-        private static void OnReceivedConnectionMessageViaClient(ClientConnectionMessage msg)
-        {
-            RoomClient.ID = msg.ConnectionID;
-        }
-        
-        /// <summary>
-        /// This function is triggered by an event from the "client". It performs various operations based on the incoming event.
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="msg"></param>
-        private void OnReceivedRoomMessageViaServer(NetworkConnectionToClient conn,
-            ServerRoomMessage msg)
-        {
-            switch (msg.ServerRoomState)
-            {
-                case ServerRoomState.Create:
-                    CreateRoom(conn, msg.RoomInfo);
-                    break;
-                case ServerRoomState.Join:
-                    JoinRoom(conn, msg.RoomInfo.Name);
-                    break;
-                case ServerRoomState.Exit:
-                    ExitRoom(conn, msg.IsDisconnected);
-                    break;
-                default:
-                    return;
-            }
-        }
-
-        /// <summary>
-        /// This function is triggered by an event from the "server". It performs various operations based on the incoming event.
-        /// </summary>
-        /// <param name="msg"></param>
-        private static void OnReceivedRoomMessageViaClient(ClientRoomMessage msg)
-        {
-            switch (msg.ClientRoomState)
-            {
-                case ClientRoomState.Created:
-                    OnClientCreatedRoom?.Invoke();
-                    break;
-                case ClientRoomState.Joined:
-                    OnClientJoinedRoom?.Invoke();
-                    break;
-                case ClientRoomState.Removed:
-                    OnClientRemovedRoom?.Invoke();
-                    break;
-                case ClientRoomState.Exited:
-                    OnClientExitedRoom?.Invoke();
-                    break;
-                case ClientRoomState.Fail:
-                    OnClientFailedRoom?.Invoke();
-                    break;
-                default:
-                    return;
-            }
-        }
-
-        #endregion
-
         #region Callback Methods
+
+        private static void ConnectionMessageForClient(int connectionID) => RoomClient.ID = connectionID;
 
         private static void SendConnectionMessageToClient(NetworkConnection conn)
         {
@@ -330,26 +260,26 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 conn.Send(message);
             }
         }
-        
-        private void OnRoomListChangeForClient(RoomListChangeMessage msg)
+
+        private void AddRoomList(RoomInfo roomInfo)
         {
-           switch (msg.State)
-            {
-                case RoomMessageState.Add:
-                    m_roomListInfos.Add(msg.RoomInfo);
-                    break;
-                case RoomMessageState.Update:
-                    var room = m_roomListInfos.FirstOrDefault(info => info.Name == msg.RoomInfo.Name);
-                    var index = m_roomListInfos.IndexOf(room);
-                    if (index < 0) break;
-                    m_roomListInfos[index] = msg.RoomInfo;
-                    break;
-                case RoomMessageState.Remove:
-                    m_roomListInfos.RemoveAll(roomInfo => roomInfo.Name == msg.RoomInfo.Name);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            m_roomListInfos.Add(roomInfo);
+        }
+
+        private void UpdateRoomList(RoomInfo roomInfo)
+        {
+            var room = m_roomListInfos.FirstOrDefault(info => info.Name == roomInfo.Name);
+            
+            var index = m_roomListInfos.IndexOf(room);
+            
+            if (index < 0) return;
+            
+            m_roomListInfos[index] = roomInfo;
+        }
+
+        private void RemoveRoomList(RoomInfo roomInfo)
+        {
+            m_roomListInfos.RemoveAll(info => info.Name == roomInfo.Name);
         }
 
         #endregion
@@ -358,7 +288,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         protected virtual void OnStartServer()
         {
-            NetworkServer.RegisterHandler<ServerRoomMessage>(OnReceivedRoomMessageViaServer);
+            ConnectionManager.roomConnections.AddRegistersForServer();
         }
         
         protected virtual void OnStopServer()
@@ -368,9 +298,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         protected virtual void OnStartClient()
         {
-            NetworkClient.RegisterHandler<ClientRoomMessage>(OnReceivedRoomMessageViaClient);
-            NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
-            NetworkClient.RegisterHandler<ClientConnectionMessage>(OnReceivedConnectionMessageViaClient);
+            ConnectionManager.roomConnections.AddRegistersForClient();
         }
 
         protected virtual void OnStopClient()
@@ -386,7 +314,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)
         {
-            
         }
 
         protected virtual void OnClientConnect()
@@ -405,18 +332,27 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private void Awake()
         {
             if(!InitializeSingleton()) return;
-
-            //Server Side
-            NetworkManager.OnStartedServer += OnStartServer;
-            NetworkManager.OnStoppedServer += OnStopServer;
-            NetworkManager.OnServerConnected += OnServerConnect;
-            NetworkManager.OnServerDisconnected += OnServerDisconnect;
             
-            //Client Side
-            NetworkManager.OnStartedClient += OnStartClient;
-            NetworkManager.OnStoppedClient += OnStopClient;
-            NetworkManager.OnClientConnected += OnClientConnect;
-            NetworkManager.OnClientDisconnected += OnClientDisconnect;
+            //SERVER SIDE
+            ConnectionManager.networkConnections.OnStartedServer += OnStartServer;
+            ConnectionManager.networkConnections.OnStoppedServer += OnStopServer;
+            ConnectionManager.networkConnections.OnServerConnected += OnServerConnect;
+            ConnectionManager.networkConnections.OnServerDisconnected += OnServerDisconnect;
+            
+            ConnectionManager.roomConnections.OnServerCreateRoom += CreateRoom;
+            ConnectionManager.roomConnections.OnServerJoinRoom += JoinRoom;
+            ConnectionManager.roomConnections.OnServerExitRoom += ExitRoom;
+            
+            //CLIENT SIDE
+            ConnectionManager.networkConnections.OnStartedClient += OnStartClient;
+            ConnectionManager.networkConnections.OnStoppedClient += OnStopClient;
+            ConnectionManager.networkConnections.OnClientConnected += OnClientConnect;
+            ConnectionManager.networkConnections.OnClientDisconnected += OnClientDisconnect;
+
+            ConnectionManager.roomConnections.OnClientRoomListAdd += AddRoomList;
+            ConnectionManager.roomConnections.OnClientRoomListUpdate += UpdateRoomList;
+            ConnectionManager.roomConnections.OnClientRoomListRemove += RemoveRoomList;
+            ConnectionManager.roomConnections.OnClientConnectionMessage += ConnectionMessageForClient;
         }
 
         #endregion

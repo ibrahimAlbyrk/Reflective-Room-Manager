@@ -1,54 +1,39 @@
-﻿using System;
-using Mirror;
+﻿using Mirror;
 using System.Linq;
-using REFLECTIVE.Runtime.NETWORK.Utilities;
 using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Manager
 {
+    using Utilities;
+    using Connection.Manager;
+    
     [AddComponentMenu("REFLECTIVE/Reflective Network Manager")]
     public class NetworkManager : Mirror.NetworkManager
     {
-        #region Events
-
-        //Server Side
-        public static event Action OnStartedServer;
-        public static event Action OnStoppedServer;
-        public static event Action<NetworkConnection> OnServerConnected;
-        public static event Action<NetworkConnectionToClient> OnServerDisconnected;
-        
-        //Client Side
-        public static event Action OnStartedClient;
-        public static event Action OnStoppedClient;
-        public static event Action OnClientConnected;
-        public static event Action OnClientDisconnected;
-
-        #endregion
-        
         #region Start & Stop Callbacks
 
         public override void OnStartServer()
         {
             spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
-            OnStartedServer?.Invoke();
+            ConnectionManager.networkConnections.OnStartedServer?.Invoke();
         }
 
         public override void OnStartClient()
         {
             spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
-            OnStartedClient?.Invoke();
+            ConnectionManager.networkConnections.OnStartedClient?.Invoke();
         }
 
         public override void OnStopServer()
         {
-            OnStoppedServer?.Invoke();
+            ConnectionManager.networkConnections.OnStoppedServer?.Invoke();
         }
 
         public override void OnStopClient()
         {
-            OnStoppedClient?.Invoke();
+            ConnectionManager.networkConnections.OnStoppedClient?.Invoke();
         }
 
         #endregion
@@ -57,22 +42,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnServerConnect(NetworkConnectionToClient conn)
         {
-            OnServerConnected?.Invoke(conn);
+            ConnectionManager.networkConnections.OnServerConnected?.Invoke(conn);
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
         {
-            OnServerDisconnected?.Invoke(conn);
+            ConnectionManager.networkConnections.OnServerDisconnected?.Invoke(conn);
         }
 
         public override void OnClientConnect()
         {
-            OnClientConnected?.Invoke();
+            ConnectionManager.networkConnections.OnClientConnected?.Invoke();
         }
 
         public override void OnClientDisconnect()
         {
-            OnClientDisconnected?.Invoke();
+            ConnectionManager.networkConnections.OnClientDisconnected?.Invoke();
         }
 
         #endregion

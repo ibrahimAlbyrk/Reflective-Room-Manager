@@ -18,19 +18,24 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             var roomName = roomInfo.Name;
             var maxPlayers = roomInfo.MaxPlayers;
 
-            if (m_rooms.Any(room => room.RoomName == roomName)) return;
+            if (m_rooms.Any(room => room.RoomName == roomName))
+            {
+                Debug.LogWarning("There is already a room with this name");
+                
+                return;
+            }
 
-            var onServer = conn is null;
+            var isServer = conn is null;
 
-            var room = new Room(roomName, maxPlayers, onServer);
+            var room = new Room(roomName, maxPlayers, isServer);
             
             RoomListUtility.AddRoomToList(ref m_rooms, room);
 
             //If it is a client, add in to the room
-            if (!onServer)
+            if (!isServer)
             {
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Created);
-
+                
                 SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Additive,
                     scene =>
                     {
