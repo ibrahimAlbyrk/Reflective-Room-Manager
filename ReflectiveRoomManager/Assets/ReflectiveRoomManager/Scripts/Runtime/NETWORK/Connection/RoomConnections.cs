@@ -1,10 +1,11 @@
 ﻿using System;
 using Mirror;
-using REFLECTIVE.Runtime.NETWORK.Room.Enums;
-using REFLECTIVE.Runtime.NETWORK.Room.Structs;
 
-namespace REFLECTIVE.Runtime.NETWORK.Connection.Manager
+namespace REFLECTIVE.Runtime.NETWORK.Connection
 {
+    using Room.Enums;
+    using Room.Structs;
+    
     public class RoomConnections
     {
         #region Events

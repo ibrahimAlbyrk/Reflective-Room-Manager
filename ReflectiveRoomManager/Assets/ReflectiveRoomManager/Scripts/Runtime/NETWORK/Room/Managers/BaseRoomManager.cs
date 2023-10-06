@@ -7,7 +7,9 @@ using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
+    using Data;
     using Enums;
+    using Loader;
     using Service;
     using Structs;
     using Utilities;
@@ -26,7 +28,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         #endregion
 
         #region Event Caller Methods
-        
+
         protected static void Invoke_OnServerCreatedRoom(RoomInfo roomInfo) =>
             OnServerCreatedRoom?.Invoke(roomInfo);
 
@@ -43,15 +45,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Serialize Variables
 
-        [Header("Configuration")]
-        [SerializeField] private bool _dontDestroyOnLoad = true;
-        
+        [Header("Configuration")] [SerializeField]
+        private bool _dontDestroyOnLoad = true;
+
+        [Header("Setup")] [SerializeField] private RoomManagementData_SO _roomManagementData;
+
         #endregion
-        
+
         #region Public Variables
-        
+
         /// <summary>The one and only RoomManager</summary>
-        public static BaseRoomManager Singleton {
+        public static BaseRoomManager Singleton
+        {
             get
             {
                 if (_singleton == null)
@@ -62,13 +67,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
-        
+
         #region Private Variables
-        
+
         protected List<Room> m_rooms = new();
-        
+
         private static BaseRoomManager _singleton;
         private readonly List<RoomInfo> m_roomListInfos = new();
+
+        private IRoomLoader _roomLoader;
 
         #endregion
 
@@ -84,19 +91,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 _singleton = this;
                 return true;
             }
-            
+
             if (_singleton != null)
             {
-                Debug.LogWarning("Multiple RoomManagers detected in the scene. Only one RoomManager can exist at a time.The duplicate RoomManager will be destroyed.");
+                Debug.LogWarning(
+                    "Multiple RoomManagers detected in the scene. Only one RoomManager can exist at a time.The duplicate RoomManager will be destroyed.");
                 Destroy(gameObject);
 
                 // Return false to not allow collision-destroyed second instance to continue.
                 return false;
             }
-                
+
             _singleton = this;
             if (!Application.isPlaying) return true;
-                
+
             // Force the object to scene root, in case user made it a child of something
             // in the scene since DDOL is only allowed for scene root objects
             transform.SetParent(null);
@@ -105,17 +113,39 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             return true;
         }
 
+        private void InitializeRoomLoader()
+        {
+            var roomData = _roomManagementData.DefaultRoomData;
+
+            _roomLoader = roomData.RoomLoaderType switch
+            {
+                RoomLoaderType.Empty => new EmptyRoomLoader(),
+                RoomLoaderType.AdditiveScene => new AdditiveSceneRoomLoader(),
+                RoomLoaderType.SingleScene => new SingleSceneRoomLoader(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        #endregion
+
+        #region Get Methods
+
+        public RoomData_SO GetRoomData()
+        {
+            return _roomManagementData.DefaultRoomData;
+        }
+
         #endregion
 
         #region Get Room Methods
-        
+
         /// <summary>
         /// Returns a list of all rooms
         /// </summary>
         /// <remarks>Only works on server</remarks>
         /// <returns></returns>
         public IEnumerable<Room> GetRooms() => m_rooms;
-        
+
         /// <summary>
         /// Returns a list of all room infos
         /// </summary>
@@ -156,7 +186,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
-        
+
         #region Request Methods
 
         /// <summary>
@@ -165,6 +195,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="roomInfo">The <see cref="RoomInfo"/> instance that contains the room's </param>
         public static void RequestCreateRoom(RoomInfo roomInfo)
         {
+            if (NetworkClient.connection == null) return;
+
             var serverRoomMessage =
                 new ServerRoomMessage(ServerRoomState.Create, roomInfo);
 
@@ -177,6 +209,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="roomName"></param>
         public static void RequestJoinRoom(string roomName)
         {
+            if (NetworkClient.connection == null) return;
+
             var roomInfo = new RoomInfo { Name = roomName };
 
             var serverRoomMessage = new ServerRoomMessage(ServerRoomState.Join, roomInfo);
@@ -190,10 +224,32 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="isDisconnected"></param>
         public static void RequestExitRoom(bool isDisconnected = false)
         {
+            if (NetworkClient.connection == null) return;
+
             var serverRoomMessage =
                 new ServerRoomMessage(ServerRoomState.Exit, default, isDisconnected);
 
             NetworkClient.Send(serverRoomMessage);
+        }
+
+        #endregion
+
+        #region Room Loader Mehods
+
+        protected void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded = null)
+        {
+            if (_roomLoader == null)
+                throw new NullReferenceException("Room Loader is null");
+
+            _roomLoader.LoadRoom(room, roomInfo, onLoaded);
+        }
+
+        protected void UnLoadRoom(Room room)
+        {
+            if (_roomLoader == null)
+                throw new NullReferenceException("Room Loader is null");
+
+            _roomLoader.UnLoadRoom(room);
         }
 
         #endregion
@@ -249,10 +305,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 ConnectionID = conn.connectionId
             });
         }
-        
+
         private void SendUpdateRoomListForClient(NetworkConnection conn)
         {
-            foreach (var message in m_rooms.Select(room => 
+            foreach (var message in m_rooms.Select(room =>
                          new RoomListChangeMessage(
                              RoomListUtility.ConvertToRoomList(room),
                              RoomMessageState.Add)))
@@ -269,11 +325,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private void UpdateRoomList(RoomInfo roomInfo)
         {
             var room = m_roomListInfos.FirstOrDefault(info => info.Name == roomInfo.Name);
-            
+
             var index = m_roomListInfos.IndexOf(room);
-            
+
             if (index < 0) return;
-            
+
             m_roomListInfos[index] = roomInfo;
         }
 
@@ -285,17 +341,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         #endregion
 
         #region Base Server Methods
-        
+
         protected virtual void OnStartServer()
         {
             ConnectionManager.roomConnections.AddRegistersForServer();
         }
-        
+
         protected virtual void OnStopServer()
         {
-            RoomServer.RemoveAllRoom(forced:true);
+            RoomServer.RemoveAllRoom(forced: true);
         }
-        
+
         protected virtual void OnStartClient()
         {
             ConnectionManager.roomConnections.AddRegistersForClient();
@@ -304,7 +360,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected virtual void OnStopClient()
         {
         }
-        
+
         protected virtual void OnServerConnect(NetworkConnection conn)
         {
             SendUpdateRoomListForClient(conn);
@@ -319,7 +375,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected virtual void OnClientConnect()
         {
         }
-        
+
         protected virtual void OnClientDisconnect()
         {
             RoomClient.ExitRoom();
@@ -329,20 +385,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Base Methods
 
-        private void Awake()
+        protected virtual void Awake()
         {
-            if(!InitializeSingleton()) return;
-            
+            if (!InitializeSingleton()) return;
+
+            InitializeRoomLoader();
+
             //SERVER SIDE
             ConnectionManager.networkConnections.OnStartedServer += OnStartServer;
             ConnectionManager.networkConnections.OnStoppedServer += OnStopServer;
             ConnectionManager.networkConnections.OnServerConnected += OnServerConnect;
             ConnectionManager.networkConnections.OnServerDisconnected += OnServerDisconnect;
-            
+
             ConnectionManager.roomConnections.OnServerCreateRoom += CreateRoom;
             ConnectionManager.roomConnections.OnServerJoinRoom += JoinRoom;
             ConnectionManager.roomConnections.OnServerExitRoom += ExitRoom;
-            
+
             //CLIENT SIDE
             ConnectionManager.networkConnections.OnStartedClient += OnStartClient;
             ConnectionManager.networkConnections.OnStoppedClient += OnStopClient;

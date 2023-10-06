@@ -1,14 +1,12 @@
 ﻿using Mirror;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Enums;
     using Structs;
     using Utilities;
-    using SceneManagement;
     
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
     public class RoomManager : BaseRoomManager
@@ -36,16 +34,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             {
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Created);
                 
-                SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Additive,
-                    scene =>
-                    {
-                        room.Scene = scene;
-                        JoinRoom(conn.identity.connectionToClient, roomName);
-                    });
+                LoadRoom(room, roomInfo, () => JoinRoom(conn.identity.connectionToClient, roomName));
             }
             else
-                SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Additive,
-                    scene => room.Scene = scene);
+                LoadRoom(room, roomInfo);
             
             Invoke_OnServerCreatedRoom(roomInfo);
         }
@@ -102,9 +94,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             if (room.IsServer && !forced) return;
 
-            var roomScene = room.Scene;
-
-            SceneManager.UnLoadScene(roomScene);
+            UnLoadRoom(room);
 
             removedConnections.ForEach(connection => RoomMessageUtility.SendRoomMessage(connection, ClientRoomState.Removed));
             

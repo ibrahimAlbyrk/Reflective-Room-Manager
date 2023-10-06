@@ -1,10 +1,19 @@
 ﻿using UnityEngine;
 
-namespace ReflectiveRoomManager.Scripts.Runtime.NETWORK.Room.Data
+namespace REFLECTIVE.Runtime.NETWORK.Room.Data
 {
-    [CreateAssetMenu(fileName = "New Room Data", menuName = "REFLECTIVE/Room/Room Data", order = 0)]
-    public class RoomData_SO : ScriptableObject
+    using Loader;
+    
+    [System.Serializable]
+    public struct RoomData_SO
     {
+        [Tooltip("Number of players to be determined when creating a server room")]
+        public int DefaultMaxPlayerCount;
         
+        [Tooltip("Maximum number of players a client can specify")]
+        public int MaxPlayerCount;
+        
+        [Tooltip("determines what type of loading the room will have")]
+        public RoomLoaderType RoomLoaderType;
     }
 }

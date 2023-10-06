@@ -21,22 +21,6 @@ namespace REFLECTIVE.Runtime.SceneManagement
         private readonly Queue<SceneLoadingTask> _scenes = new();
 
         private bool _isCurrentlyLoading;
-
-        public struct SceneTask
-        {
-            public Scene Scene;
-            public LoadOperation loadOperation;
-
-            public readonly GameObject[] RootGameObjects;
-
-            public SceneTask(Scene scene = default, LoadOperation loadOperation = LoadOperation.Load, GameObject[] rootGameObjects = null)
-            {
-                Scene = scene;
-                this.loadOperation = loadOperation;
-                
-                RootGameObjects = rootGameObjects;
-            }
-        }
         
         private class SceneLoadingTask
         {
@@ -93,11 +77,11 @@ namespace REFLECTIVE.Runtime.SceneManagement
             while (_scenes.Count > 0)
             {
                 _isCurrentlyLoading = true;
-
-                //The reason I add one is that the first scene is the menu scene and it will stay open all the time.
-                var sceneIndex = SceneManager.GetLoadedSceneCount() + 1;
                 
                 var task = _scenes.Dequeue();
+                
+                //The reason I add one is that the first scene is the menu scene and it will stay open all the time.
+                var sceneIndex = SceneManager.GetLoadedSceneCount() + (task.LoadMode == LoadSceneMode.Additive ? 1 : 0);
 
                 Scene scene = default;
                 
@@ -116,6 +100,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
                     _ => throw new ArgumentOutOfRangeException($"SceneLoader", "Load Operation is undefined")
                 };
                 
+                //It gives an error when loading single scenes
                 //If the scene is loading, the scene information comes after loaded
                 if (task.loadOperation == LoadOperation.Load)
                     scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(sceneIndex);
@@ -126,7 +111,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
             _isCurrentlyLoading = false;
         }
 
-        private AsyncOperation StartAsyncSceneLoad(SceneLoadingTask task)
+        private static AsyncOperation StartAsyncSceneLoad(SceneLoadingTask task)
         {
             var sceneParameters = new LoadSceneParameters
             {
@@ -139,7 +124,7 @@ namespace REFLECTIVE.Runtime.SceneManagement
             return asyncOperation;
         }
 
-        private AsyncOperation StartAsyncSceneUnload(SceneLoadingTask task)
+        private static AsyncOperation StartAsyncSceneUnload(SceneLoadingTask task)
         {
             var asyncOperation =
                 UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(task.Scene, UnloadSceneOptions.None);
@@ -152,6 +137,9 @@ namespace REFLECTIVE.Runtime.SceneManagement
             if (_sceneLoaderHandler != null) return;
 
             var gameObject = new GameObject("SceneLoader Handler");
+            
+            UnityEngine.Object.DontDestroyOnLoad(gameObject);
+            
             _sceneLoaderHandler = gameObject.AddComponent<SceneLoaderHandler>();
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using Mirror;
 
-namespace REFLECTIVE.Runtime.NETWORK.Connection.Manager
+namespace REFLECTIVE.Runtime.NETWORK.Connection
 {
     public class NetworkConnections
     {
