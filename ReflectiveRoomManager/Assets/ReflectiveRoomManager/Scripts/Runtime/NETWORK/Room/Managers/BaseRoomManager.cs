@@ -45,10 +45,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Serialize Variables
 
-        [Header("Configuration")] [SerializeField]
-        private bool _dontDestroyOnLoad = true;
+        [Header("Configuration")]
+        [SerializeField] private bool _dontDestroyOnLoad = true;
 
-        [Header("Setup")] [SerializeField] private RoomManagementData_SO _roomManagementData;
+        [Header("Setup")]
+        [SerializeField] private  RoomData_SO _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
 
         #endregion
 
@@ -115,9 +116,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private void InitializeRoomLoader()
         {
-            var roomData = _roomManagementData.DefaultRoomData;
-
-            _roomLoader = roomData.RoomLoaderType switch
+            _roomLoader = _defaultRoomData.RoomLoaderType switch
             {
                 RoomLoaderType.Empty => new EmptyRoomLoader(),
                 RoomLoaderType.AdditiveScene => new AdditiveSceneRoomLoader(),
@@ -130,10 +129,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Get Methods
 
-        public RoomData_SO GetRoomData()
-        {
-            return _roomManagementData.DefaultRoomData;
-        }
+        public RoomData_SO GetRoomData() => _defaultRoomData;
 
         #endregion
 

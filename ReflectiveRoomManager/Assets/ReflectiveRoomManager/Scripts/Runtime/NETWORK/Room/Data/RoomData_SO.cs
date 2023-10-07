@@ -15,5 +15,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Data
         
         [Tooltip("determines what type of loading the room will have")]
         public RoomLoaderType RoomLoaderType;
+
+        public RoomData_SO(int defaultMaxPlayerCount, int maxPlayerCount, RoomLoaderType roomLoaderType)
+        {
+            DefaultMaxPlayerCount = defaultMaxPlayerCount;
+            MaxPlayerCount = maxPlayerCount;
+            RoomLoaderType = roomLoaderType;
+        }
     }
 }

@@ -709,7 +709,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
-  _roomManagementData: {fileID: 11400000, guid: ad86938bce2b07143a16aeceac27026e, type: 2}
+  _defaultRoomData:
+    DefaultMaxPlayerCount: 10
+    MaxPlayerCount: 10
+    RoomLoaderType: 2
 --- !u!4 &1568290450
 Transform:
   m_ObjectHideFlags: 0
