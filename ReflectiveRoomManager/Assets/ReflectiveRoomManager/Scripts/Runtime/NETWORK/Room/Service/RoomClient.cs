@@ -14,17 +14,17 @@
 
         public static void CreateRoom(RoomInfo roomInfo)
         {
-            BaseRoomManager.RequestCreateRoom(roomInfo);
+            RoomManagerBase.RequestCreateRoom(roomInfo);
         }
 
         public static void JoinRoom(string roomName)
         {
-            BaseRoomManager.RequestJoinRoom(roomName);
+            RoomManagerBase.RequestJoinRoom(roomName);
         }
 
         public static void ExitRoom()
         {
-            BaseRoomManager.RequestExitRoom();
+            RoomManagerBase.RequestExitRoom();
         }
 
         #endregion

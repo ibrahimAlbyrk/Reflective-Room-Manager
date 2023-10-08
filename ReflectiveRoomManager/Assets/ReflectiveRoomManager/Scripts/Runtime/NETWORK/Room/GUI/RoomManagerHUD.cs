@@ -27,7 +27,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
             _isServer = !NetworkClient.isConnected && NetworkServer.active;
             
-            var roomManager = BaseRoomManager.Singleton;
+            var roomManager = RoomManagerBase.Singleton;
             
             if (!roomManager) return;
 
@@ -66,6 +66,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
             if (GUILayout.Button("Create Room"))
             {
+                // for (var i = 0; i < 100; i++)
+                // {
+                //     RoomServer.CreateRoom(new RoomInfo
+                //     {
+                //         Name = $"test_{i}",
+                //         SceneName = "Game_Scene",
+                //         MaxPlayers = 10
+                //     });
+                // }
+                
                 var roomInfo = new RoomInfo
                 {
                     Name = _roomNameField,
@@ -144,7 +154,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             //TODO: room list for client
             if (_isServer)
             {
-                var rooms = BaseRoomManager.Singleton.GetRooms().ToList();
+                var rooms = RoomManagerBase.Singleton.GetRooms().ToList();
             
                 var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
             
@@ -158,7 +168,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             }
             else
             {
-                var rooms = BaseRoomManager.Singleton.GetRoomInfos().ToList();
+                var rooms = RoomManagerBase.Singleton.GetRoomInfos().ToList();
             
                 var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
             

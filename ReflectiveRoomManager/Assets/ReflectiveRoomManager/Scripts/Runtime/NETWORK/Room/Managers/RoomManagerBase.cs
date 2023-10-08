@@ -15,7 +15,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Utilities;
     using Connection.Manager;
 
-    public abstract class BaseRoomManager : MonoBehaviour
+    public abstract class RoomManagerBase : MonoBehaviour
     {
         #region Events
 
@@ -48,15 +48,19 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [Header("Configuration")]
         [SerializeField] private bool _dontDestroyOnLoad = true;
 
+        [Header("Scene Management")]
+        [SerializeField] private LocalPhysicsMode _physicsMode = LocalPhysicsMode.Physics3D;
+        [SerializeField] [Scene] private string _lobbyScene;
+        
         [Header("Setup")]
-        [SerializeField] private  RoomData_SO _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
+        [SerializeField] private RoomData_SO _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
 
         #endregion
 
         #region Public Variables
 
         /// <summary>The one and only RoomManager</summary>
-        public static BaseRoomManager Singleton
+        public static RoomManagerBase Singleton
         {
             get
             {
@@ -73,7 +77,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected List<Room> m_rooms = new();
 
-        private static BaseRoomManager _singleton;
+        private static RoomManagerBase _singleton;
         private readonly List<RoomInfo> m_roomListInfos = new();
 
         private IRoomLoader _roomLoader;
@@ -118,9 +122,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             _roomLoader = _defaultRoomData.RoomLoaderType switch
             {
-                RoomLoaderType.Empty => new EmptyRoomLoader(),
-                RoomLoaderType.AdditiveScene => new AdditiveSceneRoomLoader(),
-                RoomLoaderType.SingleScene => new SingleSceneRoomLoader(),
+                RoomLoaderType.NoneScene => new NoneSceneRoomLoader(),
+                RoomLoaderType.AdditiveScene => new SceneRoomLoader(),
+                RoomLoaderType.SingleScene => new SceneRoomLoader(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -129,6 +133,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Get Methods
 
+        public LocalPhysicsMode GetPhysicMode() => _physicsMode;
+        
+        public string GetLobbySceneName() => _lobbyScene;
+        
         public RoomData_SO GetRoomData() => _defaultRoomData;
 
         #endregion

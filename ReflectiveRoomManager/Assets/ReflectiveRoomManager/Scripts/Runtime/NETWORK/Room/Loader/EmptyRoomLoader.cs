@@ -4,7 +4,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
 {
     using Structs;
     
-    public class EmptyRoomLoader : IRoomLoader
+    public class NoneSceneRoomLoader : IRoomLoader
     {
         public void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded)
         {

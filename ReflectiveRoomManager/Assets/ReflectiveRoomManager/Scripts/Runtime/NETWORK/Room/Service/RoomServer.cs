@@ -10,37 +10,37 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
         public static void CreateRoom(RoomInfo roomInfo)
         {
-            BaseRoomManager.Singleton.CreateRoom(null, roomInfo);
+            RoomManagerBase.Singleton.CreateRoom(null, roomInfo);
         }
         
         public static void CreateRoom(NetworkConnectionToClient conn, RoomInfo roomInfo)
         {
-            BaseRoomManager.Singleton.CreateRoom(conn, roomInfo);
+            RoomManagerBase.Singleton.CreateRoom(conn, roomInfo);
         }
 
         public static void JoinRoom(string roomName)
         {
-            BaseRoomManager.Singleton.JoinRoom(null, roomName);
+            RoomManagerBase.Singleton.JoinRoom(null, roomName);
         }
 
         public static void JoinRoom(NetworkConnectionToClient conn, string roomName)
         {
-            BaseRoomManager.Singleton.JoinRoom(conn, roomName);
+            RoomManagerBase.Singleton.JoinRoom(conn, roomName);
         }
 
         public static void ExitRoom(NetworkConnectionToClient conn, bool isDisconnected)
         {
-            BaseRoomManager.Singleton.ExitRoom(conn, isDisconnected);
+            RoomManagerBase.Singleton.ExitRoom(conn, isDisconnected);
         }
 
         public static void RemoveRoom(string roomName, bool forced = false)
         {
-            BaseRoomManager.Singleton.RemoveRoom(roomName, forced);
+            RoomManagerBase.Singleton.RemoveRoom(roomName, forced);
         }
 
         public static void RemoveAllRoom(bool forced = false)
         {
-            BaseRoomManager.Singleton.RemoveAllRoom(forced);
+            RoomManagerBase.Singleton.RemoveAllRoom(forced);
         }
 
         #endregion

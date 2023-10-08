@@ -2,7 +2,7 @@
 {
     public enum RoomLoaderType
     {
-        Empty,
+        NoneScene,
         SingleScene,
         AdditiveScene
     }

@@ -9,7 +9,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Utilities;
     
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
-    public class RoomManager : BaseRoomManager
+    public class RoomManager : RoomManagerBase
     {
         public override void CreateRoom(NetworkConnection conn = null, RoomInfo roomInfo = default)
         {

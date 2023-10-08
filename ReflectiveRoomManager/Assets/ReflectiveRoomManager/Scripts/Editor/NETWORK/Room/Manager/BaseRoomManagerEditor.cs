@@ -6,7 +6,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 {
     using Runtime.NETWORK.Room;
 
-    [CustomEditor(typeof(BaseRoomManager), true)]
+    [CustomEditor(typeof(RoomManagerBase), true)]
     public class BaseRoomManagerEditor : UnityEditor.Editor
     {
         private GUIStyle roomInfoStyle;
@@ -28,7 +28,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 
             SetStyles();
 
-            var roomManager = (BaseRoomManager)target;
+            var roomManager = (RoomManagerBase)target;
             var rooms = roomManager.GetRooms().ToArray();
 
             if (roomFoldouts == null || roomFoldouts.Length != rooms.Length)
@@ -71,13 +71,14 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     switch (searchType)
                     {
                         case 0 when !string.IsNullOrEmpty(searchFilter):
+                            if(!room.RoomName.Contains(searchFilter))
+                                continue;
+                            
+                            break;
+                        case 1 when !string.IsNullOrEmpty(searchFilter):
                             if(int.TryParse(searchFilter, out var id))
                                 if(room.Connections.All(conn => conn.connectionId != id))
                                     continue;
-                            break;
-                        case 1 when !string.IsNullOrEmpty(searchFilter):
-                            if(!room.RoomName.Contains(searchFilter))
-                                continue;
                             break;
                     }
 

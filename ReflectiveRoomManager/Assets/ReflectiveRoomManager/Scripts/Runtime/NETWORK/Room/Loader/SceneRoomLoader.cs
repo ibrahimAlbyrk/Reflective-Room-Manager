@@ -1,20 +1,15 @@
 ﻿using System;
-using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
 {
     using Structs;
-    using SceneManagement;
+    using SceneManagement.Manager;
     
-    public class SingleSceneRoomLoader : IRoomLoader
+    public class SceneRoomLoader : IRoomLoader
     {
-        private string _beforeSceneName;
-        
         public void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded)
         {
-            _beforeSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            
-            SceneManager.LoadScene(roomInfo.SceneName, LoadSceneMode.Single, 
+            SceneManager.LoadScene(roomInfo.SceneName, 
                 scene =>
                 {
                     room.Scene = scene;
@@ -24,7 +19,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
 
         public void UnLoadRoom(Room room)
         {
-            SceneManager.LoadScene(_beforeSceneName);
+            SceneManager.UnLoadScene(room.Scene);
         }
     }
 }
