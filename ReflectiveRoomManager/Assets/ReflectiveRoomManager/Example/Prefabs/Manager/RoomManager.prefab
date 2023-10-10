@@ -48,8 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
   _physicsMode: 2
-  _lobbyScene: Assets/_Project/Scenes/Lobby_Scene.unity
-  _roomScene: Assets/_Project/Scenes/Game_Scene.unity
+  _lobbyScene: Assets/ReflectiveRoomManager/Example/Scenes/Lobby_Scene.unity
+  _roomScene: Assets/ReflectiveRoomManager/Example/Scenes/Game_Scene.unity
   _defaultRoomData:
     DefaultMaxPlayerCount: 10
     MaxPlayerCount: 10
