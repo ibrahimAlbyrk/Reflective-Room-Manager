@@ -1,5 +1,6 @@
 ﻿using System;
 using Mirror;
+using REFLECTIVE.Runtime.NETWORK.Connection.Manager;
 
 namespace REFLECTIVE.Runtime.NETWORK.Connection
 {

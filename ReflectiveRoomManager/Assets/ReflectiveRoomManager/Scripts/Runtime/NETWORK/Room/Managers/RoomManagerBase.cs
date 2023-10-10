@@ -15,14 +15,21 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Utilities;
     using Connection.Manager;
 
+    [DisallowMultipleComponent]
     public abstract class RoomManagerBase : MonoBehaviour
     {
         #region Events
-
-        //Server Side
+        
+        /// <summary>Called on the server when the room is created</summary>
         public static event Action<RoomInfo> OnServerCreatedRoom;
+        
+        /// <summary>Called on the server when the client enters the room</summary>
         public static event Action<NetworkConnectionToClient> OnServerJoinedRoom;
+        
+        /// <summary>Called on the server when the client leaves the room</summary>
         public static event Action<NetworkConnectionToClient> OnServerExitedRoom;
+        
+        /// <summary>Called on the server when the client's connection is lost</summary>
         public static event Action<NetworkConnection> OnServerDisconnectedRoom;
 
         #endregion
@@ -51,6 +58,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [Header("Scene Management")]
         [SerializeField] private LocalPhysicsMode _physicsMode = LocalPhysicsMode.Physics3D;
         [SerializeField] [Scene] private string _lobbyScene;
+        [SerializeField] [Scene] private string _roomScene;
         
         [Header("Setup")]
         [SerializeField] private RoomData_SO _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
@@ -71,6 +79,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
+        public LocalPhysicsMode PhysicsMode => _physicsMode;
+        
+        public RoomData_SO RoomData => _defaultRoomData;
+        
+        public string LobbyScene => _lobbyScene;
+        public string RoomScene => _roomScene;
+        
         #endregion
 
         #region Private Variables
@@ -128,16 +143,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
-
-        #endregion
-
-        #region Get Methods
-
-        public LocalPhysicsMode GetPhysicMode() => _physicsMode;
-        
-        public string GetLobbySceneName() => _lobbyScene;
-        
-        public RoomData_SO GetRoomData() => _defaultRoomData;
 
         #endregion
 
@@ -321,6 +326,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
+        private void SendClientJoinSceneMessage()
+        {
+            NetworkClient.Send(new SceneMessage { sceneName = _roomScene, sceneOperation = SceneOperation.Normal });
+        }
+        
+        private void SendClientExitSceneMessage()
+        {
+            NetworkClient.Send(new SceneMessage { sceneName = _lobbyScene, sceneOperation = SceneOperation.Normal });
+        }
+
         private void AddRoomList(RoomInfo roomInfo)
         {
             m_roomListInfos.Add(roomInfo);
@@ -415,6 +430,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             ConnectionManager.roomConnections.OnClientRoomListUpdate += UpdateRoomList;
             ConnectionManager.roomConnections.OnClientRoomListRemove += RemoveRoomList;
             ConnectionManager.roomConnections.OnClientConnectionMessage += GetConnectionMessageForClient;
+
+            ConnectionManager.roomConnections.OnClientJoinedRoom += SendClientJoinSceneMessage;
+            ConnectionManager.roomConnections.OnClientExitedRoom += SendClientExitSceneMessage;
         }
 
         #endregion

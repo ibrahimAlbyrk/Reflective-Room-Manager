@@ -26,7 +26,7 @@ namespace REFLECTIVE.Runtime.SceneManagement.Processor
 
         public override void UnLoadScene(Scene scene, Action<Scene> onCompleted = null)
         {
-            var lobbySceneName = RoomManagerBase.Singleton.GetLobbySceneName();
+            var lobbySceneName = RoomManagerBase.Singleton.LobbyScene;
             
             _sceneTask = new SceneLoadingTask(lobbySceneName, LoadOperation.Load, m_loadSceneMode, onCompleted);
             

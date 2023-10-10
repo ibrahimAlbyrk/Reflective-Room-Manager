@@ -36,17 +36,9 @@ namespace REFLECTIVE.Runtime.SceneManagement.Manager
         [RuntimeInitializeOnLoadMethod]
         private static void Init()
         {
-            var roomData = RoomManagerBase.Singleton.GetRoomData();
-
-            var sceneProcessor = SceneProcessorFactory.Create(roomData.RoomLoaderType);
-
-            if (sceneProcessor is AdditiveSceneProcessor additiveSceneProcessor)
-            {
-                OnSceneLoaded += additiveSceneProcessor.KeepLoadedScene;
-                OnSceneUnloaded += additiveSceneProcessor.DiscardLoadedScene;
-            }
+            var roomData = RoomManagerBase.Singleton.RoomData;
             
-            Processor = sceneProcessor;
+            Processor = SceneProcessorFactory.Create(roomData.RoomLoaderType);
         }
     }
 }

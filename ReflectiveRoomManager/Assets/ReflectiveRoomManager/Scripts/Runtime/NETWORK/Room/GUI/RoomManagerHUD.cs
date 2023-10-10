@@ -10,6 +10,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
     [AddComponentMenu("REFLECTIVE/Network Room Manager HUD")]
     public class RoomManagerHUD : MonoBehaviour
     {
+        [SerializeField] private float offsetX;
+        [SerializeField] private float offsetY;
+        
         private static string _roomNameField = "Room Name";
         private static string _maxPlayers = "Max Player";
 
@@ -51,9 +54,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             ShowRoomButtons();
         }
 
-        private static void ShowRoomButtons()
+        private void ShowRoomButtons()
         {
-            GUILayout.BeginArea(new Rect(Screen.width - 230f, 30, 200f, 100f));
+            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, 100f));
             
             GUILayout.BeginVertical();
             
@@ -66,20 +69,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             
             if (GUILayout.Button("Create Room"))
             {
-                // for (var i = 0; i < 100; i++)
-                // {
-                //     RoomServer.CreateRoom(new RoomInfo
-                //     {
-                //         Name = $"test_{i}",
-                //         SceneName = "Game_Scene",
-                //         MaxPlayers = 10
-                //     });
-                // }
-                
                 var roomInfo = new RoomInfo
                 {
                     Name = _roomNameField,
-                    SceneName = "Game_Scene",
+                    SceneName = RoomManagerBase.Singleton.RoomScene,
                     MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2
                 };
                 
@@ -118,9 +111,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             GUILayout.EndArea();
         }
 
-        private static void ShowCurrentRoom(RoomInfo roomInfo)
+        private void ShowCurrentRoom(RoomInfo roomInfo)
         {
-            GUILayout.BeginArea(new Rect(Screen.width - 230f, 30, 200f, 200f));
+            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, 200f));
             
             GUILayout.Label($"Room Name : {roomInfo.Name}");
             GUILayout.Label($"Max Player Count : {roomInfo.MaxPlayers}");
@@ -134,7 +127,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             GUILayout.EndArea();
         }
 
-        private static void ShowRoomList()
+        private void ShowRoomList()
         {
             backgroundStyle ??= new GUIStyle
             {
@@ -144,14 +137,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 }
             };
             
-            GUILayout.BeginArea(new Rect(Screen.width - 230f, 30, 200f, Screen.height - 30));
+            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, Screen.height - 30));
 
             GUILayout.BeginVertical();
             
             if (GUILayout.Button("Close Rooms"))
                 _showingRoomList = false;
-
-            //TODO: room list for client
+            
             if (_isServer)
             {
                 var rooms = RoomManagerBase.Singleton.GetRooms().ToList();
@@ -169,7 +161,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             else
             {
                 var rooms = RoomManagerBase.Singleton.GetRoomInfos().ToList();
-            
+                
                 var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
             
                 UnityEngine.GUI.Box(new Rect(0, 25, 200f, height), "", backgroundStyle);

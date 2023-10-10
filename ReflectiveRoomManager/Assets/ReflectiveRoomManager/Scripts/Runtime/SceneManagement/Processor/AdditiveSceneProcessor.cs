@@ -17,14 +17,10 @@ namespace REFLECTIVE.Runtime.SceneManagement.Processor
         public AdditiveSceneProcessor()
         {
             m_loadSceneMode = LoadSceneMode.Additive;
-        }
-        
-        public void KeepLoadedScene(Scene scene)
-        {
-            LoadedScenes.Add(scene);
-        }
 
-        public void DiscardLoadedScene(Scene scene) => LoadedScenes.Remove(scene);
+            Manager.SceneManager.OnSceneLoaded += KeepLoadedScene;
+            Manager.SceneManager.OnSceneUnloaded += DiscardLoadedScene;
+        }
 
         public override void LoadScene(string sceneName, Action<Scene> onCompleted = null)
         {
@@ -75,5 +71,9 @@ namespace REFLECTIVE.Runtime.SceneManagement.Processor
 
             yield return null;
         }
+        
+        private void KeepLoadedScene(Scene scene) => LoadedScenes.Add(scene);
+
+        private void DiscardLoadedScene(Scene scene) => LoadedScenes.Remove(scene);
     }
 }

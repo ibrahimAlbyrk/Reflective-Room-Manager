@@ -7,6 +7,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
     using Utilities;
     using Connection.Manager;
     
+    [DisallowMultipleComponent]
     [AddComponentMenu("REFLECTIVE/Reflective Network Manager")]
     public class NetworkManager : Mirror.NetworkManager
     {

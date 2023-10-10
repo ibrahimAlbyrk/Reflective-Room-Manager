@@ -35,7 +35,7 @@ namespace REFLECTIVE.Runtime.SceneManagement.Processor
             var sceneParameters = new LoadSceneParameters
             {
                 loadSceneMode = task.LoadMode,
-                localPhysicsMode = RoomManagerBase.Singleton.GetPhysicMode()
+                localPhysicsMode = RoomManagerBase.Singleton.PhysicsMode
             };
             
             var asyncOperation = SceneManager.LoadSceneAsync(task.SceneName, sceneParameters);
