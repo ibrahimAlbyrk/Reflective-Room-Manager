@@ -18,8 +18,8 @@ namespace REFLECTIVE.Runtime.SceneManagement.Processor
         {
             m_loadSceneMode = LoadSceneMode.Additive;
 
-            Manager.SceneManager.OnSceneLoaded += KeepLoadedScene;
-            Manager.SceneManager.OnSceneUnloaded += DiscardLoadedScene;
+            Manager.ReflectiveSceneManager.OnSceneLoaded += KeepLoadedScene;
+            Manager.ReflectiveSceneManager.OnSceneUnloaded += DiscardLoadedScene;
         }
 
         public override void LoadScene(string sceneName, Action<Scene> onCompleted = null)

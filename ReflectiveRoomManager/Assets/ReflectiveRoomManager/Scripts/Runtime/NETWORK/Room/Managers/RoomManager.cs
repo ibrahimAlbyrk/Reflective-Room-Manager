@@ -96,7 +96,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             UnLoadRoom(room);
 
-            removedConnections.ForEach(connection => RoomMessageUtility.SendRoomMessage(connection, ClientRoomState.Removed));
+            removedConnections.ForEach(connection =>
+            {
+                RoomMessageUtility.SendRoomMessage(connection, ClientRoomState.Removed);
+                Invoke_OnServerExitedClient(connection?.identity?.connectionToClient);
+            });
             
             RoomListUtility.RemoveRoomToList(ref m_rooms, room);
         }
@@ -122,7 +126,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
 
             if(!isDisconnected)
-                Invoke_OnServerExitedClient(conn.identity?.connectionToClient);
+                Invoke_OnServerExitedClient(conn?.identity?.connectionToClient);
             else
                 Invoke_OnServerDisconnectedClient(conn);
         }

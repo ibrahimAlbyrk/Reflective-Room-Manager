@@ -13,18 +13,18 @@ namespace REFLECTIVE.Runtime.SceneManagement.Loader
         {
             Init();
 
-            if (SceneManager.Processor.GetLoadingState()) return;
+            if (ReflectiveSceneManager.Processor.GetLoadingState()) return;
 
-            _monoBehaviourHook.StartCoroutine(SceneManager.Processor?.Process());
+            _monoBehaviourHook.StartCoroutine(ReflectiveSceneManager.Processor?.Process());
         }
 
         public static void UnloadScene()
         {
             Init();
 
-            if (SceneManager.Processor.GetLoadingState()) return;
+            if (ReflectiveSceneManager.Processor.GetLoadingState()) return;
 
-            _monoBehaviourHook.StartCoroutine(SceneManager.Processor.Process());
+            _monoBehaviourHook.StartCoroutine(ReflectiveSceneManager.Processor.Process());
         }
 
         private static void Init()

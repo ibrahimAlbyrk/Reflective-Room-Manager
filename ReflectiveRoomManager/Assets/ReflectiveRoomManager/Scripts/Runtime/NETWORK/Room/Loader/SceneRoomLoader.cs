@@ -9,7 +9,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
     {
         public void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded)
         {
-            SceneManager.LoadScene(roomInfo.SceneName, 
+            ReflectiveSceneManager.LoadScene(roomInfo.SceneName, 
                 scene =>
                 {
                     room.Scene = scene;
@@ -19,7 +19,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
 
         public void UnLoadRoom(Room room)
         {
-            SceneManager.UnLoadScene(room.Scene);
+            ReflectiveSceneManager.UnLoadScene(room.Scene);
         }
     }
 }

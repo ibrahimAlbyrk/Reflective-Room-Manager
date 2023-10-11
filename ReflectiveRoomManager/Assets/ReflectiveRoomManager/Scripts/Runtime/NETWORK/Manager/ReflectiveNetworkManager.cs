@@ -9,7 +9,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
     
     [DisallowMultipleComponent]
     [AddComponentMenu("REFLECTIVE/Reflective Network Manager")]
-    public class NetworkManager : Mirror.NetworkManager
+    public class ReflectiveNetworkManager : NetworkManager
     {
         #region Start & Stop Callbacks
 

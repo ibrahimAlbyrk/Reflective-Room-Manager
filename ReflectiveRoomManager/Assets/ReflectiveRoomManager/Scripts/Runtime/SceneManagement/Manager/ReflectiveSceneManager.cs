@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.SceneManagement.Manager
     using NETWORK.Room;
     using Processor.Factory;
     
-    public static class SceneManager
+    public static class ReflectiveSceneManager
     {
         public static event Action<Scene> OnSceneLoaded;
         public static event Action<Scene> OnSceneUnloaded;

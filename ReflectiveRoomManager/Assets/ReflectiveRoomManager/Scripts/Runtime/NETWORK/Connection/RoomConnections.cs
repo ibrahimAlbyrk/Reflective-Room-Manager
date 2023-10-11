@@ -1,6 +1,5 @@
 ﻿using System;
 using Mirror;
-using REFLECTIVE.Runtime.NETWORK.Connection.Manager;
 
 namespace REFLECTIVE.Runtime.NETWORK.Connection
 {
@@ -34,6 +33,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         public void AddRegistersForServer()
         {
             NetworkServer.RegisterHandler<ServerRoomMessage>(OnReceivedRoomMessageViaServer);
+            
         }
         
         public void AddRegistersForClient()
@@ -42,7 +42,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
             NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
             NetworkClient.RegisterHandler<ClientConnectionMessage>(OnReceivedConnectionMessageViaClient);
         }
-
+        
         private void OnRoomListChangeForClient(RoomListChangeMessage msg)
         {
             switch (msg.State)

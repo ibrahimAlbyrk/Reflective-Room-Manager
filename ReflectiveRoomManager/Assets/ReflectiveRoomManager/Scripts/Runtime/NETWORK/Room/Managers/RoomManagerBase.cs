@@ -326,14 +326,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
-        private void SendClientJoinSceneMessage()
+        private void SendClientJoinSceneMessage(NetworkConnectionToClient conn)
         {
-            NetworkClient.Send(new SceneMessage { sceneName = _roomScene, sceneOperation = SceneOperation.Normal });
+            conn.Send(new SceneMessage{sceneName = _roomScene, sceneOperation = SceneOperation.Normal});            
         }
         
-        private void SendClientExitSceneMessage()
+        private void SendClientExitSceneMessage(NetworkConnectionToClient conn)
         {
-            NetworkClient.Send(new SceneMessage { sceneName = _lobbyScene, sceneOperation = SceneOperation.Normal });
+            conn.Send(new SceneMessage{sceneName = _lobbyScene, sceneOperation = SceneOperation.Normal});
         }
 
         private void AddRoomList(RoomInfo roomInfo)
@@ -389,6 +389,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)
         {
+            RoomServer.ExitRoom(conn, true);
         }
 
         protected virtual void OnClientConnect()
@@ -397,7 +398,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnClientDisconnect()
         {
-            RoomClient.ExitRoom();
+            
         }
 
         #endregion
@@ -419,7 +420,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             ConnectionManager.roomConnections.OnServerCreateRoom += CreateRoom;
             ConnectionManager.roomConnections.OnServerJoinRoom += JoinRoom;
             ConnectionManager.roomConnections.OnServerExitRoom += ExitRoom;
-
+            
+            OnServerJoinedRoom += SendClientJoinSceneMessage;
+            OnServerExitedRoom += SendClientExitSceneMessage;
+            
             //CLIENT SIDE
             ConnectionManager.networkConnections.OnStartedClient += OnStartClient;
             ConnectionManager.networkConnections.OnStoppedClient += OnStopClient;
@@ -430,9 +434,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             ConnectionManager.roomConnections.OnClientRoomListUpdate += UpdateRoomList;
             ConnectionManager.roomConnections.OnClientRoomListRemove += RemoveRoomList;
             ConnectionManager.roomConnections.OnClientConnectionMessage += GetConnectionMessageForClient;
-
-            ConnectionManager.roomConnections.OnClientJoinedRoom += SendClientJoinSceneMessage;
-            ConnectionManager.roomConnections.OnClientExitedRoom += SendClientExitSceneMessage;
         }
 
         #endregion
