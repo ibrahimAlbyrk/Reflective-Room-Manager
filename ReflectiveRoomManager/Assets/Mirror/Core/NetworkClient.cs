@@ -446,7 +446,7 @@ namespace Mirror
             }
             else Debug.LogError("NetworkClient Send with no connection");
         }
-
+        
         // message handlers ////////////////////////////////////////////////////
         internal static void RegisterMessageHandlers(bool hostMode)
         {

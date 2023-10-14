@@ -34,7 +34,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             {
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Created);
                 
-                LoadRoom(room, roomInfo, () => JoinRoom(conn.identity.connectionToClient, roomName));
+                LoadRoom(room, roomInfo, () => JoinRoom(conn, roomName));
             }
             else
                 LoadRoom(room, roomInfo);
@@ -42,7 +42,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             Invoke_OnServerCreatedRoom(roomInfo);
         }
 
-        public override void JoinRoom(NetworkConnectionToClient conn, string roomName)
+        public override void JoinRoom(NetworkConnection conn, string roomName)
         {
             var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
 
@@ -99,7 +99,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             removedConnections.ForEach(connection =>
             {
                 RoomMessageUtility.SendRoomMessage(connection, ClientRoomState.Removed);
-                Invoke_OnServerExitedClient(connection?.identity?.connectionToClient);
             });
             
             RoomListUtility.RemoveRoomToList(ref m_rooms, room);
@@ -126,7 +125,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
 
             if(!isDisconnected)
-                Invoke_OnServerExitedClient(conn?.identity?.connectionToClient);
+                Invoke_OnServerExitedClient(conn);
             else
                 Invoke_OnServerDisconnectedClient(conn);
         }

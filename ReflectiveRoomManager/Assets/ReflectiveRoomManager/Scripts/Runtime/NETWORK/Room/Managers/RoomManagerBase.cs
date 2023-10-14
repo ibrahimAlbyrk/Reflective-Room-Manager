@@ -24,10 +24,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public static event Action<RoomInfo> OnServerCreatedRoom;
         
         /// <summary>Called on the server when the client enters the room</summary>
-        public static event Action<NetworkConnectionToClient> OnServerJoinedRoom;
+        public static event Action<NetworkConnection> OnServerJoinedRoom;
         
         /// <summary>Called on the server when the client leaves the room</summary>
-        public static event Action<NetworkConnectionToClient> OnServerExitedRoom;
+        public static event Action<NetworkConnection> OnServerExitedRoom;
         
         /// <summary>Called on the server when the client's connection is lost</summary>
         public static event Action<NetworkConnection> OnServerDisconnectedRoom;
@@ -39,10 +39,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected static void Invoke_OnServerCreatedRoom(RoomInfo roomInfo) =>
             OnServerCreatedRoom?.Invoke(roomInfo);
 
-        protected static void Invoke_OnServerJoinedClient(NetworkConnectionToClient conn) =>
+        protected static void Invoke_OnServerJoinedClient(NetworkConnection conn) =>
             OnServerJoinedRoom?.Invoke(conn);
 
-        protected static void Invoke_OnServerExitedClient(NetworkConnectionToClient conn) =>
+        protected static void Invoke_OnServerExitedClient(NetworkConnection conn) =>
             OnServerExitedRoom?.Invoke(conn);
 
         protected static void Invoke_OnServerDisconnectedClient(NetworkConnection conn) =>
@@ -201,6 +201,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// Sends a request to the server for room creation with the specified information
         /// </summary>
+        /// <remarks>Only works on client</remarks>
         /// <param name="roomInfo">The <see cref="RoomInfo"/> instance that contains the room's </param>
         public static void RequestCreateRoom(RoomInfo roomInfo)
         {
@@ -215,6 +216,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// Sends a request to join the specified room
         /// </summary>
+        /// <remarks>Only works on client</remarks>
         /// <param name="roomName"></param>
         public static void RequestJoinRoom(string roomName)
         {
@@ -230,6 +232,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// Sends a request to the server to exit the client's room
         /// </summary>
+        /// <remarks>Only works on client</remarks>
         /// <param name="isDisconnected"></param>
         public static void RequestExitRoom(bool isDisconnected = false)
         {
@@ -280,7 +283,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="roomName"></param>
-        public abstract void JoinRoom(NetworkConnectionToClient conn, string roomName);
+        public abstract void JoinRoom(NetworkConnection conn, string roomName);
 
         /// <summary>
         /// It works on the server side. Deletes all rooms and removes all customers from the rooms.
@@ -326,12 +329,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
-        private void SendClientJoinSceneMessage(NetworkConnectionToClient conn)
+        private void SendClientJoinSceneMessage(NetworkConnection conn)
         {
             conn.Send(new SceneMessage{sceneName = _roomScene, sceneOperation = SceneOperation.Normal});            
         }
         
-        private void SendClientExitSceneMessage(NetworkConnectionToClient conn)
+        private void SendClientExitSceneMessage(NetworkConnection conn)
         {
             conn.Send(new SceneMessage{sceneName = _lobbyScene, sceneOperation = SceneOperation.Normal});
         }
@@ -368,7 +371,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnStopServer()
         {
-            RoomServer.RemoveAllRoom(forced: true);
+            RemoveAllRoom(forced:true);
         }
 
         protected virtual void OnStartClient()
@@ -389,7 +392,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)
         {
-            RoomServer.ExitRoom(conn, true);
+            ExitRoom(conn, true);
         }
 
         protected virtual void OnClientConnect()
@@ -398,7 +401,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnClientDisconnect()
         {
-            
         }
 
         #endregion

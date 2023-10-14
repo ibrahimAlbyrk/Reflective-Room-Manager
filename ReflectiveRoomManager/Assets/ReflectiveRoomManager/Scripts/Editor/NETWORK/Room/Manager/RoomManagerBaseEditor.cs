@@ -35,11 +35,19 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     EditorGUILayout.HelpBox("interest manager is not attached! If scene interest management is not added while additive room mode is selected, players may interfere with each other.", MessageType.Warning);
                 }
             }
+
+            if (EditorApplication.isPlaying)
+            {
+                EditorGUILayout.HelpBox("You cannot make changes during runtime", MessageType.Info);
+                
+                GUI.enabled = false;
+            }
             
             DrawDefaultInspector(); // Draw the default inspector
+            
+            GUI.enabled = true;
 
             SetStyles();
-
             
             var rooms = roomManager.GetRooms().ToArray();
 
