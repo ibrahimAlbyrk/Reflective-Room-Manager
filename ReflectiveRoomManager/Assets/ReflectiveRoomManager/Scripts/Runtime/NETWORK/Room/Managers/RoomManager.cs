@@ -39,7 +39,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             else
                 LoadRoom(room, roomInfo);
             
-            Invoke_OnServerCreatedRoom(roomInfo);
+            m_eventManager.Invoke_OnServerCreatedRoom(roomInfo);
         }
 
         public override void JoinRoom(NetworkConnection conn, string roomName)
@@ -68,7 +68,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
 
-            Invoke_OnServerJoinedClient(conn);
+            m_eventManager.Invoke_OnServerJoinedClient(conn);
         }
 
         public override void RemoveAllRoom(bool forced = false)
@@ -125,9 +125,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
 
             if(!isDisconnected)
-                Invoke_OnServerExitedClient(conn);
+                m_eventManager.Invoke_OnServerExitedClient(conn);
             else
-                Invoke_OnServerDisconnectedClient(conn);
+                m_eventManager.Invoke_OnServerDisconnectedClient(conn);
         }
     }
 }
