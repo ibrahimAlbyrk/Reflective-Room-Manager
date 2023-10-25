@@ -1,5 +1,6 @@
 ![Banner](https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/assets/47694762/7c61e8fa-6162-493b-92eb-43b4bd7b8e88)
-[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://reflective-roommanager.gitbook.io/docs)
+[![Documentation](https://img.shields.io/badge/Docs-white)](https://reflective-roommanager.gitbook.io/docs)
+[![Mirror](https://img.shields.io/badge/Mirror-white)](https://reflective-roommanager.gitbook.io/docs)
 # Reflective Room Manager
 
 ---
