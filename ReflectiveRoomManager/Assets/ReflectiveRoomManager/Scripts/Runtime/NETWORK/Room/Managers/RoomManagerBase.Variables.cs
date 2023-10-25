@@ -24,7 +24,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] [Scene] private string _roomScene;
         
         [Header("Setup")]
-        [SerializeField] private RoomData_SO _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
+        [SerializeField] private RoomData _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
 
         #endregion
 
@@ -42,9 +42,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
+        public RoomEventManager Events => m_eventManager;
+        
         public LocalPhysicsMode PhysicsMode => _physicsMode;
         
-        public RoomData_SO RoomData => _defaultRoomData;
+        public RoomData RoomData => _defaultRoomData;
         
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;

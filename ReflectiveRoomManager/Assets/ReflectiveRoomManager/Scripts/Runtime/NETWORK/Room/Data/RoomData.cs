@@ -5,7 +5,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Data
     using Loader;
     
     [System.Serializable]
-    public struct RoomData_SO
+    public struct RoomData
     {
         [Tooltip("Number of players to be determined when creating a server room")]
         public int DefaultMaxPlayerCount;
@@ -16,7 +16,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Data
         [Tooltip("determines what type of loading the room will have")]
         public RoomLoaderType RoomLoaderType;
 
-        public RoomData_SO(int defaultMaxPlayerCount, int maxPlayerCount, RoomLoaderType roomLoaderType)
+        public RoomData(int defaultMaxPlayerCount, int maxPlayerCount, RoomLoaderType roomLoaderType)
         {
             DefaultMaxPlayerCount = defaultMaxPlayerCount;
             MaxPlayerCount = maxPlayerCount;
