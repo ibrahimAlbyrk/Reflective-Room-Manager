@@ -1,5 +1,15 @@
+![Banner](https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/assets/47694762/7c61e8fa-6162-493b-92eb-43b4bd7b8e88)
+[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://reflective-roommanager.gitbook.io/docs)
 # Reflective Room Manager
-![Untitled-1](https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/assets/47694762/7c61e8fa-6162-493b-92eb-43b4bd7b8e88)
 
-## Explanation and documentation on how to use it will be shared soon.
-until then if you want to use it so much you will have to figure it out yourself 😁
+---
+## Getting Started
+Get **Unity 2019 / 2020 / 2021 / 2022 LTS** with [Mirror](https://github.com/MirrorNetworking/Mirror), [Download Reflective Room Manager](), open one of the examples & press Play!
+
+Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to learn how it all works.
+
+---
+## Required Packages
+- Mirror
+
+## More will be written
