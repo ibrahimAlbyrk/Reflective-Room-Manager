@@ -4,12 +4,16 @@ using System.Collections;
 using REFLECTIVE.Runtime.NETWORK.Room;
 using REFLECTIVE.Runtime.NETWORK.Utilities;
 
-namespace Example.Network.Room
+namespace Example.Basic.Network.Room
 {
+    using Character;
+    
     public class RoomPlayerSpawn : MonoBehaviour
     {
         [SerializeField] private GameObject _gamePlayerPrefab;
         [SerializeField] private GameObject _lobbyPlayerPrefab;
+
+        private int _playerCount;
 
         //If true, it creates a player object for your player in the lobby when you leave the room.
         //If your project has such a design, mark it.
@@ -103,7 +107,14 @@ namespace Example.Network.Room
             //If you need it to go to a different scene, you can change it.
             var scene = room?.Scene ?? gameObject.scene;
             
-            return NetworkSpawnUtilities.SpawnObjectForScene(scene, prefab, Vector3.zero, Quaternion.identity);
+            var player = NetworkSpawnUtilities.SpawnObjectForScene(scene, prefab, Vector3.zero, Quaternion.identity);
+            
+            if (player.TryGetComponent(out SimpleCharacterController controller) && room != null)
+            {
+                controller.ID = room.CurrentPlayers + 1;
+            }
+
+            return player;
         }
     }
 }

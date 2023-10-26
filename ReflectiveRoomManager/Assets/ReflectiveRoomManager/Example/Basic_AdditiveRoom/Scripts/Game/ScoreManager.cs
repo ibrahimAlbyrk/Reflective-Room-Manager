@@ -1,18 +1,12 @@
 ﻿using Mirror;
 using UnityEngine;
+using REFLECTIVE.Runtime.Singleton;
 
 namespace Example.Basic.Game
 {
-    public class ScoreManager : NetworkBehaviour
+    public class ScoreManager : RoomSingleton<ScoreManager>
     {
-        public static ScoreManager Instance;
-
         private readonly SyncDictionary<int, int> _scores = new();
-
-        private void Awake()
-        {
-            Instance = this;
-        }
 
         public void AddScore(int id, int score)
         {

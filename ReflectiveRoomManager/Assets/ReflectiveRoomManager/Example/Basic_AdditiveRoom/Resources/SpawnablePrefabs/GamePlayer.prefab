@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 6310058811422557040}
   - component: {fileID: 1996620744203473035}
   - component: {fileID: 1012208288137456217}
+  - component: {fileID: 2061008663601320820}
   m_Layer: 0
   m_Name: GamePlayer
   m_TagString: Player
@@ -101,6 +102,41 @@ MonoBehaviour:
   ID: 0
   speed: 10
   coinDetectRadius: 2
+--- !u!114 &2061008663601320820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4239554022242706235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 6310058811422557040}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  sendIntervalMultiplier: 1
+  timelineOffset: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  onlySyncOnChangeCorrectionMultiplier: 2
+  rotationSensitivity: 0.01
+  compressRotation: 0
+  positionPrecision: 0.01
+  scalePrecision: 0.01
 --- !u!1 &5890482806351752315
 GameObject:
   m_ObjectHideFlags: 0

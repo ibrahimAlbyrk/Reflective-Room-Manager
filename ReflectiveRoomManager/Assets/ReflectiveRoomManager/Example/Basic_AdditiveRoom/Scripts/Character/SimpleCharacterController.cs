@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Linq;
-using Example.Basic.Game;
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
+using System.Linq;
+using System.Collections;
+using REFLECTIVE.Runtime.Extensions;
 
 namespace Example.Basic.Character
 {
+    using Game;
+    
     public class SimpleCharacterController : NetworkBehaviour
     {
         [SyncVar] public int ID;
@@ -17,13 +18,21 @@ namespace Example.Basic.Character
 
         private PhysicsScene _physics;
 
+        private CoinSpawner _coinSpawner;
+        private ScoreManager _scoreManager;
+
+        [ServerCallback]
         private void Start()
         {
             _physics = gameObject.scene.GetPhysicsScene();
             
             StartCoroutine(DetectCollider());
+
+            _coinSpawner = gameObject.Container().Get<CoinSpawner>();
+            _scoreManager = gameObject.Container().Get<ScoreManager>();
         }
         
+        [ClientCallback]
         private void Update()
         {
             if (!isOwned) return;
@@ -34,6 +43,7 @@ namespace Example.Basic.Character
             transform.Translate(new Vector3(xMovement, 0, zMovement));
         }
 
+        [ServerCallback]
         private IEnumerator DetectCollider()
         {
             for (;;)
@@ -47,9 +57,9 @@ namespace Example.Basic.Character
 
                 foreach (var coll in colls.ToList().Where(coll => coll != null))
                 {
-                    NetworkServer.Destroy(coll.gameObject);
+                    _coinSpawner.DestroyCoin(coll.gameObject);
                 
-                    ScoreManager.Instance.AddScore(0, 5);
+                    _scoreManager.AddScore(ID, 5);
                     
                     yield return new WaitForFixedUpdate();
                 }

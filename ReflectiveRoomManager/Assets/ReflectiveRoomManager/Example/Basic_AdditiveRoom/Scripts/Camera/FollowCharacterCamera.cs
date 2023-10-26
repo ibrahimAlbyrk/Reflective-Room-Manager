@@ -16,12 +16,16 @@ namespace Example.Basic.Camera
         {
             if (_playerTransform == null)
             {
-                var player = GameObject.FindWithTag("Player");
+                var players = GameObject.FindGameObjectsWithTag("Player");
 
-                if (player != null && player.TryGetComponent(out NetworkIdentity identity) && identity.isOwned)
+                foreach (var player in players)
                 {
+                    if (player == null || !player.TryGetComponent(out NetworkIdentity identity) ||
+                        !identity.isOwned) continue;
+                    
                     _playerTransform = player.transform;
                     transform.position = _playerTransform.position + positionOffset;
+                    break;
                 }
             }
             else
