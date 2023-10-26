@@ -1,7 +1,5 @@
 ﻿using System;
 using Mirror;
-using REFLECTIVE.Runtime.NETWORK.Connection.Manager;
-using REFLECTIVE.Runtime.NETWORK.Room;
 
 namespace REFLECTIVE.Runtime.NETWORK.Connection
 {
