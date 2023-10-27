@@ -2,7 +2,7 @@
 [![Documentation](https://img.shields.io/badge/Docs-white)](https://reflective-roommanager.gitbook.io/docs)
 [![Mirror](https://img.shields.io/badge/Mirror-white)](https://reflective-roommanager.gitbook.io/docs)
 [![Roadmap](https://img.shields.io/badge/Roadmap-white)](https://trello.com/b/IyZs7NIi)
-[![Discord](https://img.shields.io/discord/1167179553836380270?label=discord&color=white)](https://discord.gg/MMutVRg8Jg)
+[![Discord](https://img.shields.io/discord/1167179553836380270?style=social&logo=discord&label=Discord&labelColor=white&color=gray)](https://discord.gg/MMutVRg8Jg)
 
 *No one changed the world by doing what the world told them*
 
