@@ -29,6 +29,7 @@ Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to
 - Configurable PhysicSimulator.
 - Moduler Advanced Singleton System for additive scenes
 - Possibility to develop a room system in any design you want with the modular room system.
+- Modular and generic singleton system for room systems using additive scene design
 - A modular, convenient and comprehensive Scene Management system for additive and single scenes
 - Support for Additive Scenes with Physics Isolation (battle instances, levels, etc.)
 - Several complete Examples included. *(so soon)*
