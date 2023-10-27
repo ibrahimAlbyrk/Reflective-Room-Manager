@@ -8,12 +8,12 @@ namespace REFLECTIVE.Runtime.Singleton
     {
         protected virtual void Awake()
         {
-            Container.Add(gameObject.scene, this as T);
+            RoomContainer.Add(gameObject.scene, this as T);
         }
 
         protected virtual void OnDestroy()
         {
-            Container.Remove<T>(gameObject.scene);
+            RoomContainer.Remove<T>(gameObject.scene);
         }
     }
 }

@@ -2,28 +2,28 @@
 
 namespace REFLECTIVE.Runtime.Container.Helper
 {
-    public class ContainerHelper
+    public class RoomContainerHelper
     {
         private readonly Scene _scene;
 
-        public ContainerHelper(Scene scene)
+        public RoomContainerHelper(Scene scene)
         {
             _scene = scene;
         }
 
         public bool Add<T>(T value) where T : class
         {
-            return Container.Add(_scene, value);
+            return RoomContainer.Add(_scene, value);
         }
 
         public bool Remove<T>(T element = null) where T : class
         {
-            return Container.Remove<T>(_scene);
+            return RoomContainer.Remove<T>(_scene);
         }
 
         public T Get<T>() where T : class
         {
-            return Container.Get<T>(_scene);
+            return RoomContainer.Get<T>(_scene);
         }
     }
 }

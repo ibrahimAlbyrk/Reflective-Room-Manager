@@ -5,15 +5,15 @@ namespace REFLECTIVE.Runtime.Container
 {
     using Data;
     
-    public static class Container
+    public static class RoomContainer
     {
-        private static readonly Dictionary<Scene, ContainerData> _data = new();
+        private static readonly Dictionary<Scene, RoomContainerData> _data = new();
 
         public static bool Add<T>(Scene scene, T element) where T : class
         {
             if (!_data.TryGetValue(scene, out var container))
             {
-                var containerData = new ContainerData
+                var containerData = new RoomContainerData
                 (
                     new HashSet<object> { element }
                 );

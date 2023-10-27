@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Extensions
 {
@@ -7,11 +6,9 @@ namespace REFLECTIVE.Runtime.Extensions
     
     public static class GameObjectExtensions
     {
-        private static Scene _scene;
-
-        public static ContainerHelper Container(this GameObject gameObject)
+        public static RoomContainerHelper Container(this GameObject gameObject)
         {
-            return new ContainerHelper(gameObject.scene);
+            return new RoomContainerHelper(gameObject.scene);
         }
     }
 }
