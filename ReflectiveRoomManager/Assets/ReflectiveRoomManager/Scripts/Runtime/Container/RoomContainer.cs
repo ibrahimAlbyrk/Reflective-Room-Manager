@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Container
@@ -11,6 +12,9 @@ namespace REFLECTIVE.Runtime.Container
 
         public static bool Add<T>(Scene scene, T element) where T : class
         {
+            if (scene == default) throw new ArgumentNullException(nameof(scene));
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            
             if (!_data.TryGetValue(scene, out var container))
             {
                 var containerData = new RoomContainerData
@@ -32,6 +36,8 @@ namespace REFLECTIVE.Runtime.Container
 
         public static bool Remove<T>(Scene scene) where T : class
         {
+            if (scene == default) throw new ArgumentNullException(nameof(scene));
+            
             if (!_data.TryGetValue(scene, out var container)) return false;
 
             var obj = container.GetObjectOfSameType<T>();
@@ -41,6 +47,8 @@ namespace REFLECTIVE.Runtime.Container
 
         public static T Get<T>(Scene scene) where T : class
         {
+            if (scene == default) throw new ArgumentNullException(nameof(scene));
+            
             if (!_data.TryGetValue(scene, out var container)) return null;
 
             var obj = container.GetObjectOfSameType<T>();

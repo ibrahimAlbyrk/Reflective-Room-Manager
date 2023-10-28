@@ -21,6 +21,8 @@ namespace Example.Basic.Character
         private CoinSpawner _coinSpawner;
         private ScoreManager _scoreManager;
 
+        private Transform _camTransform;
+        
         [ServerCallback]
         private void Start()
         {
@@ -28,8 +30,8 @@ namespace Example.Basic.Character
             
             StartCoroutine(DetectCollider());
 
-            _coinSpawner = gameObject.Container().Get<CoinSpawner>();
-            _scoreManager = gameObject.Container().Get<ScoreManager>();
+            _coinSpawner = gameObject.RoomContainer().Get<CoinSpawner>();
+            _scoreManager = gameObject.RoomContainer().Get<ScoreManager>();
         }
         
         [ClientCallback]
@@ -37,10 +39,16 @@ namespace Example.Basic.Character
         {
             if (!isOwned) return;
 
-            var xMovement = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
-            var zMovement = Input.GetAxis("Vertical") * speed * Time.deltaTime;
+            if (_camTransform == null)
+                _camTransform = GameObject.FindGameObjectWithTag("PlayerCamera").transform;
 
-            transform.Translate(new Vector3(xMovement, 0, zMovement));
+            var xMovement = Input.GetAxisRaw("Horizontal");
+            var zMovement = Input.GetAxisRaw("Vertical");
+
+            var dir = (_camTransform.forward * zMovement + _camTransform.right * xMovement).normalized;
+            dir.y = 0;
+
+            transform.Translate(dir * (speed * Time.deltaTime));
         }
 
         [ServerCallback]
@@ -57,9 +65,9 @@ namespace Example.Basic.Character
 
                 foreach (var coll in colls.ToList().Where(coll => coll != null))
                 {
-                    _coinSpawner.DestroyCoin(coll.gameObject);
+                    _coinSpawner?.DestroyCoin(coll.gameObject);
                 
-                    _scoreManager.AddScore(ID, 5);
+                    _scoreManager?.AddScore(ID, 1);
                     
                     yield return new WaitForFixedUpdate();
                 }

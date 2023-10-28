@@ -295,7 +295,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _count: 15
+  _count: 30
   _area: {x: 25, y: 1, z: 25}
   _coinPrefab: {fileID: 7135866885179959075, guid: 8a9e9dc0b4c583a479acdfaf2d784432, type: 3}
 --- !u!114 &1034380970

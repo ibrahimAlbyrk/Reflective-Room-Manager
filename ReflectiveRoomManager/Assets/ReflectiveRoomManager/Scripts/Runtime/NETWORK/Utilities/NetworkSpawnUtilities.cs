@@ -23,6 +23,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
 
         public static GameObject SpawnObjectForScene(Scene scene, GameObject obj, Vector3 position = default, Quaternion rotation = default)
         {
+            Debug.Log(scene.name);
+            
             var spawnedObj = SpawnObject(obj, position, rotation);
             SceneManager.MoveGameObjectToScene(spawnedObj, scene);
 

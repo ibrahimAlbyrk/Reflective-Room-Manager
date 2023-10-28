@@ -6,7 +6,7 @@ namespace REFLECTIVE.Runtime.Extensions
     
     public static class GameObjectExtensions
     {
-        public static RoomContainerHelper Container(this GameObject gameObject)
+        public static RoomContainerHelper RoomContainer(this GameObject gameObject)
         {
             return new RoomContainerHelper(gameObject.scene);
         }

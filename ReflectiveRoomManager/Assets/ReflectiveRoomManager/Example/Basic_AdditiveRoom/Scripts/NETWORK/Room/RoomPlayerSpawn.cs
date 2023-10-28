@@ -23,9 +23,11 @@ namespace Example.Basic.Network.Room
         private void Start()
         {
             RoomManagerBase.Singleton.Events.OnServerJoinedRoom += CreateGamePlayer;
-            
-            if(_useLobby)
+
+            if (_useLobby)
                 RoomManagerBase.Singleton.Events.OnServerExitedRoom += CreateLobbyPlayer;
+            else
+                RoomManagerBase.Singleton.Events.OnServerExitedRoom += RemovePlayer;
         }
 
         /// <summary>
@@ -73,6 +75,11 @@ namespace Example.Basic.Network.Room
 
             yield return new WaitForEndOfFrame();
             
+            if (newPlayer.TryGetComponent(out SimpleCharacterController controller))
+            {
+                controller.ID = conn.connectionId;
+            }
+            
             if(oldPlayer != null)
                 NetworkServer.Destroy(oldPlayer);
         }
@@ -89,6 +96,22 @@ namespace Example.Basic.Network.Room
             var player = SpawnPlayer(conn, prefab);
 
             NetworkServer.AddPlayerForConnection(connectionToClient, player);
+            
+            if (player.TryGetComponent(out SimpleCharacterController controller))
+            {
+                controller.ID = conn.connectionId;
+            }
+        }
+
+        private void RemovePlayer(NetworkConnection conn)
+        {
+            if (conn is not NetworkConnectionToClient connectionToClient) return;
+
+            var player = connectionToClient.identity.gameObject;
+            
+            NetworkServer.RemovePlayerForConnection(conn, false);
+            
+            NetworkServer.Destroy(player);
         }
         
         /// <summary>
@@ -108,11 +131,6 @@ namespace Example.Basic.Network.Room
             var scene = room?.Scene ?? gameObject.scene;
             
             var player = NetworkSpawnUtilities.SpawnObjectForScene(scene, prefab, Vector3.zero, Quaternion.identity);
-            
-            if (player.TryGetComponent(out SimpleCharacterController controller) && room != null)
-            {
-                controller.ID = room.CurrentPlayers + 1;
-            }
 
             return player;
         }
