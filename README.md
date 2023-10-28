@@ -20,8 +20,8 @@ Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to
 ---
 ## Used Packaged
 - [Mirror](https://assetstore.unity.com/packages/tools/network/mirror-129321)* (reqiured)
-- FastScriptReload
-- Quantum Console
+- [FastScriptReload](https://assetstore.unity.com/packages/tools/utilities/fast-script-reload-239351)
+- [Quantum Console](https://assetstore.unity.com/packages/tools/utilities/quantum-console-211046)
 
 ---
 ## Features
