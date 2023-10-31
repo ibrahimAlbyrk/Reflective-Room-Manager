@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 1996620744203473035}
   - component: {fileID: 1012208288137456217}
   - component: {fileID: 2061008663601320820}
+  - component: {fileID: 8739520074448142891}
   m_Layer: 0
   m_Name: GamePlayer
   m_TagString: Player
@@ -101,7 +102,7 @@ MonoBehaviour:
   syncInterval: 0
   ID: 0
   speed: 10
-  coinDetectRadius: 2
+  _collision3D: {fileID: 8739520074448142891}
 --- !u!114 &2061008663601320820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,6 +138,25 @@ MonoBehaviour:
   compressRotation: 0
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &8739520074448142891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4239554022242706235}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4eb9e6d8c9c471abb57a35a31c26617, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Editable: 0
+  m_layer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_garbageColliderSize: 5
+  _offset: {x: 0, y: 1, z: 0}
+  _size: {x: 1, y: 2, z: 1}
 --- !u!1 &5890482806351752315
 GameObject:
   m_ObjectHideFlags: 0

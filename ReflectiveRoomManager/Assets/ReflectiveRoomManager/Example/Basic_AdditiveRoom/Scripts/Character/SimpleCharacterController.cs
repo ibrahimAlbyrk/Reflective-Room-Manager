@@ -1,8 +1,7 @@
 ﻿using Mirror;
 using UnityEngine;
-using System.Linq;
-using System.Collections;
 using REFLECTIVE.Runtime.Extensions;
+using REFLECTIVE.Runtime.Physic.Collision.D3;
 
 namespace Example.Basic.Character
 {
@@ -14,9 +13,7 @@ namespace Example.Basic.Character
         
         public float speed = 10f;
 
-        public float coinDetectRadius = 1;
-
-        private PhysicsScene _physics;
+        [SerializeField] private Collision3D _collision3D;
 
         private CoinSpawner _coinSpawner;
         private ScoreManager _scoreManager;
@@ -26,12 +23,12 @@ namespace Example.Basic.Character
         [ServerCallback]
         private void Start()
         {
-            _physics = gameObject.scene.GetPhysicsScene();
-            
-            StartCoroutine(DetectCollider());
-
             _coinSpawner = gameObject.RoomContainer().Get<CoinSpawner>();
             _scoreManager = gameObject.RoomContainer().Get<ScoreManager>();
+
+            _collision3D.enabled = true;
+            _collision3D.SetLayer(LayerMask.GetMask("Coin"));
+            _collision3D.OnCollisionEnter += CollectCoin;
         }
         
         [ClientCallback]
@@ -51,36 +48,13 @@ namespace Example.Basic.Character
             transform.Translate(dir * (speed * Time.deltaTime));
         }
 
-        [ServerCallback]
-        private IEnumerator DetectCollider()
+        private void CollectCoin(Collider coll)
         {
-            for (;;)
-            {
-                var colls = new Collider[5];
-
-                var count = _physics.OverlapSphere(transform.position, coinDetectRadius, colls, LayerMask.GetMask("Coin"),
-                    QueryTriggerInteraction.Collide);
-
-                if (count < 1) yield return null;
-
-                foreach (var coll in colls.ToList().Where(coll => coll != null))
-                {
-                    _coinSpawner?.DestroyCoin(coll.gameObject);
-                
-                    _scoreManager?.AddScore(ID, 1);
-                    
-                    yield return new WaitForFixedUpdate();
-                }
-                
-                yield return new WaitForEndOfFrame();
-            }
-        }
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.red;
+            if (coll == null) return;
             
-            Gizmos.DrawWireSphere(transform.position, coinDetectRadius);
+            _coinSpawner?.DestroyCoin(coll.gameObject);
+                
+            _scoreManager?.AddScore(ID, 1);
         }
     }
 }
