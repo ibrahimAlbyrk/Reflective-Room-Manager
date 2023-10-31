@@ -30,14 +30,6 @@ namespace Example.Basic.Game
             _scores[id] += score;
         }
 
-        [ServerCallback]
-        public void AddPlayer(int id)
-        {
-            if (_scores.ContainsKey(id)) return;
-
-            _scores[id] = 0;
-        }
-
         private void UpdateText()
         {
             _scoresText.text = string.Empty;

@@ -6,6 +6,9 @@
     {
         #region Public Variables
 
+        /// <summary>
+        /// Connection ID of the client connecting to the room
+        /// </summary>
         public static int ID;
 
         #endregion
