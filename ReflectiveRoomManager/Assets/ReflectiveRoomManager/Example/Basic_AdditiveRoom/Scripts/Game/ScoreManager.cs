@@ -39,10 +39,10 @@ namespace Example.Basic.Game
                 // If id equals current client
                 if (ID == RoomClient.ID)
                 {
-                    _scoresText.text += $"<color=yellow>Player {ID}, Coin: {coin:0000}</color>";
+                    _scoresText.text += $"<color=green>Player {ID}, Coin: {coin:000}</color>";
                 }
                 else 
-                    _scoresText.text += $"Player {ID}, Coin: {coin:0000}";
+                    _scoresText.text += $"Player {ID}, Coin: {coin:000}";
 
                 _scoresText.text += "\n";
             }

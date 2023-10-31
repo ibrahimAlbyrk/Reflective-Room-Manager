@@ -24,6 +24,8 @@ namespace Example.Basic.Network.Room
         {
             RoomManagerBase.Singleton.Events.OnServerJoinedRoom += CreateGamePlayer;
 
+            //If the lobby option is used, create a player for the lobby when leaving the room,
+            //otherwise it will only delete the player.
             if (_useLobby)
                 RoomManagerBase.Singleton.Events.OnServerExitedRoom += CreateLobbyPlayer;
             else
