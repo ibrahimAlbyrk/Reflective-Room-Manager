@@ -5,12 +5,24 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
     public class CollisionSphere : Collision3D
     {
         [Header("Settings")]
-        [SerializeField] private Vector3 _offset;
+        [SerializeField] private Vector3 _center;
         [SerializeField] private float _radius = 1;
 
+        public Vector2 Center
+        {
+            get => _center;
+            set => _center = value;
+        }
+        
+        public float Radius
+        {
+            get => _radius;
+            set => _radius = value;
+        }
+        
         protected override Collider[] CalculateCollision()
         {
-            var pos = transform.position + _offset;
+            var pos = transform.position + _center;
 
             var colliders = new Collider[m_garbageColliderSize];
 

@@ -5,12 +5,24 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
     public class CollisionCircle : Collision2D
     {
         [Header("Settings")]
-        [SerializeField] private Vector2 _offset;
+        [SerializeField] private Vector2 _center;
         [SerializeField] private float _radius = 1;
+        
+        public Vector2 Center
+        {
+            get => _center;
+            set => _center = value;
+        }
+        
+        public float Radius
+        {
+            get => _radius;
+            set => _radius = value;
+        }
 
         protected override Collider2D[] CalculateCollision()
         {
-            var pos = (Vector2)transform.position + _offset;
+            var pos = (Vector2)transform.position + _center;
 
             var colliders = new Collider2D[m_garbageColliderSize];
 

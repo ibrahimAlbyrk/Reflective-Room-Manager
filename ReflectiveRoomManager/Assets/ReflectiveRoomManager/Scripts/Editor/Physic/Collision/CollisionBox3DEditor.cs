@@ -4,17 +4,46 @@ using REFLECTIVE.Runtime.Physic.Collision.D3;
 
 namespace REFLECTIVE.Editor.Physic.Collision
 {
+    using Utilities;
+    
     [CustomEditor(typeof(CollisionBox3D))]
-    public class CollisionBox3DEditor : UnityEditor.Editor
+    public class CollisionBox3DEditor : CollisionBaseEditor<CollisionBox3D>
     {
-        private void OnSceneGUI()
+        protected override void DrawGUI(CollisionBox3D myTarget)
         {
-            var myTarget = (CollisionBox3D)target;
-
-            if (!myTarget.Editable) return;
+            EditorCollisionUtilities.DrawEditColliderButton(ref myTarget.Editable);
             
-            Handles.color = Color.green;
+            myTarget.Center = EditorGUILayout.Vector3Field("Center: ", myTarget.Center);
+            myTarget.Size = EditorGUILayout.Vector3Field("Size: ", myTarget.Size);
+        }
+        
+        protected override void DrawCollision(CollisionBox3D myTarget)
+        {
+            if (myTarget.enabled)
+            {
+                Handles.color = myTarget.Editable
+                    ? EditorCollisionUtilities.EditColor
+                    : EditorCollisionUtilities.EnableColor;
+            }
+            else Handles.color = EditorCollisionUtilities.DisableColor;
+            
+            var center = myTarget.transform.position + myTarget.Center;
+            
+            Handles.DrawWireCube(center, myTarget.Size);
+        }
 
+        protected override void DrawEditableHandles(CollisionBox3D myTarget)
+        {
+            if (!myTarget.Editable || !myTarget.enabled) return;
+            
+            if (myTarget.enabled)
+            {
+                Handles.color = myTarget.Editable
+                    ? EditorCollisionUtilities.EditColor
+                    : EditorCollisionUtilities.EnableColor;
+            }
+            else Handles.color = EditorCollisionUtilities.DisableColor;
+            
             EditorGUI.BeginChangeCheck();
 
             var boxDirections = new []
@@ -27,14 +56,14 @@ namespace REFLECTIVE.Editor.Physic.Collision
                 -myTarget.transform.forward
             };
 
-            var boxCenter = myTarget.transform.position + myTarget.Offset;
+            var boxCenter = myTarget.transform.position + myTarget.Center;
             var tempSize = myTarget.Size;
 
             for (var i = 0; i < 6; i++)
             {
                 var handleDirection = boxDirections[i];
                 var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f;
-                var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.05f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
+                var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
 
                 var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
 
@@ -57,7 +86,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             if (EditorGUI.EndChangeCheck())
             {
-                Undo.RecordObject(myTarget, "Changed Offset Or Size");
+                Undo.RecordObject(myTarget, "Edited Collider");
                 myTarget.Size = tempSize;
             }
         }

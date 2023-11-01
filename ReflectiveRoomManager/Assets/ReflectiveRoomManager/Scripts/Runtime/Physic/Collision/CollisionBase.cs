@@ -5,15 +5,20 @@ using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.Physic.Collision
 {
+    public interface IEditableForEditor
+    {
+        public void SetEditable(bool state);
+        public void ChangeEditable();
+    }
+    
     [DisallowMultipleComponent]
-    public abstract class CollisionBase<TCollider> : MonoBehaviour where TCollider : Component
+    public abstract class CollisionBase<TCollider> : MonoBehaviour, IEditableForEditor where TCollider : Component
     {
         public event Action<TCollider> OnCollisionEnter;
         public event Action<TCollider> OnCollisionStay;
         public event Action<TCollider> OnCollisionExit;
         
-        [Header("GUI")]
-        public bool Editable;
+        [HideInInspector] public bool Editable;
 
         [Header("Configuration")]
         [SerializeField] protected LayerMask m_layer = ~0;
@@ -22,6 +27,12 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         protected PhysicsScene m_physicsScene;
 
         private readonly List<TCollider> _colliders = new();
+
+        public void SetEditable(bool state) => Editable = state;
+        public void ChangeEditable()
+        {
+            Editable = !Editable;
+        }
 
         public void SetLayer(LayerMask layerMask) => m_layer = layerMask;
         
