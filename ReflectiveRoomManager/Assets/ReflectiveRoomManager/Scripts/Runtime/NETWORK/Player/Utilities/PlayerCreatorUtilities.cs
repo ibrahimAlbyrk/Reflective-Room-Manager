@@ -10,7 +10,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
     public static class PlayerCreatorUtilities
     {
         /// <summary>
-        /// 
+        /// Checks whether the client is a player object.
+        /// If there is a player object, it replaces it with the replace function.
+        /// if not, it creates it with create player.
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="prefab"></param>
@@ -38,7 +40,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         }
 
         /// <summary>
-        /// 
+        /// For the given connection, it deletes the old player object and creates a new one
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="prefab"></param>
@@ -58,6 +60,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
             return newPlayer;
         }
 
+        /// <summary>
+        /// If the client has a player object,
+        /// it performs removal via the server and the client.
+        /// </summary>
+        /// <param name="conn"></param>
         public static void RemovePlayer(NetworkConnection conn)
         {
             if (conn is not NetworkConnectionToClient connectionToClient) return;
