@@ -12,7 +12,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             var _target = (TargetType)target;
             
-            DrawGUI(_target);
+            DrawInspector(_target);
             
             EditorUtility.SetDirty(target);
             
@@ -29,7 +29,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             DrawEditableHandles(myTarget);
         }
 
-        protected virtual void DrawGUI(TargetType myTarget)
+        protected virtual void DrawInspector(TargetType myTarget)
         {
         }
 

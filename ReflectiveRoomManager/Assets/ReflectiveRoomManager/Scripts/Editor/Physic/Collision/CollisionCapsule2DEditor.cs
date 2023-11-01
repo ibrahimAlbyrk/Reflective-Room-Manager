@@ -11,7 +11,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
     {
         private GUIContent editButtonContent;
 
-        protected override void DrawGUI(CollisionCapsule2D myTarget)
+        protected override void DrawInspector(CollisionCapsule2D myTarget)
         {
             EditorCollisionUtilities.DrawEditColliderButton(ref myTarget.Editable);
 

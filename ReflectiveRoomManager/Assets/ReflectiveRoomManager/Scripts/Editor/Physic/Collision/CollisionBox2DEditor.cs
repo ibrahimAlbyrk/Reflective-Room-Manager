@@ -9,7 +9,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
     [CustomEditor(typeof(CollisionBox2D))]
     public class CollisionBox2DEditor : CollisionBaseEditor<CollisionBox2D>
     {
-        protected override void DrawGUI(CollisionBox2D myTarget)
+        protected override void DrawInspector(CollisionBox2D myTarget)
         {
             EditorCollisionUtilities.DrawEditColliderButton(ref myTarget.Editable);
             
