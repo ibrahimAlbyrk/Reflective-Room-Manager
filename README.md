@@ -24,7 +24,7 @@ Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to
 - [Quantum Console](https://assetstore.unity.com/packages/tools/utilities/quantum-console-211046)
 
 ---
-## Features And Sustems
+## Features And Systems
 - Both single room and multi room system.
 - Configurable PhysicSimulator.
 - Moduler Advanced Singleton System for additive scenes
