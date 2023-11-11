@@ -4,9 +4,8 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
 {
     public abstract class Collision3D : CollisionBase<Collider>
     {
-        protected override Collider[] CalculateCollision()
+        protected override void CalculateCollision()
         {
-            return null;
         }
 
         protected override void GetPhysicScene()

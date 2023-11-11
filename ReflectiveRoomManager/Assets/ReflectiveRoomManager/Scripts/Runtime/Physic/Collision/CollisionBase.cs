@@ -35,13 +35,9 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         public void SetLayer(LayerMask layerMask) => m_layer = layerMask;
         
-        protected abstract TCollider[] CalculateCollision();
+        protected abstract void CalculateCollision();
 
         protected abstract void GetPhysicScene();
-
-        protected virtual void DrawGUI(){}
-
-        private void OnDrawGizmosSelected() => DrawGUI();
 
         private void Awake() => SetCollidersCapacity();
 
@@ -55,11 +51,16 @@ namespace REFLECTIVE.Runtime.Physic.Collision
                 return;
             }
 
-            var colliders = CalculateCollision();
+            CalculateCollision();
 
-            HandleNewCollisions(colliders);
-            HandleContinuedCollisions(colliders);
-            HandleCollisionsExit(colliders);
+            HandleNewCollisions(m_garbageColliders);
+            HandleContinuedCollisions(m_garbageColliders);
+            HandleCollisionsExit(m_garbageColliders);
+
+            for (var i = 0; i < m_garbageColliders.Length; i++)
+            {
+                m_garbageColliders[i] = null;
+            }
         }
 
         private void SetCollidersCapacity()
@@ -101,17 +102,12 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         /// <summary>
         /// If colliders in the list are not included in the colliders,
         /// it removes them from the list and triggers the event.
-        /// </summary>
+        /// </summary>s
         /// <param name="colliders"></param>
         private void HandleCollisionsExit(TCollider[] colliders)
         {
-            foreach (var coll in _colliders.ToArray())
-            {
-                if (colliders.Contains(coll)) continue;
-                
-                _colliders.Remove(coll);
-                HandleCollisionExit(coll);
-            }
+            var intersectingElements = new HashSet<TCollider>(colliders);
+            _colliders.RemoveAll(item => !intersectingElements.Contains(item));
         }
 
         private void HandleCollisionEnter(TCollider coll) => OnCollisionEnter?.Invoke(coll);

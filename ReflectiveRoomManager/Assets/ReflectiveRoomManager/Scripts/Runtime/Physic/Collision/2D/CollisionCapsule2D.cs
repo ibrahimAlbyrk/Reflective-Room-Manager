@@ -32,7 +32,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
             }
         }
 
-        protected override Collider2D[] CalculateCollision()
+        protected override void CalculateCollision()
         {
             var pos = transform.position + Center;
 
@@ -45,8 +45,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
             if (size.x  > size.y / 2) size.x  = size.y / 2;
             
             m_physicsScene.OverlapCapsule(pos, size, Dir, 0, m_garbageColliders, m_layer);
-            
-            return m_garbageColliders;
         }
     }
 }

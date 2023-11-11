@@ -15,15 +15,13 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
             set => _radius = value;
         }
 
-        protected override Collider2D[] CalculateCollision()
+        protected override void CalculateCollision()
         {
             var pos = transform.position + Center;
 
             var radius = CollisionTransformUtilities.GetRadius2D(transform, _radius);
             
             m_physicsScene.OverlapCircle(pos, radius, m_garbageColliders, m_layer);
-
-            return m_garbageColliders;
         }
     }
 }

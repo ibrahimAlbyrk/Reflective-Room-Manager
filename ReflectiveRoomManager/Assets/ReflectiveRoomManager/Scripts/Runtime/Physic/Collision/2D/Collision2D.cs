@@ -6,9 +6,8 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
     {
         protected new PhysicsScene2D m_physicsScene;
 
-        protected override Collider2D[] CalculateCollision()
+        protected override void CalculateCollision()
         {
-            return null;
         }
 
         protected override void GetPhysicScene()

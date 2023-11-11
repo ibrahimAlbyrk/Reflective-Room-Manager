@@ -77,7 +77,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             _editFunc?.Invoke(myTarget);
         }
 
-        private void DrawXAxisEditableHandles(CollisionCapsule2D myTarget)
+        private static void DrawXAxisEditableHandles(CollisionCapsule2D myTarget)
         {
             var size = GetSizeForXAxis(myTarget);
 
@@ -97,7 +97,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             DrawHandlesForDirectionY(myTarget, -myTarget.transform.right, size);
         }
         
-        private void DrawHandlesForDirectionY(CollisionCapsule2D myTarget, Vector3 drawDirection, Vector2 size)
+        private static void DrawHandlesForDirectionY(CollisionCapsule2D myTarget, Vector3 drawDirection, Vector2 size)
         {
             var boxCenter = myTarget.transform.position + myTarget.Center;
 
@@ -132,8 +132,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             Undo.RecordObject(myTarget, "Edited Collider");
         }
         
-        //TODO Scale issues
-        private void DrawHandlesForDirectionX(CollisionCapsule2D myTarget, Vector3 drawDirection, Vector2 size)
+        private static void DrawHandlesForDirectionX(CollisionCapsule2D myTarget, Vector3 drawDirection, Vector2 size)
         {
             var boxCenter = myTarget.transform.position + myTarget.Center;
 
@@ -171,7 +170,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             Undo.RecordObject(myTarget, "Edited Collider");
         }
         
-        private void DrawYAxisCollision(CollisionCapsule2D myTarget)
+        private static void DrawYAxisCollision(CollisionCapsule2D myTarget)
         {
             var transform = myTarget.transform;
 
@@ -191,7 +190,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             Handles.DrawWireArc(endPoint2, transform.forward, transform.right, -180, size.x);
         }
 
-        private void DrawXAxisCollision(CollisionCapsule2D myTarget)
+        private static void DrawXAxisCollision(CollisionCapsule2D myTarget)
         {
             var transform = myTarget.transform;
 
@@ -229,7 +228,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             };
         }
 
-        private Vector2 GetSizeForYAxis(CollisionCapsule2D myTarget)
+        private static Vector2 GetSizeForYAxis(CollisionCapsule2D myTarget)
         {
             var size = new Vector2(myTarget.Radius * myTarget.transform.localScale.x, myTarget.Height * myTarget.transform.localScale.y);
             
@@ -242,7 +241,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             return size;
         }
 
-        private Vector2 GetSizeForXAxis(CollisionCapsule2D myTarget)
+        private static Vector2 GetSizeForXAxis(CollisionCapsule2D myTarget)
         {
             var size = new Vector2(myTarget.Radius * myTarget.transform.localScale.y, myTarget.Height * myTarget.transform.localScale.x);
             

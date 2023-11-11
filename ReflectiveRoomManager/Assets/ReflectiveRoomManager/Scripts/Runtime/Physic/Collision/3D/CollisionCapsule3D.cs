@@ -37,7 +37,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
             }
         }
 
-        protected override Collider[] CalculateCollision()
+        protected override void CalculateCollision()
         {
             var pos = transform.position + Center;
 
@@ -53,17 +53,17 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
             if (height < radius * 2) height = radius * 2;
             if (radius  > height / 2) radius  = height / 2;
 
-            var dir0 = transform.TransformDirection(Dirs[0]);
-            var dir1 = transform.TransformDirection(Dirs[1]);
+            var dir0 = Dirs[0];
+            var dir1 = Dirs[1];
             
-            var point0 = pos + dir0 * (height / 2 - radius);
-            var point1 = pos + dir1 * (height / 2 - radius);
+            var offset = height / 2 - radius;
+            
+            var point0 = transform.TransformPoint(Center + dir0 * offset);
+            var point1 = transform.TransformPoint(Center + dir1 * offset);
             
             Debug.DrawLine(point0, point1, Color.red, .2f);
 
             m_physicsScene.OverlapCapsule(point0, point1, Radius, m_garbageColliders, m_layer);
-            
-            return m_garbageColliders;
         }
     }
 }

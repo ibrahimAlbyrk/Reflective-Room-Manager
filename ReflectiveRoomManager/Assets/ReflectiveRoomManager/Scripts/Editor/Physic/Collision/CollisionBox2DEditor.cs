@@ -61,15 +61,15 @@ namespace REFLECTIVE.Editor.Physic.Collision
             };
             
             var boxCenter = myTarget.transform.position + myTarget.Center;
-            var tempSize = Vector2.Scale(myTarget.transform.localScale, myTarget.Size);
+            var tempSize = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
 
             for (var i = 0; i < 4; i++)
             {
                 var handleDirection = boxDirections[i];
-                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * .5f;
+                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f;
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
-                
-                var newSizeValue = newHandlePosition.magnitude * 2;
+
+                var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
 
                 switch (i)
                 {
@@ -87,7 +87,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(myTarget, "Edited Collider");
-                myTarget.Size = tempSize / myTarget.transform.localScale;
+                myTarget.Size = tempSize / (Vector2)myTarget.transform.localScale;
             }
         }
     }
