@@ -5,16 +5,17 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
     public class CollisionCapsule3D : Collision3D
     {
         [Header("Settings")]
-        [SerializeField] public Vector3 _center;
-        [SerializeField] public float _radius = .5f;
-        [SerializeField] public float _height  = 2;
+        [SerializeField] private float _radius = .5f;
+        [SerializeField] private float _height  = 2;
 
-        public Vector3 Center
+        public int DirType = 1;
+
+        public Vector3[] Dirs { get; set; } =
         {
-            get => _center;
-            set => _center = value;
-        }
-        
+            Vector3.down,
+            Vector3.up
+        };
+
         public float Radius
         {
             get => _radius;
@@ -38,16 +39,31 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
 
         protected override Collider[] CalculateCollision()
         {
-            var pos = transform.position + _center;
+            var pos = transform.position + Center;
 
-            var colliders = new Collider[m_garbageColliderSize];
+            var scale = transform.localScale;
 
-            var point0 = transform.TransformDirection(pos + Vector3.up * (Height / 2 - Radius));
-            var point1 = transform.TransformDirection(pos + Vector3.down * (Height / 2 - Radius));
+            scale.x = Mathf.Abs(scale.x);
+            scale.y = Mathf.Max(scale.y, 0);
+            scale.z = Mathf.Abs(scale.z);
 
-            m_physicsScene.OverlapCapsule(point0, point1, Radius, colliders, m_layer);
+            var height = Height * scale.y;
+            var radius = Height * Mathf.Max(scale.x, scale.z);
             
-            return colliders;
+            if (height < radius * 2) height = radius * 2;
+            if (radius  > height / 2) radius  = height / 2;
+
+            var dir0 = transform.TransformDirection(Dirs[0]);
+            var dir1 = transform.TransformDirection(Dirs[1]);
+            
+            var point0 = pos + dir0 * (height / 2 - radius);
+            var point1 = pos + dir1 * (height / 2 - radius);
+            
+            Debug.DrawLine(point0, point1, Color.red, .2f);
+
+            m_physicsScene.OverlapCapsule(point0, point1, Radius, m_garbageColliders, m_layer);
+            
+            return m_garbageColliders;
         }
     }
 }

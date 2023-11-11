@@ -11,9 +11,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
     {
         /// <summary>
         /// Checks whether the client is a player object.
-        /// If there is a player object, it replaces it with the replace function.
-        /// if not, it creates it with create player.
+        /// If there is a player object, it replaces it with ReplacePlayer()
+        /// if not, it creates it with CreatePlayer().
         /// </summary>
+        /// <seealso cref="CreatePlayer"/>
+        /// <seealso cref="ReplacePlayer"/>
         /// <param name="conn"></param>
         /// <param name="prefab"></param>
         public static GameObject TryCreatePlayerOrReplace(NetworkConnection conn, GameObject prefab)

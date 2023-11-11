@@ -11,7 +11,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
     {
         protected override void DrawInspector(CollisionBox3D myTarget)
         {
-            EditorCollisionUtilities.DrawEditColliderButton(ref myTarget.Editable);
+            EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
             
             myTarget.Center = EditorGUILayout.Vector3Field("Center: ", myTarget.Center);
             myTarget.Size = EditorGUILayout.Vector3Field("Size: ", myTarget.Size);
@@ -22,14 +22,20 @@ namespace REFLECTIVE.Editor.Physic.Collision
             if (myTarget.enabled)
             {
                 Handles.color = myTarget.Editable
-                    ? EditorCollisionUtilities.EditColor
-                    : EditorCollisionUtilities.EnableColor;
+                    ? EditorCollisionDrawUtilities.EditColor
+                    : EditorCollisionDrawUtilities.EnableColor;
             }
-            else Handles.color = EditorCollisionUtilities.DisableColor;
+            else Handles.color = EditorCollisionDrawUtilities.DisableColor;
             
             var center = myTarget.transform.position + myTarget.Center;
+
+            var size = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
+
+            Handles.matrix = Matrix4x4.TRS(center, myTarget.transform.rotation, size);
             
-            Handles.DrawWireCube(center, myTarget.Size);
+            Handles.DrawWireCube(Vector3.zero, Vector3.one);
+            
+            Handles.matrix = Matrix4x4.identity;
         }
 
         protected override void DrawEditableHandles(CollisionBox3D myTarget)
@@ -39,10 +45,10 @@ namespace REFLECTIVE.Editor.Physic.Collision
             if (myTarget.enabled)
             {
                 Handles.color = myTarget.Editable
-                    ? EditorCollisionUtilities.EditColor
-                    : EditorCollisionUtilities.EnableColor;
+                    ? EditorCollisionDrawUtilities.EditColor
+                    : EditorCollisionDrawUtilities.EnableColor;
             }
-            else Handles.color = EditorCollisionUtilities.DisableColor;
+            else Handles.color = EditorCollisionDrawUtilities.DisableColor;
             
             EditorGUI.BeginChangeCheck();
 
@@ -57,9 +63,9 @@ namespace REFLECTIVE.Editor.Physic.Collision
             };
 
             var boxCenter = myTarget.transform.position + myTarget.Center;
-            var tempSize = myTarget.Size;
+            var tempSize = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
 
-            for (var i = 0; i < 6; i++)
+            for (var i = 0; i < boxDirections.Length; i++)
             {
                 var handleDirection = boxDirections[i];
                 var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f;
@@ -87,7 +93,10 @@ namespace REFLECTIVE.Editor.Physic.Collision
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(myTarget, "Edited Collider");
-                myTarget.Size = tempSize;
+                myTarget.Size = new Vector3(
+                    tempSize.x / myTarget.transform.localScale.x,
+                    tempSize.y / myTarget.transform.localScale.y,
+                    tempSize.z / myTarget.transform.localScale.z);
             }
         }
     }

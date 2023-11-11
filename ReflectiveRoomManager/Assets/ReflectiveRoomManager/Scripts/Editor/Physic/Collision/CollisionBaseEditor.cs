@@ -8,17 +8,13 @@ namespace REFLECTIVE.Editor.Physic.Collision
     {
         public override void OnInspectorGUI()
         {
-            EditorGUI.BeginChangeCheck();
-            
             var _target = (TargetType)target;
             
             DrawInspector(_target);
             
-            EditorUtility.SetDirty(target);
-            
-            if (!EditorGUI.EndChangeCheck()) return;
-            
             Undo.RecordObject(_target, "Change Collider Value");
+            
+            EditorUtility.SetDirty(target);
         }
 
         protected virtual void OnSceneGUI()
@@ -31,6 +27,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
         protected virtual void DrawInspector(TargetType myTarget)
         {
+            
         }
 
         protected virtual void DrawCollision(TargetType myTarget)

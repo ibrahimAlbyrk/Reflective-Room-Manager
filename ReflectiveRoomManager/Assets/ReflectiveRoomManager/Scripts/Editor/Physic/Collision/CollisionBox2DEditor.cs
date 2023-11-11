@@ -11,7 +11,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
     {
         protected override void DrawInspector(CollisionBox2D myTarget)
         {
-            EditorCollisionUtilities.DrawEditColliderButton(ref myTarget.Editable);
+            EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
             
             myTarget.Center = EditorGUILayout.Vector2Field("Center: ", myTarget.Center);
             myTarget.Size = EditorGUILayout.Vector2Field("Size: ", myTarget.Size);
@@ -22,17 +22,21 @@ namespace REFLECTIVE.Editor.Physic.Collision
             if (myTarget.enabled)
             {
                 Handles.color = myTarget.Editable
-                    ? EditorCollisionUtilities.EditColor
-                    : EditorCollisionUtilities.EnableColor;
+                    ? EditorCollisionDrawUtilities.EditColor
+                    : EditorCollisionDrawUtilities.EnableColor;
             }
-            else Handles.color = EditorCollisionUtilities.DisableColor;
+            else Handles.color = EditorCollisionDrawUtilities.DisableColor;
 
-            var center = myTarget.transform.position + (Vector3)myTarget.Center;
+            var transform = myTarget.transform;
             
-            var topLeft = center + new Vector3(-myTarget.Size.x, myTarget.Size.y, 0) / 2;
-            var topRight = center + new Vector3(myTarget.Size.x, myTarget.Size.y, 0) / 2;
-            var bottomLeft = center + new Vector3(-myTarget.Size.x, -myTarget.Size.y, 0) / 2;
-            var bottomRight = center + new Vector3(myTarget.Size.x, -myTarget.Size.y, 0) / 2;
+            var center = transform.position + myTarget.Center;
+            
+            var size = Vector3.Scale(transform.localScale, myTarget.Size);
+            
+            var topLeft = center + transform.TransformDirection(new Vector3(-size.x, size.y, 0) / 2);
+            var topRight = center + transform.TransformDirection(new Vector3(size.x, size.y, 0) / 2);
+            var bottomLeft = center + transform.TransformDirection(new Vector3(-size.x, -size.y, 0) / 2);
+            var bottomRight = center + transform.TransformDirection(new Vector3(size.x, -size.y, 0) / 2);
 
             Handles.DrawLine(topLeft, topRight);
             Handles.DrawLine(topRight, bottomRight);
@@ -44,7 +48,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
         {
             if (!myTarget.Editable || !myTarget.enabled) return;
             
-            Handles.color = myTarget.enabled ? EditorCollisionUtilities.EnableColor : EditorCollisionUtilities.DisableColor;
+            Handles.color = myTarget.enabled ? EditorCollisionDrawUtilities.EnableColor : EditorCollisionDrawUtilities.DisableColor;
 
             EditorGUI.BeginChangeCheck();
 
@@ -55,17 +59,17 @@ namespace REFLECTIVE.Editor.Physic.Collision
                 myTarget.transform.right,
                 -myTarget.transform.right,
             };
-
-            var boxCenter = myTarget.transform.position + (Vector3)myTarget.Center;
-            var tempSize = myTarget.Size;
+            
+            var boxCenter = myTarget.transform.position + myTarget.Center;
+            var tempSize = Vector2.Scale(myTarget.transform.localScale, myTarget.Size);
 
             for (var i = 0; i < 4; i++)
             {
                 var handleDirection = boxDirections[i];
-                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f;
+                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * .5f;
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
-
-                var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
+                
+                var newSizeValue = newHandlePosition.magnitude * 2;
 
                 switch (i)
                 {
@@ -83,7 +87,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(myTarget, "Edited Collider");
-                myTarget.Size = tempSize;
+                myTarget.Size = tempSize / myTarget.transform.localScale;
             }
         }
     }

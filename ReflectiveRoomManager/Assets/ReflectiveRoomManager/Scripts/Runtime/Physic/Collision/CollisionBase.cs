@@ -5,12 +5,6 @@ using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.Physic.Collision
 {
-    public interface IEditableForEditor
-    {
-        public void SetEditable(bool state);
-        public void ChangeEditable();
-    }
-    
     [DisallowMultipleComponent]
     public abstract class CollisionBase<TCollider> : MonoBehaviour, IEditableForEditor where TCollider : Component
     {
@@ -22,11 +16,16 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         [Header("Configuration")]
         [SerializeField] protected LayerMask m_layer = ~0;
-        [SerializeField] protected int m_garbageColliderSize = 5;
+        [SerializeField] public int GarbageColliderSize = 3;
+
+        [Header("Settings")]
+        [SerializeField] public Vector3 Center;
         
         protected PhysicsScene m_physicsScene;
 
-        private readonly List<TCollider> _colliders = new();
+        protected TCollider[] m_garbageColliders;
+        
+        private List<TCollider> _colliders;
 
         public void SetEditable(bool state) => Editable = state;
         public void ChangeEditable()
@@ -44,6 +43,8 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         private void OnDrawGizmosSelected() => DrawGUI();
 
+        private void Awake() => SetCollidersCapacity();
+
         private void Start() => GetPhysicScene();
 
         private void FixedUpdate()
@@ -59,6 +60,12 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             HandleNewCollisions(colliders);
             HandleContinuedCollisions(colliders);
             HandleCollisionsExit(colliders);
+        }
+
+        private void SetCollidersCapacity()
+        {
+            _colliders = new List<TCollider>(GarbageColliderSize);
+            m_garbageColliders = new TCollider[GarbageColliderSize];
         }
 
         /// <summary>

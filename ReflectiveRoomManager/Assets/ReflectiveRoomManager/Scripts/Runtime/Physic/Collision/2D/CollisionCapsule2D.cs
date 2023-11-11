@@ -5,39 +5,48 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
     public class CollisionCapsule2D : Collision2D
     {
         [Header("Settings")]
-        [SerializeField] public Vector2 _center;
-        [SerializeField] public Vector2 _size = new (.5f, 2);
+        [SerializeField] private Vector2 _size = new (.5f, 2);
 
-        public Vector2 Center
+        public int DirType = 1;
+
+        public CapsuleDirection2D Dir { get; set; } = CapsuleDirection2D.Vertical;
+
+        public float Radius
         {
-            get => _center;
-            set => _center = value;
-        }
-        
-        public Vector2 Size
-        {
-            get => _size;
+            get => _size.x;
             set
             {
-                _size = value;
-                
-                _size.x = Mathf.Max(_size.x, 0);
-                _size.y = Mathf.Max(_size.x, 0);
-                
+                _size.x = Mathf.Max(value, 0);
                 if (_size.y < _size.x * 2) _size.y = _size.x * 2;
-                if (_size.x > _size.y / 2) _size.x = _size.y / 2;
+            }
+        }
+
+        public float Height
+        {
+            get => _size.y;
+            set
+            {
+                _size.y = Mathf.Max(value, 0);
+                
+                if (_size.x  > _size.y / 2) _size.x  = _size.y / 2;
             }
         }
 
         protected override Collider2D[] CalculateCollision()
         {
-            var pos = transform.position + (Vector3)_center;
+            var pos = transform.position + Center;
 
-            var colliders = new Collider2D[m_garbageColliderSize];
+            var size = new Vector2(_size.x * transform.localScale.x, _size.y * transform.localScale.y);
 
-            m_physicsScene.OverlapCapsule(pos, _size, CapsuleDirection2D.Vertical, 0, colliders, m_layer);
+            size.x = Mathf.Abs(size.x);
+            size.y = Mathf.Max(size.y, 0);
             
-            return colliders;
+            if (size.y < size.x * 2) size.y = size.x * 2;
+            if (size.x  > size.y / 2) size.x  = size.y / 2;
+            
+            m_physicsScene.OverlapCapsule(pos, size, Dir, 0, m_garbageColliders, m_layer);
+            
+            return m_garbageColliders;
         }
     }
 }

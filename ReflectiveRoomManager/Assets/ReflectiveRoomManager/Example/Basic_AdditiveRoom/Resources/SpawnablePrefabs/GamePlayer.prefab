@@ -150,14 +150,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 810210c1b226497d98b7dbc83ec6f82b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Editable: 1
+  Editable: 0
   m_layer:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_garbageColliderSize: 5
-  _center: {x: 0, y: 1, z: 0}
+  GarbageColliderSize: 3
+  Center: {x: 0, y: 1, z: 0}
   _radius: 0.5
   _height: 2
+  DirType: 1
 --- !u!1 &5890482806351752315
 GameObject:
   m_ObjectHideFlags: 0
