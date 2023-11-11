@@ -106,8 +106,13 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         /// <param name="colliders"></param>
         private void HandleCollisionsExit(TCollider[] colliders)
         {
-            var intersectingElements = new HashSet<TCollider>(colliders);
-            _colliders.RemoveAll(item => !intersectingElements.Contains(item));
+            foreach (var coll in _colliders.ToArray())
+            {
+                if(colliders.Contains(coll)) continue;
+
+                _colliders.Remove(coll);
+                HandleCollisionExit(coll);
+            }
         }
 
         private void HandleCollisionEnter(TCollider coll) => OnCollisionEnter?.Invoke(coll);
