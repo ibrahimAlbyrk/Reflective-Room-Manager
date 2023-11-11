@@ -30,7 +30,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             var transform = myTarget.transform;
 
-            var center = transform.position + myTarget.Center;
+            var center = transform.TransformPoint(myTarget.Center);
             
             var radius = CollisionTransformUtilities.GetRadius2D(transform, myTarget.Radius);
             
@@ -44,25 +44,27 @@ namespace REFLECTIVE.Editor.Physic.Collision
             Handles.color = myTarget.enabled ? EditorCollisionDrawUtilities.EnableColor : EditorCollisionDrawUtilities.DisableColor;
         
             EditorGUI.BeginChangeCheck();
-        
+
+            var transform = myTarget.transform;
+            
             var boxDirections = new []
             {
-                myTarget.transform.up,
-                -myTarget.transform.up,
-                myTarget.transform.right,
-                -myTarget.transform.right,
+                Vector3.up,
+                -Vector3.up,
+                Vector3.right,
+                -Vector3.right,
             };
         
-            var boxCenter = myTarget.transform.position + myTarget.Center;
+            var boxCenter = myTarget.Center;
             var tempSize = myTarget.Radius;
         
             foreach (var handleDirection in boxDirections)
             {
-                var handlePosition = boxCenter + handleDirection * tempSize;
+                var handlePosition = transform.TransformPoint(boxCenter + handleDirection * tempSize);
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
                 
-                var directionChange = newHandlePosition - boxCenter;
-                var changeOnHandleDirection = Vector3.Project(directionChange, handleDirection);
+                var directionChange = newHandlePosition - transform.TransformPoint(boxCenter);
+                var changeOnHandleDirection = Vector3.Project(directionChange, transform.TransformDirection(handleDirection));
         
                 var newSizeValue = changeOnHandleDirection.magnitude;
         

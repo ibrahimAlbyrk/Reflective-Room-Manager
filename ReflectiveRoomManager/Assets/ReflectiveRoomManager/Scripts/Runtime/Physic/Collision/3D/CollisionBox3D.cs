@@ -15,7 +15,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
 
         protected override void CalculateCollision()
         {
-            var pos = transform.position + Center;
+            var pos = transform.TransformPoint(Center);
 
             var size = Vector3.Scale(transform.localScale, _size);
             

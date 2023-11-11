@@ -47,8 +47,9 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         {
             if (m_physicsScene == default)
             {
+                GetPhysicScene();
                 Debug.LogError("Physics scene not found", gameObject);
-                return;
+                //return;
             }
 
             CalculateCollision();

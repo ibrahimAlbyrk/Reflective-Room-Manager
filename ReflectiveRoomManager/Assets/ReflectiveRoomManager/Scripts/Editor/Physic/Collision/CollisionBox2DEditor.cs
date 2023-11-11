@@ -29,14 +29,14 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             var transform = myTarget.transform;
             
-            var center = transform.position + myTarget.Center;
+            var center = myTarget.Center;
             
             var size = Vector3.Scale(transform.localScale, myTarget.Size);
             
-            var topLeft = center + transform.TransformDirection(new Vector3(-size.x, size.y, 0) / 2);
-            var topRight = center + transform.TransformDirection(new Vector3(size.x, size.y, 0) / 2);
-            var bottomLeft = center + transform.TransformDirection(new Vector3(-size.x, -size.y, 0) / 2);
-            var bottomRight = center + transform.TransformDirection(new Vector3(size.x, -size.y, 0) / 2);
+            var topLeft = transform.TransformPoint(center + new Vector3(-size.x, size.y, 0) / 2);
+            var topRight = transform.TransformPoint(center + new Vector3(size.x, size.y, 0) / 2);
+            var bottomLeft = transform.TransformPoint(center + new Vector3(-size.x, -size.y, 0) / 2);
+            var bottomRight = transform.TransformPoint(center + new Vector3(size.x, -size.y, 0) / 2);
 
             Handles.DrawLine(topLeft, topRight);
             Handles.DrawLine(topRight, bottomRight);
@@ -54,22 +54,24 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             var boxDirections = new []
             {
-                myTarget.transform.up,
-                -myTarget.transform.up,
-                myTarget.transform.right,
-                -myTarget.transform.right,
+                Vector3.up,
+                -Vector3.up,
+                Vector3.right,
+                -Vector3.right,
             };
+
+            var transform = myTarget.transform;
             
-            var boxCenter = myTarget.transform.position + myTarget.Center;
+            var boxCenter = myTarget.Center;
             var tempSize = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
 
             for (var i = 0; i < 4; i++)
             {
                 var handleDirection = boxDirections[i];
-                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f;
+                var handlePosition = transform.TransformPoint(boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f);
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
 
-                var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
+                var newSizeValue = (newHandlePosition - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
 
                 switch (i)
                 {

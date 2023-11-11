@@ -81,30 +81,32 @@ namespace REFLECTIVE.Editor.Physic.Collision
         {
             var size = GetSizeForXAxis(myTarget);
 
-            DrawHandlesForDirectionX(myTarget, myTarget.transform.up, size);
-            DrawHandlesForDirectionX(myTarget, -myTarget.transform.up, size);
-            DrawHandlesForDirectionX(myTarget, myTarget.transform.right, size);
-            DrawHandlesForDirectionX(myTarget, -myTarget.transform.right, size);
+            DrawHandlesForDirectionX(myTarget, Vector3.up, size);
+            DrawHandlesForDirectionX(myTarget, -Vector3.up, size);
+            DrawHandlesForDirectionX(myTarget, Vector3.right, size);
+            DrawHandlesForDirectionX(myTarget, -Vector3.right, size);
         }
         
         private void DrawYAxisEditableHandles(CollisionCapsule2D myTarget)
         {
             var size = GetSizeForYAxis(myTarget);
             
-            DrawHandlesForDirectionY(myTarget, myTarget.transform.up, size);
-            DrawHandlesForDirectionY(myTarget, -myTarget.transform.up, size);
-            DrawHandlesForDirectionY(myTarget, myTarget.transform.right, size);
-            DrawHandlesForDirectionY(myTarget, -myTarget.transform.right, size);
+            DrawHandlesForDirectionY(myTarget, Vector3.up, size);
+            DrawHandlesForDirectionY(myTarget, -Vector3.up, size);
+            DrawHandlesForDirectionY(myTarget, Vector3.right, size);
+            DrawHandlesForDirectionY(myTarget, -Vector3.right, size);
         }
         
         private static void DrawHandlesForDirectionY(CollisionCapsule2D myTarget, Vector3 drawDirection, Vector2 size)
         {
+            var transform = myTarget.transform;
+            
             var boxCenter = myTarget.transform.position + myTarget.Center;
 
-            var sizeMultiplier = drawDirection == myTarget.transform.up || drawDirection == -myTarget.transform.up ? size.y * .5f : size.x;
+            var sizeMultiplier = drawDirection == Vector3.up || drawDirection == -Vector3.up ? size.y * .5f : size.x;
 
             var tempSize = sizeMultiplier * Vector3.one;
-            var handlePosition = boxCenter + Vector3.Scale(drawDirection, tempSize);
+            var handlePosition = transform.TransformPoint(boxCenter + Vector3.Scale(drawDirection, tempSize));
 
             EditorGUI.BeginChangeCheck();
 
@@ -113,9 +115,9 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             if (!EditorGUI.EndChangeCheck()) return;
             
-            var newSizeValue = ((newHandlePosition) - boxCenter).magnitude * 2.0f;
+            var newSizeValue = ((newHandlePosition) - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
             
-            if (drawDirection == myTarget.transform.up || drawDirection == -myTarget.transform.up)
+            if (drawDirection == Vector3.up || drawDirection == -Vector3.up)
             {
                 myTarget.Height = newSizeValue;
                 myTarget.Height /= myTarget.transform.localScale.y;
@@ -134,14 +136,16 @@ namespace REFLECTIVE.Editor.Physic.Collision
         
         private static void DrawHandlesForDirectionX(CollisionCapsule2D myTarget, Vector3 drawDirection, Vector2 size)
         {
-            var boxCenter = myTarget.transform.position + myTarget.Center;
+            var transform = myTarget.transform;
+            
+            var boxCenter = myTarget.Center;
 
-            var sizeMultiplier = (drawDirection == myTarget.transform.right || drawDirection == -myTarget.transform.right) 
+            var sizeMultiplier = (drawDirection == Vector3.right || drawDirection == -Vector3.right) 
                 ? size.y * .5f 
                 : size.x;
 
             var tempSize = sizeMultiplier * Vector3.one;
-            var handlePosition = boxCenter +  Vector3.Scale(drawDirection, tempSize);
+            var handlePosition = transform.TransformPoint(boxCenter +  Vector3.Scale(drawDirection, tempSize));
 
             EditorGUI.BeginChangeCheck();
 
@@ -150,11 +154,11 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             if (!EditorGUI.EndChangeCheck()) return;
             
-            var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
+            var newSizeValue = (newHandlePosition - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
 
             var scale = myTarget.transform.localScale;
             
-            if (drawDirection == myTarget.transform.right || drawDirection == -myTarget.transform.right)
+            if (drawDirection == Vector3.right || drawDirection == -Vector3.right)
             {
                 myTarget.Height = newSizeValue;
                 myTarget.Height /= scale.x;
@@ -174,39 +178,55 @@ namespace REFLECTIVE.Editor.Physic.Collision
         {
             var transform = myTarget.transform;
 
-            var dirs = GetDirsForAxis(transform.right);
+            var dirs = GetDirsForAxis(Vector3.right);
 
             var size = GetSizeForYAxis(myTarget);
             
-            var (endPoint1, endPoint2) = GetPointsForAxis(myTarget, transform.up, size);
+            var (point0, point1) = GetPointsForAxis(myTarget, Vector3.up, size);
+            
+            point0 = transform.TransformPoint(point0);
+            point1 = transform.TransformPoint(point1);
             
             foreach (var dir in dirs)
             {
-                Handles.DrawLine(endPoint1 + dir * size.x, endPoint2 + dir * size.x);
+                var d = myTarget.transform.TransformDirection(dir);
+                
+                var pos1 = point0 + d * size.x;
+                var pos2 = point1 + d * size.x;
+                
+                Handles.DrawLine(pos1, pos2);
             }
 
-            Handles.DrawWireArc(endPoint1, transform.forward, transform.right, 180, size.x);
+            Handles.DrawWireArc(point0, transform.forward, transform.right, 180, size.x);
 
-            Handles.DrawWireArc(endPoint2, transform.forward, transform.right, -180, size.x);
+            Handles.DrawWireArc(point1, transform.forward, transform.right, -180, size.x);
         }
 
         private static void DrawXAxisCollision(CollisionCapsule2D myTarget)
         {
             var transform = myTarget.transform;
 
-            var dirs = GetDirsForAxis(transform.up);
+            var dirs = GetDirsForAxis(Vector3.up);
 
             var size = GetSizeForXAxis(myTarget);
             
-            var (endPoint1, endPoint2) = GetPointsForAxis(myTarget, transform.right, size);
+            var (point0, point1) = GetPointsForAxis(myTarget, Vector3.right, size);
+            
+            point0 = transform.TransformPoint(point0);
+            point1 = transform.TransformPoint(point1);
             
             foreach (var dir in dirs)
             {
-                Handles.DrawLine(endPoint1 + dir * size.x, endPoint2 + dir * size.x);
+                var d = myTarget.transform.TransformDirection(dir);
+                
+                var pos1 = point0 + d * size.x;
+                var pos2 = point1 + d * size.x;
+                
+                Handles.DrawLine(pos1, pos2);
             }
 
-            Handles.DrawWireArc(endPoint1, transform.forward, transform.up, -180, size.x);
-            Handles.DrawWireArc(endPoint2, transform.forward, transform.up, 180, size.x);
+            Handles.DrawWireArc(point0, transform.forward, transform.up, -180, size.x);
+            Handles.DrawWireArc(point1, transform.forward, transform.up, 180, size.x);
         }
         
         private static (Vector3, Vector3) GetPointsForAxis(CollisionCapsule2D myTarget, Vector3 dir, Vector2 size)

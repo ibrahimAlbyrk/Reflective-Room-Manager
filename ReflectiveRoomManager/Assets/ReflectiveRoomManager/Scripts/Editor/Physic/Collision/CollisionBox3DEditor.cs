@@ -27,7 +27,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             }
             else Handles.color = EditorCollisionDrawUtilities.DisableColor;
             
-            var center = myTarget.transform.position + myTarget.Center;
+            var center = myTarget.transform.TransformPoint(myTarget.Center);
 
             var size = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
 
@@ -54,24 +54,26 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             var boxDirections = new []
             {
-                myTarget.transform.up,
-                -myTarget.transform.up,
-                myTarget.transform.right,
-                -myTarget.transform.right,
-                myTarget.transform.forward,
-                -myTarget.transform.forward
+                Vector3.up,
+                -Vector3.up,
+                Vector3.right,
+                -Vector3.right,
+                Vector3.forward,
+                -Vector3.forward
             };
 
-            var boxCenter = myTarget.transform.position + myTarget.Center;
+            var transform = myTarget.transform;
+            
+            var boxCenter = myTarget.Center;
             var tempSize = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
 
             for (var i = 0; i < boxDirections.Length; i++)
             {
                 var handleDirection = boxDirections[i];
-                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f;
+                var handlePosition = transform.TransformPoint(boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f);
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
 
-                var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
+                var newSizeValue = (newHandlePosition - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
 
                 switch (i)
                 {

@@ -15,11 +15,13 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
 
         protected override void CalculateCollision()
         { 
-            var pos = (Vector2)(transform.position + Center);
-
-            var size = Vector2.Scale(transform.localScale, _size);
+            var size = Vector3.Scale(transform.localScale, _size);
             
-            m_physicsScene.OverlapBox(pos, size, 0, m_garbageColliders, m_layer);
+            var pos = transform.TransformPoint(Center);
+
+            var angle = transform.rotation.eulerAngles.z;
+            
+            m_physicsScene.OverlapBox(pos, size, angle, m_garbageColliders, m_layer);
         }
     }
 }

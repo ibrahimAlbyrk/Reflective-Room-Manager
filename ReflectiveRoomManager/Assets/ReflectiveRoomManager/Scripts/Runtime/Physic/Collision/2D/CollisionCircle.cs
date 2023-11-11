@@ -7,7 +7,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
     public class CollisionCircle : Collision2D
     {
         [Header("Settings")]
-        [SerializeField] private float _radius = 1;
+        [SerializeField] private float _radius = .5f;
         
         public float Radius
         {
@@ -17,7 +17,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
 
         protected override void CalculateCollision()
         {
-            var pos = transform.position + Center;
+            var pos = transform.TransformPoint(Center);
 
             var radius = CollisionTransformUtilities.GetRadius2D(transform, _radius);
             

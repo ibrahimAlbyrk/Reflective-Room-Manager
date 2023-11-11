@@ -34,7 +34,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             var radius = CollisionTransformUtilities.GetRadius(transform, myTarget.Radius);
             
-            var center = transform.position + myTarget.Center;
+            var center = transform.TransformPoint(myTarget.Center);
             
             EditorDrawUtilities.DrawToShadedSphere(center, rotation, radius);
         }
@@ -59,7 +59,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             var radius = CollisionTransformUtilities.GetRadius(transform, myTarget.Radius);
 
-            var center = transform.position + myTarget.Center;
+            var center = transform.TransformPoint(myTarget.Center);
 
             var tempSize = Handles.RadiusHandle(rotation, center, radius, true);
 

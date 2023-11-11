@@ -82,40 +82,42 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
         private static void DrawAxisEdit(CollisionCapsule3D myTarget, Vector3 up)
         {
-            DrawHandlesForDirection(myTarget, myTarget.transform.up, up);
-            DrawHandlesForDirection(myTarget, -myTarget.transform.up, up);
-            DrawHandlesForDirection(myTarget, myTarget.transform.right, up);
-            DrawHandlesForDirection(myTarget, -myTarget.transform.right, up);
-            DrawHandlesForDirection(myTarget, myTarget.transform.forward, up);
-            DrawHandlesForDirection(myTarget, -myTarget.transform.forward, up);
+            DrawHandlesForDirection(myTarget, Vector3.up, up);
+            DrawHandlesForDirection(myTarget, -Vector3.up, up);
+            DrawHandlesForDirection(myTarget, Vector3.right, up);
+            DrawHandlesForDirection(myTarget, -Vector3.right, up);
+            DrawHandlesForDirection(myTarget, Vector3.forward, up);
+            DrawHandlesForDirection(myTarget, -Vector3.forward, up);
         }
         
         private static void DrawXAxisEdit(CollisionCapsule3D myTarget)
         {
-            DrawAxisEdit(myTarget, myTarget.transform.right);
+            DrawAxisEdit(myTarget, Vector3.right);
         }
         
         private static void DrawYAxisEdit(CollisionCapsule3D myTarget)
         {
-            DrawAxisEdit(myTarget, myTarget.transform.up);
+            DrawAxisEdit(myTarget, Vector3.up);
         }
         
         private static void DrawZAxisEdit(CollisionCapsule3D myTarget)
         {
-            DrawAxisEdit(myTarget, myTarget.transform.forward);
+            DrawAxisEdit(myTarget, Vector3.forward);
         }
         private static void DrawHandlesForDirection(CollisionCapsule3D myTarget, Vector3 direction, Vector3 up)
         {
-            var boxCenter = myTarget.transform.position + myTarget.Center;
+            var transform = myTarget.transform;
+            
+            var boxCenter = myTarget.Center;
             
             var size = GetSizeForAxis(myTarget.transform, myTarget.Radius, myTarget.Height);
 
             var viewTransform = SceneView.lastActiveSceneView.camera.transform;
-
+            
             var sizeMultiplier = direction == up || direction == -up ? size.y * .5f : size.x;
             
             var tempSize = sizeMultiplier * Vector3.one;
-            var handlePosition = boxCenter + Vector3.Scale(direction, tempSize);
+            var handlePosition = transform.TransformPoint(boxCenter + Vector3.Scale(direction, tempSize));
             var pointToCamera = (handlePosition - viewTransform.position).normalized;
 
             Handles.color = (Vector3.Dot(pointToCamera, direction) < 0) ?
@@ -130,7 +132,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             Undo.RecordObject(myTarget, "Edited Collider");
             
-            var newSizeValue = (newHandlePosition - boxCenter).magnitude * 2.0f;
+            var newSizeValue = (newHandlePosition - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
 
             var scale = myTarget.transform.localScale;
             
@@ -151,18 +153,32 @@ namespace REFLECTIVE.Editor.Physic.Collision
         private static void DrawAxisCollision(CollisionCapsule3D myTarget, Vector3 direction, Vector3 up,
             Vector3 forward)
         {
+            var transform = myTarget.transform;
+            
             var dirs = GetDirsForAxis(up, forward);
             
             var size = GetSizeForAxis(myTarget.transform, myTarget.Radius, myTarget.Height);
             
             var (point0, point1) = GetPointsForAxis(myTarget, direction, size);
 
+            point0 = transform.TransformPoint(point0);
+            point1 = transform.TransformPoint(point1);
+            
             // Draws the vertical lines of the capsule
             foreach (var dir in dirs)
             {
-                Handles.DrawLine(point0 + dir * size.x, point1 + dir * size.x);
+                var d = myTarget.transform.TransformDirection(dir);
+                
+                var pos1 = point0 + d * size.x;
+                var pos2 = point1 + d * size.x;
+                
+                Handles.DrawLine(pos1, pos2);
             }
-
+            
+            up = transform.TransformDirection(up);
+            forward = transform.TransformDirection(forward);
+            direction = transform.TransformDirection(direction);
+            
             // Draw front and back part of the capsule
             Handles.DrawWireDisc(point0, direction, size.x);
             Handles.DrawWireArc(point0, -up, forward, 180, size.x);
@@ -176,17 +192,17 @@ namespace REFLECTIVE.Editor.Physic.Collision
         
         private static void DrawXAxisCollision(CollisionCapsule3D myTarget)
         {
-            DrawAxisCollision(myTarget, myTarget.transform.right, myTarget.transform.forward, myTarget.transform.up);
+            DrawAxisCollision(myTarget, Vector3.right, Vector3.forward, Vector3.up);
         }
         
         private static void DrawYAxisCollision(CollisionCapsule3D myTarget)
         {
-            DrawAxisCollision(myTarget, myTarget.transform.up, myTarget.transform.right, myTarget.transform.forward);
+            DrawAxisCollision(myTarget, Vector3.up, Vector3.right, Vector3.forward);
         }
         
         private static void DrawZAxisCollision(CollisionCapsule3D myTarget)
         {
-            DrawAxisCollision(myTarget, myTarget.transform.forward, myTarget.transform.up, myTarget.transform.right);
+            DrawAxisCollision(myTarget, Vector3.forward, Vector3.up, Vector3.right);
         }
 
         private static IEnumerable<Vector3> GetDirsForAxis(Vector3 dir1, Vector3 dir2)
@@ -202,7 +218,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
         private static (Vector3, Vector3) GetPointsForAxis(CollisionCapsule3D myTarget, Vector3 dir,Vector2 size)
         {
-            var pos = myTarget.transform.position + myTarget.Center;
+            var pos = myTarget.Center;
 
             var point0 = pos + dir * (size.y / 2 - size.x);
             var point1 = pos + -dir * (size.y / 2 - size.x);

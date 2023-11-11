@@ -39,8 +39,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
 
         protected override void CalculateCollision()
         {
-            var pos = transform.position + Center;
-
             var scale = transform.localScale;
 
             scale.x = Mathf.Abs(scale.x);
@@ -48,22 +46,14 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
             scale.z = Mathf.Abs(scale.z);
 
             var height = Height * scale.y;
-            var radius = Height * Mathf.Max(scale.x, scale.z);
-            
-            if (height < radius * 2) height = radius * 2;
-            if (radius  > height / 2) radius  = height / 2;
-
-            var dir0 = Dirs[0];
-            var dir1 = Dirs[1];
+            var radius = Radius * Mathf.Max(scale.x, scale.z);
             
             var offset = height / 2 - radius;
             
-            var point0 = transform.TransformPoint(Center + dir0 * offset);
-            var point1 = transform.TransformPoint(Center + dir1 * offset);
-            
-            Debug.DrawLine(point0, point1, Color.red, .2f);
+            var point0 = transform.TransformPoint(Center + Dirs[0] * offset);
+            var point1 = transform.TransformPoint(Center + Dirs[1] * offset);
 
-            m_physicsScene.OverlapCapsule(point0, point1, Radius, m_garbageColliders, m_layer);
+            m_physicsScene.OverlapCapsule(point0, point1, radius, m_garbageColliders, m_layer);
         }
     }
 }
