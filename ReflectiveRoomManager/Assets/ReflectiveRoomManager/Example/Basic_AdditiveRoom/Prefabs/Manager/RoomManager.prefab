@@ -54,6 +54,7 @@ MonoBehaviour:
     DefaultMaxPlayerCount: 10
     MaxPlayerCount: 10
     RoomLoaderType: 2
+  AutomaticallySyncScene: 0
 --- !u!114 &1949250419701008128
 MonoBehaviour:
   m_ObjectHideFlags: 0

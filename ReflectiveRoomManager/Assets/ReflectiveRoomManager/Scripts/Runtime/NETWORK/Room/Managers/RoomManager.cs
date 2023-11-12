@@ -34,7 +34,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             {
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Created);
                 
-                LoadRoom(room, roomInfo, () => JoinRoom(conn, roomName));
+                LoadRoom(room, roomInfo, () => JoinRoom(conn, room));
             }
             else
                 LoadRoom(room, roomInfo);
@@ -42,10 +42,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_eventManager.Invoke_OnServerCreatedRoom(roomInfo);
         }
 
-        public override void JoinRoom(NetworkConnection conn, string roomName)
+        public override void JoinRoom(NetworkConnection conn, Room room)
         {
-            var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
-
             if (room == null)
             {
                 Debug.LogWarning($"There is no such room for join");
@@ -69,6 +67,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
 
             m_eventManager.Invoke_OnServerJoinedClient(conn);
+        }
+        
+        public override void JoinRoom(NetworkConnection conn, string roomName)
+        {
+            var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
+
+           JoinRoom(conn, room);
         }
 
         public override void RemoveAllRoom(bool forced = false)

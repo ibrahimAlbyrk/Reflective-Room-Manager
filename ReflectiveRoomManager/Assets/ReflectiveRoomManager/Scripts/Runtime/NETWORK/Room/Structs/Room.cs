@@ -1,7 +1,6 @@
 ﻿using Mirror;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
@@ -12,7 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         
         public string RoomName;
 
-        public Scene Scene;
+        public UnityEngine.SceneManagement.Scene Scene;
         
         public int MaxPlayers;
         public int CurrentPlayers;

@@ -50,6 +50,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;
+
+        public bool AutomaticallySyncScene;
         
         #endregion
 
