@@ -2,6 +2,7 @@
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
+    using Scenes;
     using Events;
     using Handlers;
 
@@ -10,13 +11,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     {
         protected virtual void Awake()
         {
+            //INITIALIZE
             if (!InitializeSingleton()) return;
 
             InitializeRoomLoader();
 
             m_eventManager = new RoomEventManager();
+            
             _networkConnectionHandler = new NetworkConnectionHandler();
             _roomConnectionHandler = new RoomConnectionHandler();
+
+            _sceneSynchronizer = new SceneSynchronizer();
 
             //SERVER SIDE
             _networkConnectionHandler.OnStartServer(OnStartServer);

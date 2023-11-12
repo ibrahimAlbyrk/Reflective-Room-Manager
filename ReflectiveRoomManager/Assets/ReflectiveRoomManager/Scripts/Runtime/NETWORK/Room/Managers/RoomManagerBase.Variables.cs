@@ -7,6 +7,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Data;
     using Loader;
+    using Scenes;
     using Events;
     using Structs;
     using Handlers;
@@ -58,8 +59,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         #region Private Variables
         
         protected RoomEventManager m_eventManager;
-        private NetworkConnectionHandler _networkConnectionHandler;
-        private RoomConnectionHandler _roomConnectionHandler;
 
         protected List<Room> m_rooms = new();
 
@@ -67,6 +66,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private readonly List<RoomInfo> _roomListInfos = new();
 
         private IRoomLoader _roomLoader;
+        
+        private NetworkConnectionHandler _networkConnectionHandler;
+        private RoomConnectionHandler _roomConnectionHandler;
+
+        private SceneSynchronizer _sceneSynchronizer;
 
         #endregion
     }

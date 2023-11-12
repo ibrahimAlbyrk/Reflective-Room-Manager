@@ -753,7 +753,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
       propertyPath: spawnPrefabs.Array.size
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
       propertyPath: spawnPrefabs.Array.data[0]
@@ -825,12 +825,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3451448607008810331, guid: b75002cf1545adf419954edfff2dad0a, type: 3}
-      propertyPath: _roomScene
-      value: Assets/ReflectiveRoomManager/Example/Basic_AdditiveRoom/Scenes/Game_Scene.unity
-      objectReference: {fileID: 0}
-    - target: {fileID: 3451448607008810331, guid: b75002cf1545adf419954edfff2dad0a, type: 3}
-      propertyPath: _lobbyScene
-      value: Assets/ReflectiveRoomManager/Example/Basic_AdditiveRoom/Scenes/Lobby_Scene.unity
+      propertyPath: AutomaticallySyncScene
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4646948642089394247, guid: b75002cf1545adf419954edfff2dad0a, type: 3}
       propertyPath: m_Name

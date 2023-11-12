@@ -2,6 +2,7 @@
 using Mirror;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
@@ -54,7 +55,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <remarks>Only works on server</remarks>
         /// <param name="scene"></param>
         /// <returns>Information about the room where the scene* is located</returns>
-        public Room GetRoomOfScene(UnityEngine.SceneManagement.Scene scene)
+        public Room GetRoomOfScene(Scene scene)
         {
             return m_rooms.FirstOrDefault(room => room.Scene == scene);
         }
