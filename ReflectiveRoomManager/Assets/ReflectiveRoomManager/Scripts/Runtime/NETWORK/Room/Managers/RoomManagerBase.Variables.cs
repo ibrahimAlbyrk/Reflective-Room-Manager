@@ -25,7 +25,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] [Scene] private string _roomScene;
         
         [Header("Setup")]
-        [SerializeField] private RoomData _defaultRoomData = new (10, 10, RoomLoaderType.AdditiveScene);
+        [SerializeField] private RoomData _defaultRoomData = new (100, 10, RoomLoaderType.AdditiveScene);
 
         #endregion
 
@@ -51,8 +51,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;
-
-        public bool AutomaticallySyncScene;
         
         #endregion
 

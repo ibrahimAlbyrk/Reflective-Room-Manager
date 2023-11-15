@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using System.Linq;
+using REFLECTIVE.Runtime.NETWORK.Room.Service;
 using UnityEditor;
 using UnityEngine;
 
@@ -119,7 +120,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     GUILayout.Label($"{room.CurrentPlayers}/{room.MaxPlayers}", roomInfoStyle);
                     
                     if (GUILayout.Button("Remove", removeButtonStyle))
-                        roomManager.RemoveRoom(room.RoomName, true);
+                        RoomServer.RemoveRoom(room.RoomName, true);
                     
                     GUILayout.EndHorizontal();
                     
@@ -138,7 +139,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
             GUILayout.Space(10);
 
             if (GUILayout.Button("Remove All Rooms", buttonStyle))
-                roomManager.RemoveAllRoom(true);
+                RoomServer.RemoveAllRoom(true);
         }
 
         private void SetStyles()

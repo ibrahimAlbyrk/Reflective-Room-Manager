@@ -44,5 +44,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         }
 
         #endregion
+
+        #region Scene Methods
+
+        public static void ChangeScene(Room room, string sceneName)
+        {
+            room.ChangeScene(sceneName);
+        }
+
+        #endregion
     }
 }

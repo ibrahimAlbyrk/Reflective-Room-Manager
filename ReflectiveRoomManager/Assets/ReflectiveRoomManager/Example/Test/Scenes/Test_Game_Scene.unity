@@ -421,7 +421,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fd30e814157ea74bb070e8474949c14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _collision2D: {fileID: 866373485}
 --- !u!114 &866373485
 MonoBehaviour:
   m_ObjectHideFlags: 0

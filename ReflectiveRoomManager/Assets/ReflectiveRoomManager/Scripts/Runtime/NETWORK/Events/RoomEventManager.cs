@@ -19,16 +19,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
         /// <summary>Called on the server when the client's connection is lost</summary>
         public event Action<NetworkConnection> OnServerDisconnectedRoom;
         
-        public void Invoke_OnServerCreatedRoom(RoomInfo roomInfo) =>
+        internal void Invoke_OnServerCreatedRoom(RoomInfo roomInfo) =>
             OnServerCreatedRoom?.Invoke(roomInfo);
 
-        public void Invoke_OnServerJoinedClient(NetworkConnection conn) =>
+        internal void Invoke_OnServerJoinedClient(NetworkConnection conn) =>
             OnServerJoinedRoom?.Invoke(conn);
 
-        public void Invoke_OnServerExitedClient(NetworkConnection conn) =>
+        internal void Invoke_OnServerExitedClient(NetworkConnection conn) =>
             OnServerExitedRoom?.Invoke(conn);
 
-        public void Invoke_OnServerDisconnectedClient(NetworkConnection conn) =>
+        internal void Invoke_OnServerDisconnectedClient(NetworkConnection conn) =>
             OnServerDisconnectedRoom?.Invoke(conn);
     }
 }

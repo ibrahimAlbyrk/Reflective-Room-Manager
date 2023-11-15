@@ -1,7 +1,10 @@
-﻿using Mirror;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Mirror;
 using UnityEngine;
 using REFLECTIVE.Runtime.NETWORK.Room;
 using REFLECTIVE.Runtime.NETWORK.Player.Utilities;
+using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
 namespace Example.Basic.Network.Room
 {
@@ -31,7 +34,7 @@ namespace Example.Basic.Network.Room
                 RoomManagerBase.Singleton.Events.OnServerExitedRoom += PlayerCreatorUtilities.RemovePlayer;
         }
         
-        private void CreateGamePlayer(NetworkConnection conn)
+        private async void CreateGamePlayer(NetworkConnection conn)
         {
             var player = PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _gamePlayerPrefab);
 
@@ -39,6 +42,12 @@ namespace Example.Basic.Network.Room
             {
                 controller.ID = conn.connectionId;
             }
+            
+            await Task.Delay(2000);
+
+            var room = RoomManagerBase.Singleton.GetRooms().First();
+            
+            RoomServer.ChangeScene(room, "Game_Scene");
         }
         
         private void CreateLobbyPlayer(NetworkConnection conn)

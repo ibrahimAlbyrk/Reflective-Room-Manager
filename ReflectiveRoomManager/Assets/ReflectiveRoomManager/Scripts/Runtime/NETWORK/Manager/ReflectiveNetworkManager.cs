@@ -15,14 +15,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnStartServer()
         {
-            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+            //spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
             ConnectionManager.networkConnections.OnStartedServer?.Invoke();
         }
 
         public override void OnStartClient()
         {
-            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+            //spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             
             ConnectionManager.networkConnections.OnStartedClient?.Invoke();
         }

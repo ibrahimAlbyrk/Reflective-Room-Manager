@@ -1,20 +1,21 @@
-﻿using UnityEngine.SceneManagement;
+﻿using Mirror;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 {
-    using SceneManagement.Manager;
-    
     public class SceneSynchronizer
     {
         public SceneSynchronizer()
         {
-            ReflectiveSceneManager.OnSceneLoaded += DoSyncScene;
+            RoomManagerBase.Singleton.Events.OnServerJoinedRoom += DoSyncScene;
         }
 
-        public void DoSyncScene(Scene scene)
+        private static void DoSyncScene(NetworkConnection conn)
         {
-            if (!RoomManagerBase.Singleton.AutomaticallySyncScene)
-                return;
+            var room = RoomManagerBase.Singleton.GetRoomOfPlayer(conn);
+
+            if (room == null) return;
+            
+            conn.Send(new SceneMessage{sceneName = room.Scene.name, sceneOperation = SceneOperation.Normal});
         }
     }
 }

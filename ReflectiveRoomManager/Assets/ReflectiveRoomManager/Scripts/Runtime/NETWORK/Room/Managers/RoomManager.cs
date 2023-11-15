@@ -11,7 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
     public class RoomManager : RoomManagerBase
     {
-        public override void CreateRoom(NetworkConnection conn = null, RoomInfo roomInfo = default)
+        internal override void CreateRoom(NetworkConnection conn = null, RoomInfo roomInfo = default)
         {
             var roomName = roomInfo.Name;
             var maxPlayers = roomInfo.MaxPlayers;
@@ -42,7 +42,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_eventManager.Invoke_OnServerCreatedRoom(roomInfo);
         }
 
-        public override void JoinRoom(NetworkConnection conn, Room room)
+        internal override void JoinRoom(NetworkConnection conn, Room room)
         {
             if (room == null)
             {
@@ -69,14 +69,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_eventManager.Invoke_OnServerJoinedClient(conn);
         }
         
-        public override void JoinRoom(NetworkConnection conn, string roomName)
+        internal override void JoinRoom(NetworkConnection conn, string roomName)
         {
             var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
 
            JoinRoom(conn, room);
         }
 
-        public override void RemoveAllRoom(bool forced = false)
+        internal override void RemoveAllRoom(bool forced = false)
         {
             foreach (var room in m_rooms.ToList())
             {
@@ -84,7 +84,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
 
-        public override void RemoveRoom(string roomName, bool forced = false)
+        internal override void RemoveRoom(string roomName, bool forced = false)
         {
             var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
             
@@ -109,7 +109,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomListUtility.RemoveRoomToList(ref m_rooms, room);
         }
 
-        public override void ExitRoom(NetworkConnection conn, bool isDisconnected)
+        internal override void ExitRoom(NetworkConnection conn, bool isDisconnected)
         {
             var exitedRoom = m_rooms.FirstOrDefault(room => room.RemoveConnection(conn));
             

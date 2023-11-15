@@ -69,7 +69,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <remarks>Only works on client</remarks>
         /// <param name="roomInfo">The <see cref="RoomInfo"/> instance that contains the room's </param>
-        public static void RequestCreateRoom(RoomInfo roomInfo)
+        internal static void RequestCreateRoom(RoomInfo roomInfo)
         {
             if (NetworkClient.connection == null) return;
 
@@ -84,7 +84,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <remarks>Only works on client</remarks>
         /// <param name="roomName"></param>
-        public static void RequestJoinRoom(string roomName)
+        internal static void RequestJoinRoom(string roomName)
         {
             if (NetworkClient.connection == null) return;
 
@@ -100,7 +100,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <remarks>Only works on client</remarks>
         /// <param name="isDisconnected"></param>
-        public static void RequestExitRoom(bool isDisconnected = false)
+        internal static void RequestExitRoom(bool isDisconnected = false)
         {
             if (NetworkClient.connection == null) return;
 
@@ -141,7 +141,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="roomInfo"></param>
-        public abstract void CreateRoom(NetworkConnection conn = null,
+        internal abstract void CreateRoom(NetworkConnection conn = null,
             RoomInfo roomInfo = default);
 
         /// <summary>
@@ -149,33 +149,33 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="room"></param>
-        public abstract void JoinRoom(NetworkConnection conn, Room room);
+        internal abstract void JoinRoom(NetworkConnection conn, Room room);
         
         /// <summary>
         /// Joins the client into the room with the specified room' name
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="roomName"></param>
-        public abstract void JoinRoom(NetworkConnection conn, string roomName);
+        internal abstract void JoinRoom(NetworkConnection conn, string roomName);
 
         /// <summary>
         /// It works on the server side. Deletes all rooms and removes all customers from the rooms.
         /// </summary>
-        public abstract void RemoveAllRoom(bool forced = false);
+        internal abstract void RemoveAllRoom(bool forced = false);
 
         /// <summary>
         /// It works on the server side. It deletes the specified Room and removes all customers from the room.
         /// </summary>
         /// <param name="roomName"></param>
         /// <param name="forced"></param>
-        public abstract void RemoveRoom(string roomName, bool forced = false);
+        internal abstract void RemoveRoom(string roomName, bool forced = false);
 
         /// <summary>
         /// It works on the server side. It performs the process of a client exiting from the server.
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="isDisconnected"></param>
-        public abstract void ExitRoom(NetworkConnection conn, bool isDisconnected);
+        internal abstract void ExitRoom(NetworkConnection conn, bool isDisconnected);
 
         #endregion
     }

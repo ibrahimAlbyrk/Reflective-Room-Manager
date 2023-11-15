@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
+    using SceneManagement.Manager;
+    
     [System.Serializable]
     public class Room
     {
@@ -29,6 +31,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
             
             Scene = default;
         }
+
+        #region Connection
 
         public bool AddConnection(NetworkConnection conn)
         {
@@ -63,5 +67,26 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 
             return isRemoved;
         }
+
+        #endregion
+
+        #region Scene
+
+        public void ChangeScene(string sceneName)
+        {
+            ReflectiveSceneManager.UnLoadScene(Scene);
+            
+            ReflectiveSceneManager.LoadScene(sceneName, loadedScene =>
+            {
+                Scene = loadedScene;
+            });
+            
+            Connections.ForEach(conn =>
+            {
+                conn.Send(new SceneMessage{sceneName = sceneName, sceneOperation = SceneOperation.Normal});
+            });
+        }
+
+        #endregion
     }
 }
