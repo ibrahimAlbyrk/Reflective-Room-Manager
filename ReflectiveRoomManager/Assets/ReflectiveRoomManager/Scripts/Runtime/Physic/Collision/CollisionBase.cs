@@ -2,11 +2,13 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using REFLECTIVE.Runtime.SceneManagement.Manager;
+using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Physic.Collision
 {
     [DisallowMultipleComponent]
-    public abstract class CollisionBase<TCollider> : MonoBehaviour, IEditableForEditor where TCollider : Component
+    public abstract class CollisionBase<TCollider, PScene> : MonoBehaviour, IEditableForEditor where TCollider : Component
     {
         public event Action<TCollider> OnCollisionEnter;
         public event Action<TCollider> OnCollisionStay;
@@ -21,7 +23,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         [Header("Settings")]
         [SerializeField] public Vector3 Center;
         
-        protected PhysicsScene m_physicsScene;
+        protected PScene m_physicsScene;
 
         protected TCollider[] m_garbageColliders;
         
@@ -33,19 +35,34 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             Editable = !Editable;
         }
 
+        public void UpdatePhysicScene(PScene physicsScene)
+        {
+            m_physicsScene = physicsScene;
+        }
+        
         public void SetLayer(LayerMask layerMask) => m_layer = layerMask;
         
         protected abstract void CalculateCollision();
 
         protected abstract void GetPhysicScene();
 
+        private void OnEnable()
+        {
+            ReflectiveSceneManager.OnSceneLoaded += OnSceneLoaded;
+        }
+        
+        private void OnDisable()
+        {
+            ReflectiveSceneManager.OnSceneLoaded -= OnSceneLoaded;
+        }
+        
         private void Awake() => SetCollidersCapacity();
 
         private void Start() => GetPhysicScene();
 
         private void FixedUpdate()
         {
-            if (m_physicsScene == default)
+            if (m_physicsScene == null)
             {
                 GetPhysicScene();
                 Debug.LogError("Physics scene not found", gameObject);
@@ -64,6 +81,11 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             }
         }
 
+        private void OnSceneLoaded(Scene _)
+        {
+            GetPhysicScene();
+        }
+        
         private void SetCollidersCapacity()
         {
             _colliders = new List<TCollider>(GarbageColliderSize);
