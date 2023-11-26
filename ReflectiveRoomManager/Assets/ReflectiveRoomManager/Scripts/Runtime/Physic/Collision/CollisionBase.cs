@@ -2,8 +2,6 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using REFLECTIVE.Runtime.SceneManagement.Manager;
-using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Physic.Collision
 {
@@ -46,16 +44,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         protected abstract void GetPhysicScene();
 
-        private void OnEnable()
-        {
-            ReflectiveSceneManager.OnSceneLoaded += OnSceneLoaded;
-        }
-        
-        private void OnDisable()
-        {
-            ReflectiveSceneManager.OnSceneLoaded -= OnSceneLoaded;
-        }
-        
         private void Awake() => SetCollidersCapacity();
 
         private void Start() => GetPhysicScene();
@@ -81,11 +69,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             }
         }
 
-        private void OnSceneLoaded(Scene _)
-        {
-            GetPhysicScene();
-        }
-        
         private void SetCollidersCapacity()
         {
             _colliders = new List<TCollider>(GarbageColliderSize);
@@ -97,7 +80,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         /// they add them to the list and trigger the event.
         /// </summary>
         /// <param name="colliders"></param>
-        private void HandleNewCollisions(TCollider[]colliders)
+        private void HandleNewCollisions(IEnumerable<TCollider> colliders)
         {
             foreach (var coll in colliders.ToArray())
             {
