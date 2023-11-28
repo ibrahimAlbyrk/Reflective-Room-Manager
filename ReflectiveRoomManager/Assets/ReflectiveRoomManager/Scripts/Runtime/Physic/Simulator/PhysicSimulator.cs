@@ -27,7 +27,7 @@ namespace REFLECTIVE.Runtime.Physic
                 return;
             }
 
-            var physicsMode = RoomManagerBase.Singleton.PhysicsMode; 
+            var physicsMode = RoomManagerBase.Instance.PhysicsMode; 
             
             _simulator = physicsMode switch
             {

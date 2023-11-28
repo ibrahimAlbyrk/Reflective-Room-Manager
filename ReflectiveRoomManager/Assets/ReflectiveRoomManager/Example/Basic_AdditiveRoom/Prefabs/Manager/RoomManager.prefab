@@ -50,11 +50,9 @@ MonoBehaviour:
   _physicsMode: 2
   _lobbyScene: Assets/ReflectiveRoomManager/Example/Basic_AdditiveRoom/Scenes/Lobby_Scene.unity
   _roomScene: Assets/ReflectiveRoomManager/Example/Basic_AdditiveRoom/Scenes/Game_Scene.unity
-  _defaultRoomData:
-    DefaultMaxPlayerCount: 10
-    MaxPlayerCount: 10
-    RoomLoaderType: 2
-  AutomaticallySyncScene: 1
+  _maxRoomCount: 10
+  _maxPlayerCountPerRoom: 5
+  _RoomLoaderType: 2
 --- !u!114 &1949250419701008128
 MonoBehaviour:
   m_ObjectHideFlags: 0

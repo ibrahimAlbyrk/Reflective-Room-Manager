@@ -11,10 +11,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ReflectiveRoomManager/Example/Basic_AdditiveRoom/Scenes/Game_Scene.unity
     guid: b6be536dd0aeace45933aebc8d1d5c9d
-  - enabled: 0
-    path: Assets/ReflectiveRoomManager/Example/Test/Scenes/Test_Game_Scene.unity
-    guid: 7681dd868c9c3b94a975d01edf0f7b72
-  - enabled: 0
-    path: Assets/ReflectiveRoomManager/Example/Test/Scenes/Test_Lobby_Scene.unity
-    guid: ddd50f85d2e2af142be5b162f831abed
   m_configObjects: {}

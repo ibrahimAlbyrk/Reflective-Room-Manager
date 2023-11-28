@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
-    using Data;
     using Loader;
     using Scenes;
     using Events;
@@ -24,15 +23,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] [Scene] private string _lobbyScene;
         [SerializeField] [Scene] private string _roomScene;
         
-        [Header("Setup")]
-        [SerializeField] private RoomData _defaultRoomData = new (100, 10, RoomLoaderType.AdditiveScene);
+        [Header("Room Info")]
+        [Tooltip("Maximum number of rooms that can be on the server")]
+        [SerializeField] private int _maxRoomCount = 10;
+        
+        [Tooltip("Maximum number of players a client can specify for a room")]
+        [SerializeField] private int _maxPlayerCountPerRoom = 5;
+
+        [Tooltip("determines what type of loading the room will have")]
+        [SerializeField] private RoomLoaderType _RoomLoaderType = RoomLoaderType.AdditiveScene;
 
         #endregion
 
         #region Public Variables
 
         /// <summary>The one and only RoomManager</summary>
-        public static RoomManagerBase Singleton
+        public static RoomManagerBase Instance
         {
             get
             {
@@ -46,8 +52,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public RoomEventManager Events => m_eventManager;
         
         public LocalPhysicsMode PhysicsMode => _physicsMode;
-        
-        public RoomData RoomData => _defaultRoomData;
+        public int MaxRoomCount => _maxRoomCount;
+        public int MaxPlayerCountPerRoom => _maxPlayerCountPerRoom;
+
+        public RoomLoaderType RoomLoaderType => _RoomLoaderType;
         
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;

@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using Mirror;
 using UnityEngine;
+using System.Collections.Generic;
 using REFLECTIVE.Runtime.Singleton;
 using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
@@ -21,9 +22,8 @@ namespace Example.Basic.Game
         [ServerCallback]
         public void AddScore(int id, int score)
         {
-            if (!_scores.ContainsKey(id))
+            if (_scores.TryAdd(id, score))
             {
-                _scores.Add(id, score);
                 return;
             }
             

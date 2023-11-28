@@ -1,6 +1,5 @@
 ﻿using Mirror;
 using System.Linq;
-using REFLECTIVE.Runtime.NETWORK.Room.Service;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,6 +7,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 {
     using Runtime.NETWORK.Room;
     using Runtime.NETWORK.Room.Loader;
+    using Runtime.NETWORK.Room.Service;
 
     [CustomEditor(typeof(RoomManagerBase), true)]
     public class RoomManagerBaseEditor : UnityEditor.Editor
@@ -31,7 +31,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 
             if (!roomManager.gameObject.TryGetComponent(out SceneInterestManagement _))
             {
-                if(roomManager.RoomData.RoomLoaderType == RoomLoaderType.AdditiveScene)
+                if(roomManager.RoomLoaderType == RoomLoaderType.AdditiveScene)
                 {
                     EditorGUILayout.HelpBox("interest manager is not attached! If scene interest management is not added while additive room mode is selected, players may interfere with each other.", MessageType.Warning);
                 }

@@ -1,16 +1,13 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
 using REFLECTIVE.Runtime.NETWORK.Room;
 using REFLECTIVE.Runtime.NETWORK.Player.Utilities;
-using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
 namespace Example.Basic.Network.Room
 {
     using Character;
     
-    public class RoomPlayerSpawn : MonoBehaviour
+    public class RoomPlayerSpawn : NetworkBehaviour
     {
         [SerializeField] private GameObject _gamePlayerPrefab;
         [SerializeField] private GameObject _lobbyPlayerPrefab;
@@ -22,19 +19,21 @@ namespace Example.Basic.Network.Room
         [SerializeField] private bool _useLobby;
         
         // Necessary event assignments are being made
+        [ServerCallback]
         private void Start()
         {
-            RoomManagerBase.Singleton.Events.OnServerJoinedRoom += CreateGamePlayer;
+            RoomManagerBase.Instance.Events.OnServerJoinedRoom += CreateGamePlayer;
 
             //If the lobby option is used, create a player for the lobby when leaving the room,
             //otherwise it will only delete the player.
             if (_useLobby)
-                RoomManagerBase.Singleton.Events.OnServerExitedRoom += CreateLobbyPlayer;
+                RoomManagerBase.Instance.Events.OnServerExitedRoom += CreateLobbyPlayer;
             else
-                RoomManagerBase.Singleton.Events.OnServerExitedRoom += PlayerCreatorUtilities.RemovePlayer;
+                RoomManagerBase.Instance.Events.OnServerExitedRoom += PlayerCreatorUtilities.RemovePlayer;
         }
         
-        private async void CreateGamePlayer(NetworkConnection conn)
+        [ServerCallback]
+        private void CreateGamePlayer(NetworkConnection conn)
         {
             var player = PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _gamePlayerPrefab);
 
@@ -42,14 +41,9 @@ namespace Example.Basic.Network.Room
             {
                 controller.ID = conn.connectionId;
             }
-            
-            await Task.Delay(2000);
-
-            var room = RoomManagerBase.Singleton.GetRooms().First();
-            
-            RoomServer.ChangeScene(room, "Game_Scene");
         }
         
+        [ServerCallback]
         private void CreateLobbyPlayer(NetworkConnection conn)
         {
             PlayerCreatorUtilities.ReplacePlayer(conn, _lobbyPlayerPrefab);

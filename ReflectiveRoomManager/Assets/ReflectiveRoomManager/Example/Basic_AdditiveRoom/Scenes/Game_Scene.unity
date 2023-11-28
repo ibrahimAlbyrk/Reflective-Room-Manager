@@ -271,8 +271,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1034380971}
-  - component: {fileID: 1034380970}
   - component: {fileID: 1034380969}
+  - component: {fileID: 1034380970}
   m_Layer: 0
   m_Name: CoinSpawner
   m_TagString: Untagged
@@ -468,6 +468,50 @@ Transform:
   - {fileID: 1402654714}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1642221423
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1642221424}
+  - component: {fileID: 1642221425}
+  m_Layer: 0
+  m_Name: RoomSceneChanger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1642221424
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642221423}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1642221425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642221423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d6f01bbc7a4163b8c2293b6bd49b78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &4852244262240021085
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -595,3 +639,4 @@ SceneRoots:
   - {fileID: 1034380971}
   - {fileID: 5793645215529444765}
   - {fileID: 1630267824}
+  - {fileID: 1642221424}

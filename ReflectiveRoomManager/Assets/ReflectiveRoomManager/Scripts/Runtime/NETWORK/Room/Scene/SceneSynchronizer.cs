@@ -6,12 +6,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
     {
         public SceneSynchronizer()
         {
-            RoomManagerBase.Singleton.Events.OnServerJoinedRoom += DoSyncScene;
+            RoomManagerBase.Instance.Events.OnServerJoinedRoom += DoSyncScene;
         }
 
         private static void DoSyncScene(NetworkConnection conn)
         {
-            var room = RoomManagerBase.Singleton.GetRoomOfPlayer(conn);
+            var room = RoomManagerBase.Instance.GetRoomOfPlayer(conn);
 
             if (room == null) return;
             

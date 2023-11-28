@@ -36,7 +36,7 @@ namespace REFLECTIVE.Editor.Physic.Collision.Utilities
             GUILayout.EndHorizontal();
         }
 
-        public static void DrawGarbageField<TCollision>(CollisionBase<TCollision> collision)
+        public static void DrawGarbageField<TCollision, PScene>(CollisionBase<TCollision, PScene> collision)
             where TCollision : Component
         {
             if (EditorApplication.isPlaying)
@@ -50,7 +50,7 @@ namespace REFLECTIVE.Editor.Physic.Collision.Utilities
             EditorGUILayout.Space(10);
         }
 
-        public static void DrawBaseInspector<TCollision>(CollisionBase<TCollision> collision)
+        public static void DrawBaseInspector<TCollision, PScene>(CollisionBase<TCollision, PScene> collision)
             where TCollision : Component
         {
             DrawEditColliderButton(ref collision.Editable);

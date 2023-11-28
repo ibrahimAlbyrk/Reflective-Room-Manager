@@ -41,7 +41,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private void InitializeRoomLoader()
         {
-            _roomLoader = _defaultRoomData.RoomLoaderType switch
+            _roomLoader = RoomLoaderType switch
             {
                 RoomLoaderType.NoneScene => new NoneSceneRoomLoader(),
                 RoomLoaderType.AdditiveScene => new SceneRoomLoader(),

@@ -1,13 +1,15 @@
 ﻿using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using REFLECTIVE.Runtime.Extensions;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
+using REFLECTIVE.Runtime.NETWORK.Room.Listeners;
 
 namespace Example.Basic.Character
 {
     using Game;
     
-    public class SimpleCharacterController : NetworkBehaviour
+    public class SimpleCharacterController : NetworkBehaviour, IRoomListener
     {
         [SyncVar] public int ID;
         
@@ -15,20 +17,32 @@ namespace Example.Basic.Character
 
         [SerializeField] private Collision3D _collision3D;
 
+        private Transform _camTransform;
+
         private CoinSpawner _coinSpawner;
         private ScoreManager _scoreManager;
-
-        private Transform _camTransform;
+        
+        [ServerCallback]
+        private void OnDestroy()
+        {
+            gameObject.RoomContainer().UnRegisterListener(this);
+        }
+        
+        public void OnRoomSceneChanged(Scene scene)
+        {
+            SetManagers();
+        }
         
         [ServerCallback]
         private void Start()
         {
-            _coinSpawner = gameObject.RoomContainer().Get<CoinSpawner>();
-            _scoreManager = gameObject.RoomContainer().Get<ScoreManager>();
-
             _collision3D.enabled = true;
             _collision3D.SetLayer(LayerMask.GetMask("Coin"));
             _collision3D.OnCollisionEnter += CollectCoin;
+            
+            gameObject.RoomContainer().RegisterListener(this);
+
+            SetManagers();
         }
         
         [ClientCallback]
@@ -47,14 +61,21 @@ namespace Example.Basic.Character
 
             transform.Translate(dir * (speed * Time.deltaTime));
         }
+        
+        private void SetManagers()
+        {
+            _coinSpawner = gameObject.RoomContainer().GetSingleton<CoinSpawner>();
 
+            _scoreManager = gameObject.RoomContainer().GetSingleton<ScoreManager>();
+        }
+        
         private void CollectCoin(Collider coll)
         {
             if (coll == null) return;
             
-            _coinSpawner?.DestroyCoin(coll.gameObject);
+            _coinSpawner.DestroyCoin(coll.gameObject);
                 
-            _scoreManager?.AddScore(ID, 1);
+            _scoreManager.AddScore(ID, 1);
         }
     }
 }

@@ -6,6 +6,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Enums;
     using Structs;
+    using Container;
     using Utilities;
     
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
@@ -14,7 +15,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         internal override void CreateRoom(NetworkConnection conn = null, RoomInfo roomInfo = default)
         {
             var roomName = roomInfo.Name;
-            var maxPlayers = roomInfo.MaxPlayers;
+            var maxPlayers = Mathf.Max(roomInfo.MaxPlayers, MaxPlayerCountPerRoom);
+
+            if (m_rooms.Count >= MaxRoomCount)
+            {
+                Debug.LogWarning("No more rooms can be created as there is a maximum number of rooms");
+                
+                return;
+            }
 
             if (m_rooms.Any(room => room.RoomName == roomName))
             {
@@ -107,6 +115,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             });
             
             RoomListUtility.RemoveRoomToList(ref m_rooms, room);
+            
+            RoomContainer.Listener.RemoveRoomListenerHandlers(roomName);
         }
 
         internal override void ExitRoom(NetworkConnection conn, bool isDisconnected)

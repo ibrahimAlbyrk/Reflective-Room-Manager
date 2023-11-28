@@ -31,11 +31,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
         }
         
-        private void SendClientJoinSceneMessage(NetworkConnection conn)
-        {
-            conn.Send(new SceneMessage{sceneName = _roomScene, sceneOperation = SceneOperation.Normal});
-        }
-        
         private void SendClientExitSceneMessage(NetworkConnection conn)
         {
             conn.Send(new SceneMessage{sceneName = _lobbyScene, sceneOperation = SceneOperation.Normal});

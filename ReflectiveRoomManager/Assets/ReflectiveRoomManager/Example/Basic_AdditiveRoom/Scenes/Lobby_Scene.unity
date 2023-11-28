@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: 4ea77ae94cb3bd64390c7729568bd2b5, type: 2}
+  m_LightingDataAsset: {fileID: 112000000, guid: c3b584799efa83d4ea5402c88f1f84b0, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -165,6 +165,7 @@ GameObject:
   m_Component:
   - component: {fileID: 697162652}
   - component: {fileID: 697162653}
+  - component: {fileID: 697162654}
   m_Layer: 0
   m_Name: RoomPlayerSpawn
   m_TagString: Untagged
@@ -199,9 +200,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a05e68a32ee4af6b230593ff54b5164, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _gamePlayerPrefab: {fileID: 4239554022242706235, guid: 12ff49afde7e5f64c9c887af499df93f, type: 3}
   _lobbyPlayerPrefab: {fileID: 4239554022242706235, guid: 61e7b7f97e3a72a47a24d897a18a7211, type: 3}
   _useLobby: 0
+--- !u!114 &697162654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697162651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 3146436195
+  _assetId: 0
+  serverOnly: 0
+  visible: 0
+  hasSpawned: 0
 --- !u!1 &815652007
 GameObject:
   m_ObjectHideFlags: 0
@@ -751,25 +772,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: spawnPrefabs.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: spawnPrefabs.Array.data[0]
-      value: 
-      objectReference: {fileID: 7135866885179959075, guid: 8a9e9dc0b4c583a479acdfaf2d784432, type: 3}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: spawnPrefabs.Array.data[1]
-      value: 
-      objectReference: {fileID: 4239554022242706235, guid: 12ff49afde7e5f64c9c887af499df93f, type: 3}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: spawnPrefabs.Array.data[2]
-      value: 
-      objectReference: {fileID: 4239554022242706235, guid: 61e7b7f97e3a72a47a24d897a18a7211, type: 3}
     - target: {fileID: 6022252970684794576, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
       propertyPath: m_Name
       value: NetworkManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8166190489961329328, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
+      propertyPath: debugLog
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8166190489961329328, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
+      propertyPath: statisticsGUI
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8166190489961329328, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
+      propertyPath: statisticsLog
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -822,10 +839,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 960522536939440557, guid: b75002cf1545adf419954edfff2dad0a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3451448607008810331, guid: b75002cf1545adf419954edfff2dad0a, type: 3}
-      propertyPath: AutomaticallySyncScene
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4646948642089394247, guid: b75002cf1545adf419954edfff2dad0a, type: 3}
