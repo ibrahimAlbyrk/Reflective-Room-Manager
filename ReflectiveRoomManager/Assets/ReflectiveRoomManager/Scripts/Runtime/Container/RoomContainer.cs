@@ -17,7 +17,7 @@ namespace REFLECTIVE.Runtime.Container
 
     internal class SingletonContainer
     {
-        private readonly Dictionary<Scene, RoomContainerData> _data = new();
+        private readonly Dictionary<Scene, RoomSingletonData> _data = new();
 
         /// <summary>
         /// Adds an element of type T to the specified room.
@@ -34,7 +34,7 @@ namespace REFLECTIVE.Runtime.Container
 
             if (!_data.TryGetValue(scene, out var container))
             {
-                var containerData = new RoomContainerData
+                var containerData = new RoomSingletonData
                 (
                     new HashSet<object> { element }
                 );

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.Container.Data
 {
-    public readonly struct RoomContainerData
+    public readonly struct RoomSingletonData
     {
         public readonly HashSet<object> Objects;
         
-        public RoomContainerData(HashSet<object> objects)
+        public RoomSingletonData(HashSet<object> objects)
         {
             Objects = objects;
         }
