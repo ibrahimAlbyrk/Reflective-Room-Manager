@@ -90,14 +90,11 @@ namespace REFLECTIVE.Runtime.Container
 
     internal class ListenerContainer
     {
-        /// <summary>
-        /// Manages the room listeners for a given room.
-        /// </summary>
         private class RoomListenersHandler
         {
             private readonly Dictionary<Type, List<IRoomListener>> listeners = new();
 
-            public List<T> GetListeners<T>() where T : IRoomListener
+            public List<T> GetListeners<T>()
             {
                 if (!listeners.TryGetValue(typeof(T), out var list))
                     return null;
@@ -105,7 +102,7 @@ namespace REFLECTIVE.Runtime.Container
                 return list.Cast<T>().ToList();
             }
 
-            public void AddListener<T>(T listener) where T : IRoomListener
+            public void AddListener<T>(IRoomListener listener)
             {
                 if (!listeners.TryGetValue(typeof(T), out var list))
                 {
@@ -116,7 +113,7 @@ namespace REFLECTIVE.Runtime.Container
                 list.Add(listener);
             }
 
-            public void RemoveListener<T>(T listener) where T : IRoomListener
+            public void RemoveListener<T>(IRoomListener listener)
             {
                 if (listeners.TryGetValue(typeof(T), out var list))
                 {
@@ -126,21 +123,18 @@ namespace REFLECTIVE.Runtime.Container
         }
 
         private readonly Dictionary<string, RoomListenersHandler> _listenerHandlers = new();
-
-        /// <summary>
-        /// Calls the scene change listeners for a given room and scene.
-        /// </summary>
-        /// <param name="roomName">The name of the room where the scene change listeners are located.</param>
-        /// <param name="scene">The scene that is being changed to.</param>
+        
         internal void CallSceneChangeListeners(string roomName, Scene scene)
         {
             if (!HasRoom(roomName)) return;
 
             var listeners = GetListeners<IRoomSceneListener>(roomName);
 
+            if (listeners == null) return;
+
             foreach (var listener in listeners)
             {
-                listener.OnRoomSceneListener(scene);
+                listener?.OnRoomSceneListener(scene);
             }
         }
 
@@ -151,26 +145,26 @@ namespace REFLECTIVE.Runtime.Container
             _listenerHandlers.Remove(roomName);
         }
         
-        internal void RegisterListener(string roomName, IRoomListener roomListener)
+        internal void RegisterListener<T>(string roomName, IRoomListener listener)
         {
             if (!HasRoom(roomName))
             {
                 var listenersHandler = new RoomListenersHandler();
-                listenersHandler.AddListener(roomListener);
+                listenersHandler.AddListener<T>(listener);
                 
                 _listenerHandlers.Add(roomName, listenersHandler);
 
                 return;
             }
             
-            _listenerHandlers[roomName].AddListener(roomListener);
+            _listenerHandlers[roomName].AddListener<T>(listener);
         }
         
-        internal void UnRegisterListener(string roomName, IRoomListener roomListener)
+        internal void UnRegisterListener<T>(string roomName, IRoomListener listener)
         {
             if (!HasRoom(roomName)) return;
             
-            _listenerHandlers[roomName].RemoveListener(roomListener);
+            _listenerHandlers[roomName].RemoveListener<T>(listener);
         }
 
         private List<T> GetListeners<T>(string roomName) where T : IRoomListener

@@ -25,7 +25,7 @@ namespace Example.Basic.Character
         [ServerCallback]
         private void OnDestroy()
         {
-            gameObject.RoomContainer().UnRegisterListener(this);
+            gameObject.RoomContainer().UnRegisterListener<IRoomSceneListener>(this);
         }
         
         public void OnRoomSceneListener(Scene scene)
@@ -40,7 +40,7 @@ namespace Example.Basic.Character
             _collision3D.SetLayer(LayerMask.GetMask("Coin"));
             _collision3D.OnCollisionEnter += CollectCoin;
             
-            gameObject.RoomContainer().RegisterListener(this);
+            gameObject.RoomContainer().RegisterListener<IRoomSceneListener>(this);
 
             SetManagers();
         }
