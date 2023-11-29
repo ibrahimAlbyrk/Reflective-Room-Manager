@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System.Linq;
 using System.Collections.Generic;
+using REFLECTIVE.Runtime.NETWORK.Room.Listeners;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
@@ -134,7 +135,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
                 
             ReflectiveSceneManager.UnLoadScene(beforeScene);
                 
-            RoomContainer.Listener.CallSceneListeners(loadedScene, RoomName);
+            RoomContainer.Listener.CallListeners<IRoomSceneListener>(RoomName, loadedScene);
         }
         
         private void MovePlayersToSceneAndNotify(string sceneName, ref Scene loadedScene)

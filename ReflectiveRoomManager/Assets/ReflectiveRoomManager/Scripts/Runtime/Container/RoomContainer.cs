@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Container
@@ -94,47 +95,55 @@ namespace REFLECTIVE.Runtime.Container
         /// </summary>
         private class RoomListenersHandler
         {
+            private readonly Dictionary<Type, List<IRoomListener>> listeners = new();
+            
             public readonly List<IRoomSceneListener> SceneListeners = new();
 
-            /// <summary>
-            /// Adds a listener to the room.
-            /// </summary>
-            /// <param name="listener">The listener to be added. Must implement the <see cref="IRoomListener"/> interface.</param>
-            internal void AddListener(IRoomListener listener)
+            public List<T> GetListeners<T>() where T : IRoomListener
             {
-                if (listener is IRoomSceneListener sceneListener)
-                {
-                    SceneListeners.Add(sceneListener);
-                }
+                if (!listeners.TryGetValue(typeof(T), out var list))
+                    return null;
+
+                return list.Cast<T>().ToList();
             }
 
-            /// <summary>
-            /// Removes a listener from the room.
-            /// </summary>
-            /// <param name="listener">The listener to be removed. Must implement the <see cref="IRoomListener"/> interface.</param>
-            internal void RemoveListener(IRoomListener listener)
+            public void AddListener<T>(T listener) where T : IRoomListener
             {
-                if (listener is IRoomSceneListener sceneListener)
+                if (!listeners.TryGetValue(typeof(T), out var list))
                 {
-                    SceneListeners.Remove(sceneListener);
+                    list = new List<IRoomListener> { listener };
+                    listeners[typeof(T)] = list;
+                }
+                
+                list.Add(listener);
+            }
+
+            public void RemoveListener<T>(T listener) where T : IRoomListener
+            {
+                if (listeners.TryGetValue(typeof(T), out var list))
+                {
+                    list.Remove(listener);
                 }
             }
         }
 
         private readonly Dictionary<string, RoomListenersHandler> _listenerHandlers = new();
 
-        /// <summary>
-        /// Calls scene listeners that have subscribed to scene changes in a specified room.
-        /// </summary>
-        /// <param name="scene">The scene to notify the listeners about.</param>
-        /// <param name="roomName">The name of the room that has changed.</param>
-        internal void CallSceneListeners(Scene scene, string roomName)
+        
+        internal void CallListeners<T>(string roomName, params object[] parameters) where T : IRoomListener
         {
             if (!HasRoom(roomName)) return;
 
-            var listeners = _listenerHandlers[roomName].SceneListeners;
-            
-            listeners.ForEach(listener => listener.OnRoomSceneChanged(scene));
+            var listeners = _listenerHandlers[roomName].GetListeners<T>();
+
+            var listenerName = typeof(T).Name;
+            var methodName = $"On{listenerName[1..]}"; //skips the "I" character in IRoomListener
+
+            foreach (var listener in listeners)
+            {
+                var method = listener.GetType().GetMethod(methodName);
+                method?.Invoke(listener, parameters);
+            }
         }
 
         internal void RemoveRoomListenerHandlers(string roomName)
