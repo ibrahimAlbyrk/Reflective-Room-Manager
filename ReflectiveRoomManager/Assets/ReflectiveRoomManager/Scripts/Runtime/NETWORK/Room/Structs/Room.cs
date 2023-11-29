@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using REFLECTIVE.Runtime.Container;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
     using Loader;
+    using Container;
     using Player.Utilities;
     using SceneManagement.Manager;
 
@@ -97,7 +97,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         #endregion
 
         #region Scene
-
+        
         /// <summary>
         /// Changes the current scene to the specified scene.
         /// </summary>
@@ -105,29 +105,55 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         /// <param name="keepClientObjects">Specifies whether to keep client objects when changing scenes.</param>
         internal void ChangeScene(string sceneName, bool keepClientObjects)
         {
-            ReflectiveSceneManager.LoadScene(sceneName, loadedScene =>
-            {
-                var beforeScene = Scene;
-
-                if (keepClientObjects && RoomManagerBase.Instance.RoomLoaderType != RoomLoaderType.NoneScene)
-                {
-                    foreach (var conn in Connections)
-                    {
-                        PlayerMoveUtilities.PlayerMoveToScene(conn, loadedScene);
-                    }   
-                }
-
-                Scene = loadedScene;
-                
-                ReflectiveSceneManager.UnLoadScene(beforeScene);
-                
-                RoomContainer.Listener.CallListeners(loadedScene, RoomName);
-            });
+            ReflectiveSceneManager.LoadScene(sceneName, OnSceneLoaded);
             
-            Connections.ForEach(conn =>
+            return;
+
+            void OnSceneLoaded(Scene loadedScene)
             {
-                conn.Send(new SceneMessage{sceneName = sceneName, sceneOperation = SceneOperation.Normal});
-            });
+                HandleSceneLoadingAndUpdateState(sceneName, keepClientObjects, ref loadedScene);
+            }
+        }
+
+        /// <summary>
+        /// Handles the loading of a scene and updates the state accordingly.
+        /// </summary>
+        /// <param name="sceneName">The name of the scene to load.</param>
+        /// <param name="keepClientObjects">A boolean indicating whether client objects should be kept.</param>
+        /// <param name="loadedScene">A reference to the loaded scene object.</param>
+        private void HandleSceneLoadingAndUpdateState(string sceneName, bool keepClientObjects, ref Scene loadedScene)
+        {
+            var beforeScene = Scene;
+
+            if (keepClientObjects)
+            {
+                MovePlayersToSceneAndNotify(sceneName, ref loadedScene);
+            }
+
+            Scene = loadedScene;
+                
+            ReflectiveSceneManager.UnLoadScene(beforeScene);
+                
+            RoomContainer.Listener.CallSceneListeners(loadedScene, RoomName);
+        }
+        
+        private void MovePlayersToSceneAndNotify(string sceneName, ref Scene loadedScene)
+        {
+            if (RoomManagerBase.Instance.RoomLoaderType == RoomLoaderType.NoneScene) return;
+            
+            var clientChangeRoomSceneMessage = new ClientChangeRoomSceneMessage { SceneName = sceneName };
+            
+            foreach (var conn in Connections)
+            {
+                PlayerMoveUtilities.PlayerMoveToScene(conn, loadedScene);
+
+                SendClientChangeSceneMessage(conn, clientChangeRoomSceneMessage);
+            }   
+        }
+        
+        private void SendClientChangeSceneMessage(NetworkConnection conn, ClientChangeRoomSceneMessage clientChangeRoomSceneMessage)
+        {
+            conn.Send(clientChangeRoomSceneMessage);
         }
 
         #endregion

@@ -94,21 +94,45 @@ namespace REFLECTIVE.Runtime.Container
         /// </summary>
         private class RoomListenersHandler
         {
-            public readonly List<IRoomListener> Listeners = new();
+            public readonly List<IRoomSceneListener> SceneListeners = new();
+
+            /// <summary>
+            /// Adds a listener to the room.
+            /// </summary>
+            /// <param name="listener">The listener to be added. Must implement the <see cref="IRoomListener"/> interface.</param>
+            internal void AddListener(IRoomListener listener)
+            {
+                if (listener is IRoomSceneListener sceneListener)
+                {
+                    SceneListeners.Add(sceneListener);
+                }
+            }
+
+            /// <summary>
+            /// Removes a listener from the room.
+            /// </summary>
+            /// <param name="listener">The listener to be removed. Must implement the <see cref="IRoomListener"/> interface.</param>
+            internal void RemoveListener(IRoomListener listener)
+            {
+                if (listener is IRoomSceneListener sceneListener)
+                {
+                    SceneListeners.Remove(sceneListener);
+                }
+            }
         }
 
         private readonly Dictionary<string, RoomListenersHandler> _listenerHandlers = new();
 
         /// <summary>
-        /// Calls listeners that have subscribed to scene changes in a specified room.
+        /// Calls scene listeners that have subscribed to scene changes in a specified room.
         /// </summary>
         /// <param name="scene">The scene to notify the listeners about.</param>
         /// <param name="roomName">The name of the room that has changed.</param>
-        internal void CallListeners(Scene scene, string roomName)
+        internal void CallSceneListeners(Scene scene, string roomName)
         {
             if (!HasRoom(roomName)) return;
 
-            var listeners = _listenerHandlers[roomName].Listeners;
+            var listeners = _listenerHandlers[roomName].SceneListeners;
             
             listeners.ForEach(listener => listener.OnRoomSceneChanged(scene));
         }
@@ -124,32 +148,32 @@ namespace REFLECTIVE.Runtime.Container
         /// Registers a listener for a specified room.
         /// </summary>
         /// <param name="roomName">The name of the room to register the listener to.</param>
-        /// <param name="listener">The listener object that will receive events from the room.</param>
-        internal void RegisterListener(string roomName, IRoomListener listener)
+        /// <param name="roomListener">The listener object that will receive events from the room.</param>
+        internal void RegisterListener(string roomName, IRoomListener roomListener)
         {
             if (!HasRoom(roomName))
             {
                 var listenersHandler = new RoomListenersHandler();
-                listenersHandler.Listeners.Add(listener);
+                listenersHandler.AddListener(roomListener);
                 
                 _listenerHandlers.Add(roomName, listenersHandler);
 
                 return;
             }
             
-            _listenerHandlers[roomName].Listeners.Add(listener);
+            _listenerHandlers[roomName].AddListener(roomListener);
         }
 
         /// <summary>
         /// Unregisters a listener from a specific room.
         /// </summary>
         /// <param name="roomName">The name of the room.</param>
-        /// <param name="listener">The listener to be unregistered.</param>
-        internal void UnRegisterListener(string roomName, IRoomListener listener)
+        /// <param name="roomListener">The listener to be unregistered.</param>
+        internal void UnRegisterListener(string roomName, IRoomListener roomListener)
         {
             if (!HasRoom(roomName)) return;
             
-            _listenerHandlers[roomName].Listeners.Remove(listener);
+            _listenerHandlers[roomName].RemoveListener(roomListener);
         }
 
         /// <summary>

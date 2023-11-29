@@ -56,28 +56,28 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// Registers a listener to receive updates from a room in the scene.
         /// </summary>
         /// <remarks>The earliest method it can call is the Start method.</remarks>
-        /// <param name="listener">The listener object that implements the IRoomListener interface.</param>
-        public void RegisterListener(IRoomListener listener)
+        /// <param name="sceneListener">The listener object that implements the IRoomListener interface.</param>
+        public void RegisterListener(IRoomSceneListener sceneListener)
         {
             var room = RoomManagerBase.Instance.GetRoomOfScene(_scene);
             
             if (room == null) return;
             
-            RoomContainer.Listener.RegisterListener(room.RoomName, listener);
+            RoomContainer.Listener.RegisterListener(room.RoomName, sceneListener);
         }
 
         /// <summary>
         /// Unregisters a listener from the specified room.
         /// </summary>
         /// <remarks>The earliest method it can call is the OnDestroy method.</remarks>
-        /// <param name="listener">The listener to unregister.</param>
-        public void UnRegisterListener(IRoomListener listener)
+        /// <param name="sceneListener">The listener to unregister.</param>
+        public void UnRegisterListener(IRoomSceneListener sceneListener)
         {
             var room = RoomManagerBase.Instance.GetRoomOfScene(_scene);
 
             if (room == null) return;
             
-            RoomContainer.Listener.UnRegisterListener(room.RoomName, listener);
+            RoomContainer.Listener.UnRegisterListener(room.RoomName, sceneListener);
         }
 
         #endregion

@@ -9,7 +9,7 @@ namespace Example.Basic.Character
 {
     using Game;
     
-    public class SimpleCharacterController : NetworkBehaviour, IRoomListener
+    public class SimpleCharacterController : NetworkBehaviour, IRoomSceneListener
     {
         [SyncVar] public int ID;
         

@@ -1,5 +1,6 @@
 ﻿using System;
 using Mirror;
+using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Connection
 {
@@ -28,6 +29,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         public event Action OnClientExitedRoom;
         public event Action OnClientFailedRoom;
 
+        public event Action<string> OnClientChangedRoomScene;
+
         #endregion
 
         public void AddRegistersForServer()
@@ -41,6 +44,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
             NetworkClient.RegisterHandler<ClientRoomMessage>(OnReceivedRoomMessageViaClient);
             NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
             NetworkClient.RegisterHandler<ClientConnectionMessage>(OnReceivedConnectionMessageViaClient);
+            NetworkClient.RegisterHandler<ClientChangeRoomSceneMessage>(OnClientSceneChanged);
         }
         
         private void OnRoomListChangeForClient(RoomListChangeMessage msg)
@@ -59,6 +63,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
                 default:
                     throw new ArgumentException("Invalid RoomMessageState", nameof(msg.State));
             }
+        }
+
+        /// <summary>
+        /// Callback method called when the client scene is changed.
+        /// </summary>
+        /// <param name="msg">The message containing the scene name to load.</param>
+        private void OnClientSceneChanged(ClientChangeRoomSceneMessage msg)
+        {
+            //If it is a host, we do not perform this operation.
+            //The reason is that transactions are already being performed on the server.
+            if (NetworkServer.active)
+                return;
+
+            SceneManager.LoadScene(msg.SceneName);
+            
+            OnClientChangedRoomScene?.Invoke(msg.SceneName);
         }
         
         /// <summary>
