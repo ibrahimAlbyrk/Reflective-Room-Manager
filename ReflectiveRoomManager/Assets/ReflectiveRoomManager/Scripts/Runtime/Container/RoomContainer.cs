@@ -96,8 +96,6 @@ namespace REFLECTIVE.Runtime.Container
         private class RoomListenersHandler
         {
             private readonly Dictionary<Type, List<IRoomListener>> listeners = new();
-            
-            public readonly List<IRoomSceneListener> SceneListeners = new();
 
             public List<T> GetListeners<T>() where T : IRoomListener
             {
