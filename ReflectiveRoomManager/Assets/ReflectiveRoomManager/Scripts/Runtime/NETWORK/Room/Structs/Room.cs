@@ -135,7 +135,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
                 
             ReflectiveSceneManager.UnLoadScene(beforeScene);
                 
-            RoomContainer.Listener.CallListeners<IRoomSceneListener>(RoomName, loadedScene);
+            RoomContainer.Listener.CallSceneChangeListeners(RoomName, loadedScene);
         }
         
         private void MovePlayersToSceneAndNotify(string sceneName, ref Scene loadedScene)

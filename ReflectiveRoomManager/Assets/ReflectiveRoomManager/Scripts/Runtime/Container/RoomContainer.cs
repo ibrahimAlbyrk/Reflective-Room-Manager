@@ -129,20 +129,20 @@ namespace REFLECTIVE.Runtime.Container
 
         private readonly Dictionary<string, RoomListenersHandler> _listenerHandlers = new();
 
-        
-        internal void CallListeners<T>(string roomName, params object[] parameters) where T : IRoomListener
+        /// <summary>
+        /// Calls the scene change listeners for a given room and scene.
+        /// </summary>
+        /// <param name="roomName">The name of the room where the scene change listeners are located.</param>
+        /// <param name="scene">The scene that is being changed to.</param>
+        internal void CallSceneChangeListeners(string roomName, Scene scene)
         {
             if (!HasRoom(roomName)) return;
 
-            var listeners = _listenerHandlers[roomName].GetListeners<T>();
-
-            var listenerName = typeof(T).Name;
-            var methodName = $"On{listenerName[1..]}"; //skips the "I" character in IRoomListener
+            var listeners = GetListeners<IRoomSceneListener>(roomName);
 
             foreach (var listener in listeners)
             {
-                var method = listener.GetType().GetMethod(methodName);
-                method?.Invoke(listener, parameters);
+                listener.OnRoomSceneListener(scene);
             }
         }
 
@@ -153,11 +153,6 @@ namespace REFLECTIVE.Runtime.Container
             _listenerHandlers.Remove(roomName);
         }
         
-        /// <summary>
-        /// Registers a listener for a specified room.
-        /// </summary>
-        /// <param name="roomName">The name of the room to register the listener to.</param>
-        /// <param name="roomListener">The listener object that will receive events from the room.</param>
         internal void RegisterListener(string roomName, IRoomListener roomListener)
         {
             if (!HasRoom(roomName))
@@ -172,12 +167,7 @@ namespace REFLECTIVE.Runtime.Container
             
             _listenerHandlers[roomName].AddListener(roomListener);
         }
-
-        /// <summary>
-        /// Unregisters a listener from a specific room.
-        /// </summary>
-        /// <param name="roomName">The name of the room.</param>
-        /// <param name="roomListener">The listener to be unregistered.</param>
+        
         internal void UnRegisterListener(string roomName, IRoomListener roomListener)
         {
             if (!HasRoom(roomName)) return;
@@ -185,11 +175,11 @@ namespace REFLECTIVE.Runtime.Container
             _listenerHandlers[roomName].RemoveListener(roomListener);
         }
 
-        /// <summary>
-        /// Determines whether a specified room has registered listeners.
-        /// </summary>
-        /// <param name="roomName">The name of the room to check.</param>
-        /// <returns>true if the room has registered listeners; otherwise, false.</returns>
+        private List<T> GetListeners<T>(string roomName) where T : IRoomListener
+        {
+            return _listenerHandlers[roomName].GetListeners<T>();
+        }
+        
         private bool HasRoom(string roomName)
         {
             return _listenerHandlers.ContainsKey(roomName);

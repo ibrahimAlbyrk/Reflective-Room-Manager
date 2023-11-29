@@ -28,7 +28,7 @@ namespace Example.Basic.Character
             gameObject.RoomContainer().UnRegisterListener(this);
         }
         
-        public void OnRoomSceneChanged(Scene scene)
+        public void OnRoomSceneListener(Scene scene)
         {
             SetManagers();
         }
