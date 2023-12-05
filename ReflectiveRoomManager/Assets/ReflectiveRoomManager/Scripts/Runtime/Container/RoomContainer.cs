@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Container
@@ -134,7 +134,7 @@ namespace REFLECTIVE.Runtime.Container
 
             foreach (var listener in listeners)
             {
-                listener?.OnRoomSceneListener(scene);
+                listener?.OnRoomSceneChanged(scene);
             }
         }
 

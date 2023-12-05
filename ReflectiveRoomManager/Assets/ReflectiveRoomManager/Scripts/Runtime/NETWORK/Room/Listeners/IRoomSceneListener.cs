@@ -7,6 +7,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Listeners
     /// </summary>
     public interface IRoomSceneListener : IRoomListener
     {
-        public void OnRoomSceneListener(Scene scene);
+        public void OnRoomSceneChanged(Scene scene);
     }
 }

@@ -43,7 +43,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             get
             {
                 if (_singleton == null)
-                    Debug.LogWarning("There is no Room Manager");
+                    Debug.LogWarning("There is no Room Manager Instance");
 
                 return _singleton;
             }

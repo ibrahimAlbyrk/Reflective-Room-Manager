@@ -15,16 +15,26 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnStartServer()
         {
-            //spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
-            
             ConnectionManager.networkConnections.OnStartedServer?.Invoke();
+            
+            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
         }
-
+        
         public override void OnStartClient()
         {
-            //spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
-            
             ConnectionManager.networkConnections.OnStartedClient?.Invoke();
+            
+            //If it is a host, we do not perform this operation.
+            //The reason is that transactions are already being performed on the server.
+            if (NetworkServer.active)
+                return;
+            
+            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+
+            foreach (var prefab in spawnPrefabs)
+            {
+                NetworkClient.RegisterPrefab(prefab);
+            }
         }
 
         public override void OnStopServer()
