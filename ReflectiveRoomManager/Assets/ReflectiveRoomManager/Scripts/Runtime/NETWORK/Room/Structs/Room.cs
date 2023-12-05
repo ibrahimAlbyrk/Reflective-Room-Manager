@@ -1,12 +1,14 @@
 ﻿using Mirror;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
     using Loader;
     using Container;
+    using NETWORK.Utilities;
     using Player.Utilities;
     using SceneManagement.Manager;
 
@@ -105,55 +107,71 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         /// <param name="keepClientObjects">Specifies whether to keep client objects when changing scenes.</param>
         internal void ChangeScene(string sceneName, bool keepClientObjects)
         {
+            if (keepClientObjects)
+            {
+                RemovePlayersToOldScene();
+            }
+            
+            SendChangeSceneMsgToClient(sceneName);
+            
             ReflectiveSceneManager.LoadScene(sceneName, OnSceneLoaded);
             
             return;
 
             void OnSceneLoaded(Scene loadedScene)
             {
-                HandleSceneLoadingAndUpdateState(sceneName, keepClientObjects, ref loadedScene);
+                HandleSceneLoadingAndUpdateState(loadedScene);
+                
+                SpawnPlayersToScene(loadedScene);
             }
         }
 
         /// <summary>
         /// Handles the loading of a scene and updates the state accordingly.
         /// </summary>
-        /// <param name="sceneName">The name of the scene to load.</param>
-        /// <param name="keepClientObjects">A boolean indicating whether client objects should be kept.</param>
         /// <param name="loadedScene">A reference to the loaded scene object.</param>
-        private void HandleSceneLoadingAndUpdateState(string sceneName, bool keepClientObjects, ref Scene loadedScene)
+        private void HandleSceneLoadingAndUpdateState(Scene loadedScene)
         {
             var beforeScene = Scene;
-
-            if (keepClientObjects)
-            {
-                MovePlayersToSceneAndNotify(sceneName, ref loadedScene);
-            }
-
+            
             Scene = loadedScene;
                 
             ReflectiveSceneManager.UnLoadScene(beforeScene);
                 
             RoomContainer.Listener.CallSceneChangeListeners(RoomName, loadedScene);
         }
+
+        private void SendChangeSceneMsgToClient(string sceneName)
+        {
+            var sceneMessage = new SceneMessage
+            {
+                sceneName = sceneName, sceneOperation = SceneOperation.Normal
+            };
+                
+            foreach (var conn in Connections)
+            {
+                conn.Send(sceneMessage);
+            }
+        }
         
-        private void MovePlayersToSceneAndNotify(string sceneName, ref Scene loadedScene)
+        private void RemovePlayersToOldScene()
+        {
+            foreach (var conn in Connections)
+            {
+                PlayerCreatorUtilities.RemovePlayer(conn);
+            }
+        }
+        
+        private void SpawnPlayersToScene(Scene loadedScene)
         {
             if (RoomManagerBase.Instance.RoomLoaderType == RoomLoaderType.NoneScene) return;
             
-            var clientChangeRoomSceneMessage = new ClientChangeRoomSceneMessage { SceneName = sceneName };
-            
             foreach (var conn in Connections)
             {
-                PlayerMoveUtilities.PlayerMoveToScene(conn, loadedScene);
-
-                SendClientChangeSceneMessage(conn, clientChangeRoomSceneMessage);
-            }   
-        }
-        
-        private void SendClientChangeSceneMessage(NetworkConnection conn, ClientChangeRoomSceneMessage clientChangeRoomSceneMessage)
-        {
-            conn.Send(clientChangeRoomSceneMessage);
+                var player = PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, NetworkManager.singleton.playerPrefab);
+                
+                SceneManager.MoveGameObjectToScene(player, loadedScene);
+            }
         }
 
         #endregion
