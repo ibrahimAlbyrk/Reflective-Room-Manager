@@ -5,8 +5,6 @@ using REFLECTIVE.Runtime.NETWORK.Player.Utilities;
 
 namespace Example.Basic.Network.Room
 {
-    using Character;
-    
     public class RoomPlayerSpawn : NetworkBehaviour
     {
         [SerializeField] private GameObject _gamePlayerPrefab;
@@ -35,12 +33,7 @@ namespace Example.Basic.Network.Room
         [ServerCallback]
         private void CreateGamePlayer(NetworkConnection conn)
         {
-            var player = PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _gamePlayerPrefab);
-
-            if (player.TryGetComponent(out SimpleCharacterController controller))
-            {
-                controller.ID = conn.connectionId;
-            }
+            PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _gamePlayerPrefab);
         }
         
         [ServerCallback]

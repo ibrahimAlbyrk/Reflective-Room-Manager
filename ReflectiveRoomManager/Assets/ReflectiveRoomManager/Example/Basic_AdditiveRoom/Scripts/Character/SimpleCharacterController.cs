@@ -1,15 +1,13 @@
 ﻿using Mirror;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using REFLECTIVE.Runtime.Extensions;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
-using REFLECTIVE.Runtime.NETWORK.Room.Listeners;
 
 namespace Example.Basic.Character
 {
     using Game;
     
-    public class SimpleCharacterController : NetworkBehaviour, IRoomSceneListener
+    public class SimpleCharacterController : NetworkBehaviour
     {
         [SyncVar] public int ID;
         
@@ -23,26 +21,18 @@ namespace Example.Basic.Character
         private ScoreManager _scoreManager;
         
         [ServerCallback]
-        private void OnDestroy()
-        {
-            gameObject.RoomContainer().UnRegisterListener<IRoomSceneListener>(this);
-        }
-        
-        public void OnRoomSceneListener(Scene scene)
-        {
-            SetManagers();
-        }
-        
-        [ServerCallback]
         private void Start()
         {
             _collision3D.enabled = true;
             _collision3D.SetLayer(LayerMask.GetMask("Coin"));
             _collision3D.OnCollisionEnter += CollectCoin;
-            
-            gameObject.RoomContainer().RegisterListener<IRoomSceneListener>(this);
 
             SetManagers();
+
+            if(TryGetComponent(out NetworkIdentity identity))
+            {
+                ID = identity.connectionToClient.connectionId;
+            }
         }
         
         [ClientCallback]
@@ -61,11 +51,10 @@ namespace Example.Basic.Character
 
             transform.Translate(dir * (speed * Time.deltaTime));
         }
-        
+
         private void SetManagers()
         {
             _coinSpawner = gameObject.RoomContainer().GetSingleton<CoinSpawner>();
-
             _scoreManager = gameObject.RoomContainer().GetSingleton<ScoreManager>();
         }
         
