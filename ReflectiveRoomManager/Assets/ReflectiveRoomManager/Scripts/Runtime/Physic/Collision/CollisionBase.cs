@@ -54,7 +54,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             {
                 GetPhysicScene();
                 Debug.LogError("Physics scene not found", gameObject);
-                //return;
+                return;
             }
 
             CalculateCollision();
@@ -63,10 +63,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             HandleContinuedCollisions(m_garbageColliders);
             HandleCollisionsExit(m_garbageColliders);
 
-            for (var i = 0; i < m_garbageColliders.Length; i++)
-            {
-                m_garbageColliders[i] = null;
-            }
+            handleColliderCleaner();
         }
 
         private void SetCollidersCapacity()
@@ -75,17 +72,36 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             m_garbageColliders = new TCollider[GarbageColliderSize];
         }
 
+        private void handleColliderCleaner()
+        {
+            //COLLIDER
+            for (var i = _colliders.Count - 1; i >= 0; i--)
+            {
+                if(_colliders[i] != null) continue;
+                
+                _colliders.RemoveAt(i);
+            }
+            
+            //GARBAGE
+            for (var i = 0; i < m_garbageColliders.Length; i++)
+            {
+                m_garbageColliders[i] = null;
+            }
+        }
+
         /// <summary>
         /// If colliding colliders are not in the list,
         /// they add them to the list and trigger the event.
         /// </summary>
         /// <param name="colliders"></param>
-        private void HandleNewCollisions(IEnumerable<TCollider> colliders)
+        private void HandleNewCollisions(TCollider[] colliders)
         {
-            foreach (var coll in colliders.ToArray())
+            for (var i = colliders.Length - 1; i >= 0; i--)
             {
-                if (_colliders.Contains(coll)) continue;
+                var coll = colliders[i];
                 
+                if (_colliders.Contains(coll)) continue;
+
                 _colliders.Add(coll);
                 HandleCollisionEnter(coll);
             }
@@ -112,11 +128,13 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         /// <param name="colliders"></param>
         private void HandleCollisionsExit(TCollider[] colliders)
         {
-            foreach (var coll in _colliders.ToArray())
+            for (var i = _colliders.Count - 1; i >= 0; i--)
             {
-                if(colliders.Contains(coll)) continue;
+                var coll = _colliders[i];
+                
+                if (colliders.Contains(coll)) continue;
 
-                _colliders.Remove(coll);
+                _colliders.RemoveAt(i);
                 HandleCollisionExit(coll);
             }
         }
