@@ -151,12 +151,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         /// <param name="keepClientObjects">Specifies whether to keep client objects when changing scenes.</param>
         internal void ChangeScene(string sceneName, bool keepClientObjects)
         {
-            if (keepClientObjects)
-            {
-                RemovePlayersToOldScene();
-            }
-            
-            SendChangeSceneMsgToClient(sceneName);
+            PrepareSceneChange(keepClientObjects, sceneName);
             
             ReflectiveSceneManager.LoadScene(sceneName, OnSceneLoaded);
             
@@ -170,10 +165,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
             }
         }
 
-        /// <summary>
-        /// Handles the loading of a scene and updates the state accordingly.
-        /// </summary>
-        /// <param name="loadedScene">A reference to the loaded scene object.</param>
+        private void PrepareSceneChange(bool keepClientObjects, string sceneName)
+        {
+            if (keepClientObjects)
+            {
+                RemoveAllPlayerFromPreviousScene();
+            }
+        
+            NotifyClientsAboutSceneChange(sceneName);
+        }
+        
+
         private void HandleSceneLoadingAndUpdateState(Scene loadedScene)
         {
             var beforeScene = Scene;
@@ -185,25 +187,25 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
             RoomContainer.Listener.CallSceneChangeListeners(RoomName, loadedScene);
         }
 
-        private void SendChangeSceneMsgToClient(string sceneName)
+        private void NotifyClientsAboutSceneChange(string sceneName)
         {
-            var sceneMessage = new SceneMessage
-            {
-                sceneName = sceneName, sceneOperation = SceneOperation.Normal
-            };
+            var sceneMessage = CreateSceneMessage(sceneName);
                 
-            foreach (var conn in Connections)
-            {
-                conn.Send(sceneMessage);
-            }
+            Connections.ForEach(conn => conn.Send(sceneMessage));
         }
         
-        private void RemovePlayersToOldScene()
+        private SceneMessage CreateSceneMessage(string sceneName)
         {
-            foreach (var conn in Connections)
+            return new SceneMessage
             {
-                PlayerCreatorUtilities.RemovePlayer(conn);
-            }
+                sceneName = sceneName, 
+                sceneOperation = SceneOperation.Normal
+            };
+        }
+        
+        private void RemoveAllPlayerFromPreviousScene()
+        {
+            Connections.ForEach(PlayerCreatorUtilities.RemovePlayer);
         }
         
         private void SpawnPlayersToScene(Scene loadedScene)
