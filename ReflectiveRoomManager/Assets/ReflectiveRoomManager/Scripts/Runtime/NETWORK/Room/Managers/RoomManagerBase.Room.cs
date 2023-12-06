@@ -22,6 +22,32 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public IEnumerable<Room> GetRooms() => m_rooms;
 
         /// <summary>
+        /// Retrieve a room based on the given room name.
+        /// </summary>
+        /// <param name="roomName">The name of the room to retrieve.</param>
+        /// <remarks>Only works on server</remarks>
+        /// <returns>The room object if found, otherwise null.</returns>
+        public Room GetRoom(string roomName)
+        {
+            var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
+
+            return room;
+        }
+
+        /// <summary>
+        /// Retrieve a room info based on the given room name.
+        /// </summary>
+        /// <param name="roomName">The name of the room to retrieve information for.</param>
+        /// <remarks>Only works on client</remarks>
+        /// <returns>The RoomInfo object containing information about the room. Returns null if the room does not exist.</returns>
+        public RoomInfo GetRoomInfo(string roomName)
+        {
+            var roomInfo = _roomListInfos.FirstOrDefault(roomInfo => roomInfo.Name == roomName);
+
+            return roomInfo;
+        }
+        
+        /// <summary>
         /// Returns a list of all room infos
         /// </summary>
         /// <remarks>Only works on client</remarks>
@@ -114,6 +140,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #region Room Loader Mehods
 
+        /// <summary>
+        /// Loads a specific room with the provided information
+        /// and executes a callback after the room is loaded.
+        /// </summary>
+        /// <param name="room">The room object to load.</param>
+        /// <param name="roomInfo">The information of the room to be loaded.</param>
+        /// <param name="onLoaded">An optional callback to be executed after the room is loaded.</param>
+        /// <exception cref="NullReferenceException">Thrown if the Room Loader is null.</exception>
         protected void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded = null)
         {
             if (_roomLoader == null)
@@ -122,6 +156,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _roomLoader.LoadRoom(room, roomInfo, onLoaded);
         }
 
+        /// <summary>
+        /// UnLoads a specific room and executes
+        /// a callback after the room is unloaded.
+        /// </summary>
+        /// <param name="room">The room to be unloaded.</param>
+        /// <exception cref="NullReferenceException">Thrown if the Room Loader is null.</exception>
         protected void UnLoadRoom(Room room)
         {
             if (_roomLoader == null)

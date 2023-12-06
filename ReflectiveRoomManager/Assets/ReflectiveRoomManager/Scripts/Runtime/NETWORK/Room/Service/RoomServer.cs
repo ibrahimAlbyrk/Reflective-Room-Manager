@@ -1,5 +1,4 @@
 ﻿using Mirror;
-using System.Linq;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
@@ -50,7 +49,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
         public static void ChangeScene(string roomName, string sceneName, bool keepClientObjects = false)
         {
-            var room = RoomManagerBase.Instance?.GetRooms().FirstOrDefault(room => room.RoomName == roomName);
+            var room = RoomManagerBase.Instance?.GetRoom(roomName);
 
             room?.ChangeScene(sceneName, keepClientObjects);
         }
