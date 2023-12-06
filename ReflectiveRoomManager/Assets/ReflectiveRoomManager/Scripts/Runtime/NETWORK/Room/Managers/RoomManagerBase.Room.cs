@@ -42,7 +42,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <returns>The RoomInfo object containing information about the room. Returns null if the room does not exist.</returns>
         public RoomInfo GetRoomInfo(string roomName)
         {
-            var roomInfo = _roomListInfos.FirstOrDefault(roomInfo => roomInfo.Name == roomName);
+            var roomInfo = _roomListInfos.FirstOrDefault(roomInfo => roomInfo.RoomName == roomName);
 
             return roomInfo;
         }
@@ -114,7 +114,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             if (NetworkClient.connection == null) return;
 
-            var roomInfo = new RoomInfo { Name = roomName };
+            var roomInfo = new RoomInfo(roomName);
 
             var serverRoomMessage = new ServerRoomMessage(ServerRoomState.Join, roomInfo);
 
@@ -179,10 +179,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// If the client's connection information is null, it creates the room as belonging to the server.
         /// If the connection is not null, it creates it as belonging to the client.
         /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="roomInfo"></param>
-        internal abstract void CreateRoom(NetworkConnection conn = null,
-            RoomInfo roomInfo = default);
+        /// <param name="roomInfo">The information about the room to be created.</param>
+        /// <param name="conn">The optional network connection to use when creating the room.</param>
+        internal abstract void CreateRoom(RoomInfo roomInfo, NetworkConnection conn = null);
 
         /// <summary>
         /// Joins the client into the specified room

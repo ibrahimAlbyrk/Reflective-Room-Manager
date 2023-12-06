@@ -38,7 +38,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             {
                 var currentRoom = roomManager.GetRoomOfClient();
                 
-                if (!string.IsNullOrEmpty(currentRoom.Name))
+                if (!string.IsNullOrEmpty(currentRoom.RoomName))
                 {
                     ShowCurrentRoom(currentRoom);
                     return;
@@ -70,16 +70,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             if (GUILayout.Button("Create Room"))
             {
                 var roomInfo = new RoomInfo
-                {
-                    Name = _roomNameField,
-                    SceneName = RoomManagerBase.Instance.RoomScene,
-                    MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2
-                };
+                (
+                    _roomNameField,
+                    RoomManagerBase.Instance.RoomScene,
+                    int.TryParse(_maxPlayers, out var result) ? result : 2
+                );
                 
                 if(_isServer)
                     RoomServer.CreateRoom(roomInfo);
                 else
-                    RoomClient.CreateRoom(roomInfo);
+                    RoomClient.CreateRoom(roomInfo.RoomName, roomInfo.SceneName, roomInfo.MaxPlayers);
             }
 
             if (!_isServer)
@@ -115,7 +115,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         {
             GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, 200f));
             
-            GUILayout.Label($"Room Name : {roomInfo.Name}");
+            GUILayout.Label($"Room Name : {roomInfo.RoomName}");
             GUILayout.Label($"Max Player Count : {roomInfo.MaxPlayers}");
             GUILayout.Label($"Current Player Count : {roomInfo.CurrentPlayers}");
             
@@ -167,9 +167,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 UnityEngine.GUI.Box(new Rect(0, 25, 200f, height), "", backgroundStyle);
                 _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
             
-                foreach (var room in rooms.Where(room => GUILayout.Button($"{room.Name} - {room.CurrentPlayers}/{room.MaxPlayers}")))
+                foreach (var room in rooms.Where(room => GUILayout.Button($"{room.RoomName} - {room.CurrentPlayers}/{room.MaxPlayers}")))
                 {
-                    RoomClient.JoinRoom(room.Name);
+                    RoomClient.JoinRoom(room.RoomName);
                 } 
             }
             

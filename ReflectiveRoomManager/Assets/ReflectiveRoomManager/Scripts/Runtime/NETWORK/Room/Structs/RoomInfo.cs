@@ -5,22 +5,45 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
     [System.Serializable]
     public struct RoomInfo
     {
-        public string Name;
+        public string RoomName;
         public string SceneName;
         
         public int MaxPlayers;
         public int CurrentPlayers;
 
         public List<int> ConnectionIds;
-        
-        public RoomInfo(string name, int maxPlayers, int currentPlayers, List<int> connectionIds = default)
-        {
-            Name = name;
-            SceneName = default;
-            MaxPlayers = maxPlayers;
-            CurrentPlayers = currentPlayers;
 
-            ConnectionIds = connectionIds;
+        public List<string> CustomDataKeys;
+        public List<string> CustomDataValues;
+        
+        public RoomInfo(string roomName)
+        {
+            RoomName = roomName;
+            SceneName = "";
+            
+            MaxPlayers = 0;
+            
+            CurrentPlayers = 0;
+            
+            ConnectionIds = new List<int>();
+            
+            CustomDataKeys = new List<string>();
+            CustomDataValues = new List<string>();
+        }
+
+        public RoomInfo(string roomName, string sceneName, int maxPlayers)
+        {
+            RoomName = roomName;
+            SceneName = sceneName;
+            
+            MaxPlayers = maxPlayers;
+            
+            CurrentPlayers = 0;
+            
+            ConnectionIds = new List<int>();
+            
+            CustomDataKeys = new List<string>();
+            CustomDataValues = new List<string>();
         }
     }
 }

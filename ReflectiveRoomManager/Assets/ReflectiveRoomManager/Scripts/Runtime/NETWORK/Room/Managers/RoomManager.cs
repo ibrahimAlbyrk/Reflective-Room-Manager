@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System.Linq;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
@@ -12,10 +13,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
     public class RoomManager : RoomManagerBase
     {
-        internal override void CreateRoom(NetworkConnection conn = null, RoomInfo roomInfo = default)
+        internal override void CreateRoom(RoomInfo roomInfo, NetworkConnection conn = default)
         {
-            var roomName = roomInfo.Name;
-            var maxPlayers = Mathf.Max(roomInfo.MaxPlayers, MaxPlayerCountPerRoom);
+            var roomName = roomInfo.RoomName;
+            var maxPlayers = Mathf.Min(roomInfo.MaxPlayers, MaxPlayerCountPerRoom);
 
             if (m_rooms.Count >= MaxRoomCount)
             {
@@ -34,6 +35,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             var isServer = conn is null;
 
             var room = new Room(roomName, maxPlayers, isServer);
+
+            var customData = new Dictionary<string, string>();
+            
+            for (var i = 0; i < roomInfo.CustomDataKeys.Count; i++)
+            {
+                customData.Add(roomInfo.CustomDataKeys[i], roomInfo.CustomDataValues[i]);
+            }
+            
+            room.SetCustomData(customData);
             
             RoomListUtility.AddRoomToList(ref m_rooms, room);
             

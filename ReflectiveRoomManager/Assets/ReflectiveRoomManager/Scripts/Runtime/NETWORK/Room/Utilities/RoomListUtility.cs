@@ -10,7 +10,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
     {
         public static RoomInfo ConvertToRoomList(Room room)
         {
-            return new RoomInfo(room.RoomName, room.MaxPlayers, room.CurrentPlayers, room.Connections.Select(conn => conn.connectionId).ToList());
+            return new RoomInfo
+            {
+                RoomName = room.RoomName,
+                MaxPlayers = room.MaxPlayers,
+                CurrentPlayers = room.CurrentPlayers,
+                CustomDataKeys = room.GetCustomData().Keys.ToList(),
+                CustomDataValues = room.GetCustomData().Values.ToList(),
+                ConnectionIds = room.Connections.Select(conn => conn.connectionId).ToList()
+            };
         }
         
         public static void UpdateRoomToList(ref List<Room> rooms, Room room)

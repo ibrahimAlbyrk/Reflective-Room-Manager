@@ -10,12 +10,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
         public static void CreateRoom(RoomInfo roomInfo)
         {
-            RoomManagerBase.Instance?.CreateRoom(null, roomInfo);
+            RoomManagerBase.Instance?.CreateRoom(roomInfo);
         }
         
         public static void CreateRoom(NetworkConnectionToClient conn, RoomInfo roomInfo)
         {
-            RoomManagerBase.Instance?.CreateRoom(conn, roomInfo);
+            RoomManagerBase.Instance?.CreateRoom(roomInfo, conn);
         }
 
         public static void JoinRoom(string roomName)

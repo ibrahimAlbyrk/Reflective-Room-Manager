@@ -32,8 +32,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _roomConnectionHandler.OnServerCreateRoom(CreateRoom);
             _roomConnectionHandler.OnServerJoinRoom(JoinRoom);
             _roomConnectionHandler.OnServerExitRoom(ExitRoom);
-
-            //m_eventManager.OnServerJoinedRoom += SendClientJoinSceneMessage;
+            
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
             
             //CLIENT SIDE

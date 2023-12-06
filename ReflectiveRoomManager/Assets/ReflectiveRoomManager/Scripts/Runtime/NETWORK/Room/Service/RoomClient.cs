@@ -1,4 +1,8 @@
-﻿namespace REFLECTIVE.Runtime.NETWORK.Room.Service
+﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
     using Structs;
     
@@ -15,11 +19,42 @@
         
         #region Transaction Methods
 
-        public static void CreateRoom(RoomInfo roomInfo)
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
         {
+            var data = new Dictionary<string, string>();
+
+            foreach (var (key, value) in customData)
+            {
+                data.Add(key, value);
+            }
+            
+            var roomInfo = new RoomInfo(roomName, sceneName, maxPlayers)
+            {
+                CustomDataKeys = data.Keys.ToList(),
+                CustomDataValues = data.Values.ToList()
+            };
+            
+            RoomManagerBase.RequestCreateRoom(roomInfo);
+        }
+        
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData)
+        {
+            var roomInfo = new RoomInfo(roomName, sceneName, maxPlayers)
+            {
+                CustomDataKeys = customData.Keys.ToList(),
+                CustomDataValues = customData.Values.ToList()
+            };
+            
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }
 
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers)
+        {
+            var roomInfo = new RoomInfo(roomName, sceneName, maxPlayers);
+            
+            RoomManagerBase.RequestCreateRoom(roomInfo);
+        }
+        
         public static void JoinRoom(string roomName)
         {
             RoomManagerBase.RequestJoinRoom(roomName);
@@ -28,6 +63,28 @@
         public static void ExitRoom()
         {
             RoomManagerBase.RequestExitRoom();
+        }
+
+        #endregion
+
+        #region Data Methods
+        
+        public static string GetRoomCustomData(string dataName)
+        {
+            var room = RoomManagerBase.Instance.GetRoomOfClient();
+            
+            var index = room.CustomDataKeys.IndexOf(dataName);
+            
+            if (index < 0)
+            {
+                Debug.LogWarning("No such data was found");
+                
+                return default;
+            }
+            
+            var dataValue = room.CustomDataValues[index];
+            
+            return dataValue;
         }
 
         #endregion

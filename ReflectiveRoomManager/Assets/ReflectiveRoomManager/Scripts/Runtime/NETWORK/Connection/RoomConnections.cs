@@ -11,7 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         #region Events
 
         //Server Side
-        public event Action<NetworkConnectionToClient, RoomInfo> OnServerCreateRoom;
+        public event Action<RoomInfo, NetworkConnectionToClient> OnServerCreateRoom;
         public event Action<NetworkConnectionToClient, string> OnServerJoinRoom;
         public event Action<NetworkConnectionToClient, bool> OnServerExitRoom;
 
@@ -80,10 +80,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
             switch (msg.ServerRoomState)
             {
                 case ServerRoomState.Create:
-                    OnServerCreateRoom?.Invoke(conn, msg.RoomInfo);
+                    OnServerCreateRoom?.Invoke(msg.RoomInfo, conn);
                     break;
                 case ServerRoomState.Join:
-                    OnServerJoinRoom?.Invoke(conn, msg.RoomInfo.Name);
+                    OnServerJoinRoom?.Invoke(conn, msg.RoomInfo.RoomName);
                     break;
                 case ServerRoomState.Exit:
                     OnServerExitRoom?.Invoke(conn, msg.IsDisconnected);

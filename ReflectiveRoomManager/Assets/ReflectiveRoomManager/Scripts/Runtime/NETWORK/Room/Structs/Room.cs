@@ -8,7 +8,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
     using Loader;
     using Container;
-    using NETWORK.Utilities;
     using Player.Utilities;
     using SceneManagement.Manager;
 
@@ -29,6 +28,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 
         public readonly List<NetworkConnection> Connections;
 
+        private Dictionary<string, string> _customData;
+        
         /// <summary>
         /// Represents a room in a network game.
         /// </summary>
@@ -44,7 +45,50 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
             Connections = new List<NetworkConnection>();
             
             Scene = default;
+
+            _customData = new Dictionary<string, string>();
         }
+
+        #region Custom Data
+
+        internal Dictionary<string, string> GetCustomData()
+        {
+            return _customData;
+        }
+        
+        internal void SetCustomData(Dictionary<string, string> customData)
+        {
+            _customData = customData;
+        }
+
+        internal void SetCustomData(params (string, string)[] customData)
+        {
+            foreach (var (key, value) in customData)
+            {
+                _customData.Add(key, value);
+            }
+        }
+
+        internal void AddCustomData(string key, string value)
+        {
+            if (_customData.TryAdd(key, value)) return;
+            
+            Debug.LogWarning("There is data with the same name for custom data");
+        }
+        
+        internal bool RemoveCustomDataset(string dataName)
+        {
+            var isRemoved = _customData.Remove(dataName);
+
+            return isRemoved;
+        }
+
+        internal void RemoveAllCustomData()
+        {
+            _customData.Clear();
+        }
+
+        #endregion
 
         #region Connection
 

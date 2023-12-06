@@ -43,7 +43,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private void UpdateRoomList(RoomInfo roomInfo)
         {
-            var room = _roomListInfos.FirstOrDefault(info => info.Name == roomInfo.Name);
+            var room = _roomListInfos.FirstOrDefault(info => info.RoomName == roomInfo.RoomName);
 
             var index = _roomListInfos.IndexOf(room);
 
@@ -54,7 +54,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private void RemoveRoomList(RoomInfo roomInfo)
         {
-            _roomListInfos.RemoveAll(info => info.Name == roomInfo.Name);
+            _roomListInfos.RemoveAll(info => info.RoomName == roomInfo.RoomName);
         }
     }
 }

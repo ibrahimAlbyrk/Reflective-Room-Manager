@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Handlers
     
     public class RoomConnectionHandler
     {
-        public void OnServerCreateRoom(Action<NetworkConnectionToClient, RoomInfo> callback)
+        public void OnServerCreateRoom(Action<RoomInfo, NetworkConnectionToClient> callback)
         {
             ConnectionManager.roomConnections.OnServerCreateRoom += callback;
         }
