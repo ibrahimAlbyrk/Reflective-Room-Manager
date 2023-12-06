@@ -1,7 +1,7 @@
 ﻿using Mirror;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
@@ -53,12 +53,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 
         internal Dictionary<string, string> GetCustomData()
         {
-            return _customData;
+            return new Dictionary<string, string>(_customData);
         }
         
         internal void SetCustomData(Dictionary<string, string> customData)
         {
-            _customData = customData;
+            _customData = new Dictionary<string, string>(customData);
         }
 
         internal void SetCustomData(params (string, string)[] customData)

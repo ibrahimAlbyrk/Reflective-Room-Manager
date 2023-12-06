@@ -19,7 +19,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
         public RoomInfo(string roomName)
         {
             RoomName = roomName;
-            SceneName = "";
+            SceneName = string.Empty;
             
             MaxPlayers = 0;
             
