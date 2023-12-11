@@ -208,6 +208,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="roomName"></param>
         /// <param name="forced"></param>
         internal abstract void RemoveRoom(string roomName, bool forced = false);
+        
+        /// <summary>
+        /// It works on the server side. It deletes the specified Room and removes all customers from the room.
+        /// </summary>
+        /// <param name="room"></param>
+        /// <param name="forced"></param>
+        internal abstract void RemoveRoom(Room room, bool forced = false);
 
         /// <summary>
         /// It works on the server side. It performs the process of a client exiting from the server.

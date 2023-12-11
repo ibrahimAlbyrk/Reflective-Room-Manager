@@ -1,7 +1,6 @@
 ﻿using Mirror;
 using System.Linq;
 using UnityEngine;
-using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
@@ -36,14 +35,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             var room = new Room(roomName, maxPlayers, isServer);
 
-            var customData = new Dictionary<string, string>();
-            
-            for (var i = 0; i < roomInfo.CustomDataKeys.Count; i++)
-            {
-                customData.Add(roomInfo.CustomDataKeys[i], roomInfo.CustomDataValues[i]);
-            }
-            
-            room.SetCustomData(customData);
+            room.SetCustomData(roomInfo.CustomData);
             
             RoomListUtility.AddRoomToList(ref m_rooms, room);
             
@@ -55,8 +47,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 LoadRoom(room, roomInfo, () => JoinRoom(conn, room));
             }
             else
+            {
                 LoadRoom(room, roomInfo);
-            
+            }
+
             m_eventManager.Invoke_OnServerCreatedRoom(roomInfo);
         }
 
@@ -98,14 +92,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             foreach (var room in m_rooms.ToList())
             {
-                RemoveRoom(room.RoomName, forced);
+                RemoveRoom(room, forced);
             }
         }
 
-        internal override void RemoveRoom(string roomName, bool forced = false)
+        internal override void RemoveRoom(Room room, bool forced = false)
         {
-            var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
-            
             if (room == null)
             {
                 Debug.LogWarning($"There is no such room for remove");
@@ -126,7 +118,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             RoomListUtility.RemoveRoomToList(ref m_rooms, room);
             
-            RoomContainer.Listener.RemoveRoomListenerHandlers(roomName);
+            RoomContainer.Listener.RemoveRoomListenerHandlers(room.RoomName);
+        }
+
+        internal override void RemoveRoom(string roomName, bool forced = false)
+        {
+            var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
+            
+            RemoveRoom(room, forced);
         }
 
         internal override void ExitRoom(NetworkConnection conn, bool isDisconnected)
@@ -142,17 +141,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
             
-            if (exitedRoom.CurrentPlayers < 1 && !exitedRoom.IsServer)
-                RemoveRoom(exitedRoom.RoomName);
-            else
-                RoomListUtility.UpdateRoomToList(ref m_rooms,exitedRoom);
-            
-            RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
-
             if(!isDisconnected)
                 m_eventManager.Invoke_OnServerExitedClient(conn);
             else
                 m_eventManager.Invoke_OnServerDisconnectedClient(conn);
+            
+            if (exitedRoom.CurrentPlayers < 1 && !exitedRoom.IsServer)
+                RemoveRoom(exitedRoom);
+            else
+                RoomListUtility.UpdateRoomToList(ref m_rooms,exitedRoom);
+            
+            RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
         }
     }
 }
