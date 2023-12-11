@@ -30,12 +30,17 @@ Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to
 
 ---
 ## Features And Systems
-- Both single room and multi room system.
-- Configurable PhysicSimulator.
-- Moduler Advanced Singleton System for additive scenes
-- Modular collision system (designed for additive scenes and others)
-- Possibility to develop a room system in any design you want with the modular room system.
-- Modular and generic singleton system for room systems using additive scene design
-- A modular, convenient and comprehensive Scene Management system for additive and single scenes
-- Support for Additive Scenes with Physics Isolation (battle instances, levels, etc.)
-- Several complete Examples included. *(so soon)*
+
+| Feature                                 | Description                                                                                                                                                   
+|-----------------------------------------|------------------------------------------------------------------------------------------------|
+| **Configurable Room**                   | Both single room and multi room system                                                         |
+|  **Physics**                            | Configurable PhysicSimulator.                                                                  |
+|  **Singleton For Per Room**             | Moduler Advanced Singleton System for additive scenes                                          |
+|  **Collision**                          | Modular collision system (designed for additive scenes and others)                             |
+|  **Modularity for room system**         | Possibility to develop a room system in any design you want with the modular room system.      |           
+|  **Room Container**                     | Modular and generic singleton system for room systems using additive scene design              |
+|  **Scene Management**                   | A modular, convenient and comprehensive Scene Management system for additive and single scenes |
+|  **Physics Isolation**                  | Support for Additive Scenes with Physics Isolation (battle instances, levels, etc.)            |
+|  **Examples**                           | Several complete Examples included. *(so soon)*                                                |
+
+---
