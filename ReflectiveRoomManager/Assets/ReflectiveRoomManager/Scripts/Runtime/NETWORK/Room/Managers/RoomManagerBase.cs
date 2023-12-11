@@ -17,34 +17,34 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             InitializeRoomLoader();
 
             m_eventManager = new RoomEventManager();
-            
-            _networkConnectionHandler = new NetworkConnectionHandler();
-            _roomConnectionHandler = new RoomConnectionHandler();
-
             _sceneSynchronizer = new SceneSynchronizer();
 
             //SERVER SIDE
-            _networkConnectionHandler.OnStartServer(OnStartServer);
-            _networkConnectionHandler.OnStopServer(OnStopServer);
-            _networkConnectionHandler.OnServerConnect(OnServerConnect);
-            _networkConnectionHandler.OnServerDisconnect(OnServerDisconnect);
+            NetworkConnectionHandler.OnStartServer(OnStartServer);
+            NetworkConnectionHandler.OnStopServer(OnStopServer);
+            
+            NetworkConnectionHandler.OnStopServer(() => RemoveAllRoom(true));
+            
+            NetworkConnectionHandler.OnServerConnect(OnServerConnect);
+            NetworkConnectionHandler.OnServerDisconnect(OnServerDisconnect);
 
-            _roomConnectionHandler.OnServerCreateRoom(CreateRoom);
-            _roomConnectionHandler.OnServerJoinRoom(JoinRoom);
-            _roomConnectionHandler.OnServerExitRoom(ExitRoom);
+            RoomConnectionHandler.OnServerCreateRoom(CreateRoom);
+            RoomConnectionHandler.OnServerJoinRoom(JoinRoom);
+            RoomConnectionHandler.OnServerExitRoom(ExitRoom);
             
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
             
             //CLIENT SIDE
-            _networkConnectionHandler.OnStartClient(OnStartClient);
-            _networkConnectionHandler.OnStopClient(OnStopClient);
-            _networkConnectionHandler.OnClientConnect(OnClientConnect);
-            _networkConnectionHandler.OnClientDisconnect(OnClientDisconnect);
+            NetworkConnectionHandler.OnStartClient(OnStartClient);
+            NetworkConnectionHandler.OnStopClient(OnStopClient);
+
+            NetworkConnectionHandler.OnClientConnect(OnClientConnect);
+            NetworkConnectionHandler.OnClientDisconnect(OnClientDisconnect);
             
-            _roomConnectionHandler.OnClientRoomListAdd(AddRoomList);
-            _roomConnectionHandler.OnClientRoomListUpdate(UpdateRoomList);
-            _roomConnectionHandler.OnClientRoomListRemove(RemoveRoomList);
-            _roomConnectionHandler.OnClientConnectionMessage(GetConnectionMessageForClient);
+            RoomConnectionHandler.OnClientRoomListAdd(AddRoomList);
+            RoomConnectionHandler.OnClientRoomListUpdate(UpdateRoomList);
+            RoomConnectionHandler.OnClientRoomListRemove(RemoveRoomList);
+            RoomConnectionHandler.OnClientConnectionMessage(GetConnectionMessageForClient);
         }
     }
 }

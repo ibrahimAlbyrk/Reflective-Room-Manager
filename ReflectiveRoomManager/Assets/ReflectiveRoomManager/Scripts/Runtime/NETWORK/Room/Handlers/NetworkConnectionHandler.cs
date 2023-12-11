@@ -5,46 +5,46 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Handlers
 {
     using Connection.Manager;
     
-    public class NetworkConnectionHandler
+    internal static class NetworkConnectionHandler
     {
-        public void OnStartServer(Action callback)
+        internal static void OnStartServer(Action callback)
         {
-            ConnectionManager.networkConnections.OnStartedServer += callback;
+            ReflectiveConnectionManager.networkConnections.OnServerStarted_AddListener(callback);
         }
 
-        public void OnStopServer(Action callback)
+        internal static void OnStopServer(Action callback)
         {
-            ConnectionManager.networkConnections.OnStoppedServer += callback;
+            ReflectiveConnectionManager.networkConnections.OnServerStopped_AddListener(callback);
         }
 
-        public void OnServerConnect(Action<NetworkConnection> callback)
+        internal static void OnServerConnect(Action<NetworkConnection> callback)
         {
-            ConnectionManager.networkConnections.OnServerConnected += callback;
+            ReflectiveConnectionManager.networkConnections.OnServerConnected_AddListener(callback);
         }
 
-        public void OnServerDisconnect(Action<NetworkConnectionToClient> callback)
+        internal static void OnServerDisconnect(Action<NetworkConnectionToClient> callback)
         {
-            ConnectionManager.networkConnections.OnServerDisconnected += callback;
+            ReflectiveConnectionManager.networkConnections.OnServerDisconnected_AddListener(callback);
         }
 
-        public void OnStartClient(Action callback)
+        internal static void OnStartClient(Action callback)
         {
-            ConnectionManager.networkConnections.OnStartedClient += callback;
+            ReflectiveConnectionManager.networkConnections.OnClientStarted_AddListener(callback);
         }
 
-        public void OnStopClient(Action callback)
+        internal static void OnStopClient(Action callback)
         {
-            ConnectionManager.networkConnections.OnStoppedClient += callback;
+            ReflectiveConnectionManager.networkConnections.OnClientStopped_AddListener(callback);
         }
 
-        public void OnClientConnect(Action callback)
+        internal static void OnClientConnect(Action callback)
         {
-            ConnectionManager.networkConnections.OnClientConnected += callback;
+            ReflectiveConnectionManager.networkConnections.OnClientConnected_AddListener(callback);
         }
 
-        public void OnClientDisconnect(Action callback)
+        internal static void OnClientDisconnect(Action callback)
         {
-            ConnectionManager.networkConnections.OnClientDisconnected += callback;
+            ReflectiveConnectionManager.networkConnections.OnClientDisconnected_AddListener(callback);
         }
     }
 }

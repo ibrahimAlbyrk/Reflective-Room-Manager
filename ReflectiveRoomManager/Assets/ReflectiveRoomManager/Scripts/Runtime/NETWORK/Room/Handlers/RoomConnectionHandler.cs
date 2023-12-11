@@ -6,41 +6,41 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Handlers
     using Structs;
     using Connection.Manager;
     
-    public class RoomConnectionHandler
+    internal static class RoomConnectionHandler
     {
-        public void OnServerCreateRoom(Action<RoomInfo, NetworkConnectionToClient> callback)
+        internal static void OnServerCreateRoom(Action<RoomInfo, NetworkConnectionToClient> callback)
         {
-            ConnectionManager.roomConnections.OnServerCreateRoom += callback;
+            ReflectiveConnectionManager.roomConnections.OnServerCreateRoom_AddListener(callback);
         }
         
-        public void OnServerJoinRoom(Action<NetworkConnectionToClient, string> callback)
+        internal static void OnServerJoinRoom(Action<NetworkConnectionToClient, string> callback)
         {
-            ConnectionManager.roomConnections.OnServerJoinRoom += callback;
+            ReflectiveConnectionManager.roomConnections.OnServerJoinRoom_AddListener(callback);
         }
         
-        public void OnServerExitRoom(Action<NetworkConnectionToClient, bool>  callback)
+        internal static void OnServerExitRoom(Action<NetworkConnectionToClient, bool>  callback)
         {
-            ConnectionManager.roomConnections.OnServerExitRoom += callback;
+            ReflectiveConnectionManager.roomConnections.OnServerExitRoom_AddListener(callback);
         }
         
-        public void OnClientRoomListAdd(Action<RoomInfo> callback)
+        internal static void OnClientRoomListAdd(Action<RoomInfo> callback)
         {
-            ConnectionManager.roomConnections.OnClientRoomListAdd += callback;
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListAdd_AddListener(callback);
         }
         
-        public void OnClientRoomListUpdate(Action<RoomInfo> callback)
+        internal static void OnClientRoomListUpdate(Action<RoomInfo> callback)
         {
-            ConnectionManager.roomConnections.OnClientRoomListUpdate += callback;
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListUpdate_AddListener(callback);
         }
         
-        public void OnClientRoomListRemove(Action<RoomInfo> callback)
+        internal static void OnClientRoomListRemove(Action<RoomInfo> callback)
         {
-            ConnectionManager.roomConnections.OnClientRoomListRemove += callback;
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListRemove_AddListener(callback);
         }
         
-        public void OnClientConnectionMessage(Action<int> callback)
+        internal static void OnClientConnectionMessage(Action<int> callback)
         {
-            ConnectionManager.roomConnections.OnClientConnectionMessage += callback;
+            ReflectiveConnectionManager.roomConnections.OnClientConnectionMessage_AddListener(callback);
         }
     }
 }

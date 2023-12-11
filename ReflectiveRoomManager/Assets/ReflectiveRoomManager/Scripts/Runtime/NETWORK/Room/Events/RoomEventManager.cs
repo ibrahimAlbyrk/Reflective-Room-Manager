@@ -1,5 +1,6 @@
 ﻿using System;
 using Mirror;
+using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Events
 {
@@ -19,16 +20,28 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
         /// <summary>Called on the server when the client's connection is lost</summary>
         public event Action<NetworkConnection> OnServerDisconnectedRoom;
         
-        internal void Invoke_OnServerCreatedRoom(RoomInfo roomInfo) =>
+        internal void Invoke_OnServerCreatedRoom(RoomInfo roomInfo)
+        {
+            Debug.Log("OnServerCreatedRoom");
             OnServerCreatedRoom?.Invoke(roomInfo);
+        }
 
-        internal void Invoke_OnServerJoinedClient(NetworkConnection conn) =>
+        internal void Invoke_OnServerJoinedClient(NetworkConnection conn)
+        {
+            Debug.Log("OnServerJoinedRoom");
             OnServerJoinedRoom?.Invoke(conn);
+        }
 
-        internal void Invoke_OnServerExitedClient(NetworkConnection conn) =>
+        internal void Invoke_OnServerExitedClient(NetworkConnection conn)
+        {
+            Debug.Log("OnServerExitedRoom");
             OnServerExitedRoom?.Invoke(conn);
+        }
 
-        internal void Invoke_OnServerDisconnectedClient(NetworkConnection conn) =>
+        internal void Invoke_OnServerDisconnectedClient(NetworkConnection conn)
+        {
+            Debug.Log("OnServerDisconnectedClient");
             OnServerDisconnectedRoom?.Invoke(conn);
+        }
     }
 }
