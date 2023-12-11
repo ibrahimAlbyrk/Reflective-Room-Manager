@@ -1,6 +1,6 @@
 ﻿namespace REFLECTIVE.Runtime.NETWORK.Connection.Manager
 {
-    public static class ConnectionManager
+    public static class ReflectiveConnectionManager
     {
         public static RoomConnections roomConnections => _roomConnections ??= new RoomConnections();
 

@@ -72,9 +72,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private readonly List<RoomInfo> _roomListInfos = new();
 
         private IRoomLoader _roomLoader;
-        
-        private NetworkConnectionHandler _networkConnectionHandler;
-        private RoomConnectionHandler _roomConnectionHandler;
 
         private SceneSynchronizer _sceneSynchronizer;
 

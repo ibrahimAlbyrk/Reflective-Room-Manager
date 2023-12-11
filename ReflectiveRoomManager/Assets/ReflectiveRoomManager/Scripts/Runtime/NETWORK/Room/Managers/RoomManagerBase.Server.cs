@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     {
         protected virtual void OnStartServer()
         {
-            ConnectionManager.roomConnections.AddRegistersForServer();
+            ReflectiveConnectionManager.roomConnections.AddRegistersForServer();
         }
 
         protected virtual void OnStopServer()
@@ -18,7 +18,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnStartClient()
         {
-            ConnectionManager.roomConnections.AddRegistersForClient();
+            ReflectiveConnectionManager.roomConnections.AddRegistersForClient();
         }
 
         protected virtual void OnStopClient()
