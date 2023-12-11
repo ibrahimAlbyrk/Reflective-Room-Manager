@@ -1,8 +1,12 @@
 ![Banner](https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/assets/47694762/7c61e8fa-6162-493b-92eb-43b4bd7b8e88)
-[![Documentation](https://img.shields.io/badge/Docs-white)](https://reflective-roommanager.gitbook.io/docs)
-[![Mirror](https://img.shields.io/badge/Mirror-white)](https://reflective-roommanager.gitbook.io/docs)
-[![Roadmap](https://img.shields.io/badge/Roadmap-white)](https://trello.com/b/IyZs7NIi)
-[![Discord](https://img.shields.io/discord/1167179553836380270?style=social&logo=discord&label=Discord&labelColor=white&color=gray)](https://discord.gg/MMutVRg8Jg)
+<p align="center">
+  <a href="https://reflective-roommanager.gitbook.io/docs"><img src="https://img.shields.io/badge/docs-brightgreen.svg?style=for-the-badge&logo=gitbook&logoColor=white&colorA=000000&colorB=ffffff" alt="Documentation"></a>
+  <a href="https://github.com/MirrorNetworking/Mirror"><img src="https://img.shields.io/badge/mirror-brightgreen.svg?style=for-the-badge&logo=unity&colorA=000000&colorB=ffffff" alt="Mirror"></a>
+  <a href="https://trello.com/b/IyZs7NIi"><img src="https://img.shields.io/badge/roadmap-brightgreen.svg?style=for-the-badge&logo=trello&colorA=000000&colorB=ffffff" alt="Roadmap"></a>
+  <br>
+  <a href="https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/releases/latest"><img src="https://img.shields.io/badge/V1.0.0-brightgreen?style=for-the-badge&label=release&colorA=ffffff&colorB=gray" alt="release"></a>
+  <a href="https://discord.gg/MMutVRg8Jg"><img src="https://img.shields.io/discord/1167179553836380270?style=for-the-badge&label=Discord&labelColor=white&color=gray" alt="Discord"></a>
+</p>
 
 *No one changed the world by doing what the world told them*
 
