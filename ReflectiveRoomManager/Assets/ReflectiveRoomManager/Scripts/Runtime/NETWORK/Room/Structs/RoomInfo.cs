@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 {
@@ -13,9 +14,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 
         public List<int> ConnectionIds;
 
-        public List<string> CustomDataKeys;
-        public List<string> CustomDataValues;
-        
+        public Dictionary<string, string> CustomData;
+
         public RoomInfo(string roomName)
         {
             RoomName = roomName;
@@ -26,9 +26,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
             CurrentPlayers = 0;
             
             ConnectionIds = new List<int>();
-            
-            CustomDataKeys = new List<string>();
-            CustomDataValues = new List<string>();
+
+            CustomData = new Dictionary<string, string>();
         }
 
         public RoomInfo(string roomName, string sceneName, int maxPlayers)
@@ -42,8 +41,21 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
             
             ConnectionIds = new List<int>();
             
-            CustomDataKeys = new List<string>();
-            CustomDataValues = new List<string>();
+            CustomData = new Dictionary<string, string>();
+        }
+        
+        public RoomInfo(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData)
+        {
+            RoomName = roomName;
+            SceneName = sceneName;
+            
+            MaxPlayers = maxPlayers;
+            
+            CurrentPlayers = 0;
+            
+            ConnectionIds = new List<int>();
+            
+            CustomData = customData;
         }
     }
 }

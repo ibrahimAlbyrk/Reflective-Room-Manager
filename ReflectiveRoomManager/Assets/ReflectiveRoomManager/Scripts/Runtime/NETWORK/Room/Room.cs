@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
-namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
+namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Loader;
     using Container;
@@ -63,6 +63,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
 
         internal void SetCustomData(params (string, string)[] customData)
         {
+            _customData = new Dictionary<string, string>();
+            
             foreach (var (key, value) in customData)
             {
                 _customData.Add(key, value);

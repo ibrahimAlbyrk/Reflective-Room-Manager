@@ -39,7 +39,7 @@ namespace Example.Basic.Network.Room
         [ServerCallback]
         private void CreateLobbyPlayer(NetworkConnection conn)
         {
-            PlayerCreatorUtilities.ReplacePlayer(conn, _lobbyPlayerPrefab);
+            PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _lobbyPlayerPrefab);
         }
     }
 }

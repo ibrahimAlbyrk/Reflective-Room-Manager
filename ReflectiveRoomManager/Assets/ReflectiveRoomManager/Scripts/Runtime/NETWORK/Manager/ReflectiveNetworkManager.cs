@@ -15,14 +15,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnStartServer()
         {
-            ConnectionManager.networkConnections.OnStartedServer?.Invoke();
+            ReflectiveConnectionManager.networkConnections.OnServerStarted_Call();
             
             spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
         }
         
         public override void OnStartClient()
         {
-            ConnectionManager.networkConnections.OnStartedClient?.Invoke();
+            ReflectiveConnectionManager.networkConnections.OnClientStarted_Call();
             
             //If it is a host, we do not perform this operation.
             //The reason is that transactions are already being performed on the server.
@@ -39,12 +39,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnStopServer()
         {
-            ConnectionManager.networkConnections.OnStoppedServer?.Invoke();
+            ReflectiveConnectionManager.networkConnections.OnServerStopped_Call();
         }
 
         public override void OnStopClient()
         {
-            ConnectionManager.networkConnections.OnStoppedClient?.Invoke();
+            ReflectiveConnectionManager.networkConnections.OnClientStopped_Call();
         }
 
         #endregion
@@ -53,28 +53,26 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnServerConnect(NetworkConnectionToClient conn)
         {
-            ConnectionManager.networkConnections.OnServerConnected?.Invoke(conn);
+            ReflectiveConnectionManager.networkConnections.OnServerConnected_Call(conn);
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
         {
-            base.OnServerDisconnect(conn);
+            ReflectiveConnectionManager.networkConnections.OnServerDisconnected_Call(conn);
             
-            ConnectionManager.networkConnections.OnServerDisconnected?.Invoke(conn);
+            base.OnServerDisconnect(conn);
         }
 
         public override void OnClientConnect()
         {
             base.OnClientConnect();
             
-            ConnectionManager.networkConnections.OnClientConnected?.Invoke();
+            ReflectiveConnectionManager.networkConnections.OnClientConnected_Call();
         }
 
         public override void OnClientDisconnect()
         {
-            base.OnClientDisconnect();
-            
-            ConnectionManager.networkConnections.OnClientDisconnected?.Invoke();
+            ReflectiveConnectionManager.networkConnections.OnClientDisconnected_Call();
         }
 
         #endregion

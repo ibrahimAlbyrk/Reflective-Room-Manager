@@ -15,8 +15,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
                 RoomName = room.RoomName,
                 MaxPlayers = room.MaxPlayers,
                 CurrentPlayers = room.CurrentPlayers,
-                CustomDataKeys = room.GetCustomData().Keys.ToList(),
-                CustomDataValues = room.GetCustomData().Values.ToList(),
+                CustomData = room.GetCustomData(),
                 ConnectionIds = room.Connections.Select(conn => conn.connectionId).ToList()
             };
         }
