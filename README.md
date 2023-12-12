@@ -5,7 +5,7 @@
   <a href="https://trello.com/b/IyZs7NIi"><img src="https://img.shields.io/badge/roadmap-brightgreen.svg?style=for-the-badge&logo=trello&colorA=000000&colorB=ffffff" alt="Roadmap"></a>
   <br>
   <a href="https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-brightgreen.svg?style=for-the-badge&colorA=ffffff&colorB=gray" alt="License: MIT"></a>
-  <a href="https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/releases/latest"><img src="https://img.shields.io/badge/V1.0.0-brightgreen?style=for-the-badge&label=release&colorA=ffffff&colorB=gray" alt="release"></a>
+  <a href="https://github.com/ibrahimAlbyrk/Reflective-Room-Manager/releases/latest"><img src="https://img.shields.io/github/v/release/ibrahimAlbyrk/Reflective-Room-Manager?style=for-the-badge&label=release&colorA=ffffff&colorB=gray" alt="release"></a>
   <a href="https://discord.gg/MMutVRg8Jg"><img src="https://img.shields.io/discord/1167179553836380270?style=for-the-badge&label=Discord&labelColor=white&color=gray" alt="Discord"></a>
 </p>
 
