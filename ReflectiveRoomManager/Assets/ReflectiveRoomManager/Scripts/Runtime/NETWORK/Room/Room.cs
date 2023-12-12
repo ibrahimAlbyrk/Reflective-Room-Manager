@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using REFLECTIVE.Runtime.NETWORK.Connection.Manager;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -161,6 +162,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             void OnSceneLoaded(Scene loadedScene)
             {
+                ReflectiveConnectionManager.roomConnections.OnServerRoomSceneChanged.Call(loadedScene);
+                
                 HandleSceneLoadingAndUpdateState(loadedScene);
                 
                 SpawnPlayersToScene(loadedScene);

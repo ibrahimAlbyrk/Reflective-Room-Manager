@@ -6,10 +6,8 @@ using UnityEngine.SceneManagement;
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Loader;
-    using Scenes;
     using Events;
     using Structs;
-    using Handlers;
     
     public abstract partial class RoomManagerBase
     {
@@ -72,8 +70,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private readonly List<RoomInfo> _roomListInfos = new();
 
         private IRoomLoader _roomLoader;
-
-        private SceneSynchronizer _sceneSynchronizer;
 
         #endregion
     }

@@ -205,7 +205,7 @@ MonoBehaviour:
   syncInterval: 0
   _gamePlayerPrefab: {fileID: 4239554022242706235, guid: 12ff49afde7e5f64c9c887af499df93f, type: 3}
   _lobbyPlayerPrefab: {fileID: 4239554022242706235, guid: 61e7b7f97e3a72a47a24d897a18a7211, type: 3}
-  _useLobby: 1
+  _useLobby: 0
 --- !u!114 &697162654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -675,22 +675,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 4239554022242706235, guid: 61e7b7f97e3a72a47a24d897a18a7211, type: 3}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: autoCreatePlayer
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: spawnPrefabs.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1740755314672185775, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
-      propertyPath: spawnPrefabs.Array.data[0]
-      value: 
-      objectReference: {fileID: 4239554022242706235, guid: 12ff49afde7e5f64c9c887af499df93f, type: 3}
     - target: {fileID: 6022252970684794576, guid: 2f11edc813c99b14b94dde840ae76f6a, type: 3}
       propertyPath: m_Name
       value: NetworkManager

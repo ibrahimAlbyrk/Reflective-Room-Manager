@@ -17,13 +17,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             InitializeRoomLoader();
 
             m_eventManager = new RoomEventManager();
-            _sceneSynchronizer = new SceneSynchronizer();
 
             //SERVER SIDE
-            NetworkConnectionHandler.OnStartServer(OnStartServer);
-            NetworkConnectionHandler.OnStopServer(OnStopServer);
+            NetworkConnectionHandler.OnServerStart(OnStartServer);
+            NetworkConnectionHandler.OnServerStop(OnStopServer);
             
-            NetworkConnectionHandler.OnStopServer(() => RemoveAllRoom(true));
+            NetworkConnectionHandler.OnServerStop(() => RemoveAllRoom(true));
             
             NetworkConnectionHandler.OnServerConnect(OnServerConnect);
             NetworkConnectionHandler.OnServerDisconnect(OnServerDisconnect);
@@ -32,11 +31,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomConnectionHandler.OnServerJoinRoom(JoinRoom);
             RoomConnectionHandler.OnServerExitRoom(ExitRoom);
             
+            m_eventManager.OnServerJoinedRoom += RoomSceneSynchronizer.DoSyncScene;
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
-            
+
             //CLIENT SIDE
-            NetworkConnectionHandler.OnStartClient(OnStartClient);
-            NetworkConnectionHandler.OnStopClient(OnStopClient);
+            NetworkConnectionHandler.OnClientStart(OnStartClient);
+            NetworkConnectionHandler.OnClientStop(OnStopClient);
 
             NetworkConnectionHandler.OnClientConnect(OnClientConnect);
             NetworkConnectionHandler.OnClientDisconnect(OnClientDisconnect);

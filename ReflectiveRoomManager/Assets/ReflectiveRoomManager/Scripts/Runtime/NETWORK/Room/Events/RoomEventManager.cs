@@ -1,6 +1,5 @@
 ﻿using System;
 using Mirror;
-using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Events
 {
@@ -22,25 +21,29 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
         
         internal void Invoke_OnServerCreatedRoom(RoomInfo roomInfo)
         {
-            Debug.Log("OnServerCreatedRoom");
+            // Debug.Log("OnServerCreatedRoom");
+            
             OnServerCreatedRoom?.Invoke(roomInfo);
         }
 
         internal void Invoke_OnServerJoinedClient(NetworkConnection conn)
         {
-            Debug.Log("OnServerJoinedRoom");
+            // Debug.Log("OnServerJoinedRoom");
+            
             OnServerJoinedRoom?.Invoke(conn);
         }
 
         internal void Invoke_OnServerExitedClient(NetworkConnection conn)
         {
-            Debug.Log("OnServerExitedRoom");
+            // Debug.Log("OnServerExitedRoom");
+            
             OnServerExitedRoom?.Invoke(conn);
         }
 
         internal void Invoke_OnServerDisconnectedClient(NetworkConnection conn)
         {
-            Debug.Log("OnServerDisconnectedClient");
+            // Debug.Log("OnServerDisconnectedClient");
+            
             OnServerDisconnectedRoom?.Invoke(conn);
         }
     }

@@ -140,18 +140,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 
                 return;
             }
-            
-            if(!isDisconnected)
-                m_eventManager.Invoke_OnServerExitedClient(conn);
-            else
-                m_eventManager.Invoke_OnServerDisconnectedClient(conn);
-            
+
             if (exitedRoom.CurrentPlayers < 1 && !exitedRoom.IsServer)
                 RemoveRoom(exitedRoom);
             else
                 RoomListUtility.UpdateRoomToList(ref m_rooms,exitedRoom);
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
+            
+            if(!isDisconnected)
+                m_eventManager.Invoke_OnServerExitedClient(conn);
+            else
+                m_eventManager.Invoke_OnServerDisconnectedClient(conn);
         }
     }
 }

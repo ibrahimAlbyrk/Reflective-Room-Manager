@@ -3,6 +3,7 @@
 namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
 {
     using Structs;
+    using Connection.Manager;
     using SceneManagement.Manager;
     
     public class SceneRoomLoader : IRoomLoader
@@ -14,6 +15,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
                 {
                     room.Scene = scene;
                     onLoaded?.Invoke();
+                    
+                    ReflectiveConnectionManager.roomConnections.OnServerRoomSceneLoaded.Call(scene);
                 });
         }
 

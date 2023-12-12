@@ -2,14 +2,9 @@
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 {
-    public class SceneSynchronizer
+    internal static class RoomSceneSynchronizer
     {
-        public SceneSynchronizer()
-        {
-            RoomManagerBase.Instance.Events.OnServerJoinedRoom += DoSyncScene;
-        }
-
-        private static void DoSyncScene(NetworkConnection conn)
+        internal static void DoSyncScene(NetworkConnection conn)
         {
             var room = RoomManagerBase.Instance.GetRoomOfPlayer(conn);
 

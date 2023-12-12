@@ -6,7 +6,7 @@ using REFLECTIVE.Runtime.Physic.Collision.D3;
 namespace Example.Basic.Character
 {
     using Game;
-    
+
     public class SimpleCharacterController : NetworkBehaviour
     {
         [SyncVar] public int ID;
