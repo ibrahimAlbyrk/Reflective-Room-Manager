@@ -219,9 +219,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             foreach (var conn in Connections)
             {
-                var player = PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, NetworkManager.singleton.playerPrefab);
-                
-                SceneManager.MoveGameObjectToScene(player, loadedScene);
+                PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, NetworkManager.singleton.playerPrefab,
+                    spawnedPlayer =>
+                    {
+                        SceneManager.MoveGameObjectToScene(spawnedPlayer, loadedScene);   
+                    });
             }
         }
 
