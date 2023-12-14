@@ -89,7 +89,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
             //If you need it to go to a different scene, you can change it.
             var scene = room?.Scene ?? SceneManager.GetActiveScene();
             
-            var player = NetworkSpawnUtilities.SpawnObjectForScene(scene, prefab, Vector3.zero, Quaternion.identity);
+            var player = NetworkSpawnUtilities.SpawnObjectForScene(scene, prefab, Vector3.zero, Quaternion.identity, conn);
 
             return player;
         }
