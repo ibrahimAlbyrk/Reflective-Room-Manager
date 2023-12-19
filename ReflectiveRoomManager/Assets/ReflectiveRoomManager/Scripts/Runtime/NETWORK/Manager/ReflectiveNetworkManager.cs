@@ -11,13 +11,28 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
     [AddComponentMenu("REFLECTIVE/Reflective Network Manager")]
     public class ReflectiveNetworkManager : NetworkManager
     {
+        #region Properties For SpawnablePrefabs
+
+        [Tooltip("When it is active, it searches for a folder named Spawnable Prefabs in the resources folder and loads all objects in it.")]
+        [HideInInspector] public bool IsAutoPrefabSearcher;
+        
+        [Tooltip("When it is active, it allows you to select a folder and the objects in the folder are loaded.")]
+        [HideInInspector] public bool IsFolderSearch;
+        
+        [HideInInspector] public string SpawnablePrefabsPath;
+
+        #endregion
+        
         #region Start & Stop Callbacks
 
         public override void OnStartServer()
         {
             ReflectiveConnectionManager.networkConnections.OnServerStarted.Call();
-            
-            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+
+            if (IsAutoPrefabSearcher)
+            {
+                spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+            }
         }
         
         public override void OnStartClient()
@@ -28,12 +43,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
             //The reason is that transactions are already being performed on the server.
             if (NetworkServer.active)
                 return;
-            
-            spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
 
-            foreach (var prefab in spawnPrefabs)
+            if (IsAutoPrefabSearcher)
             {
-                NetworkClient.RegisterPrefab(prefab);
+                spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
+
+                foreach (var prefab in spawnPrefabs)
+                {
+                    NetworkClient.RegisterPrefab(prefab);
+                }
             }
         }
 
@@ -44,7 +62,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnStopClient()
         {
-            ReflectiveConnectionManager.networkConnections.OnClientStopped.Call();;
+            ReflectiveConnectionManager.networkConnections.OnClientStopped.Call();
         }
 
         #endregion
