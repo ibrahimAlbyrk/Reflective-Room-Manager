@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Linq;
 using System.Collections.Generic;
-using Mirror;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
@@ -53,9 +51,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.RequestJoinRoom(roomName);
         }
 
-        public static void ExitRoom()
+        public static void ExitRoom(bool isDisconnected)
         {
-            RoomManagerBase.RequestExitRoom();
+            RoomManagerBase.RequestExitRoom(isDisconnected);
         }
 
         #endregion
