@@ -7,15 +7,13 @@ namespace REFLECTIVE.Editor.Physic.Collision
 {
     using Utilities;
     
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(CollisionCircle))]
     public class CollisionCircleEditor : CollisionBaseEditor<CollisionCircle>
     {
         protected override void DrawInspector(CollisionCircle myTarget)
         {
             EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
-            
-            myTarget.Center = EditorGUILayout.Vector2Field("Center: ", myTarget.Center);
-            myTarget.Radius = EditorGUILayout.FloatField("Radius: ", myTarget.Radius);
         }
 
         protected override void DrawCollision(CollisionCircle myTarget)

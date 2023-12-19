@@ -54,8 +54,6 @@ namespace REFLECTIVE.Editor.Physic.Collision.Utilities
             where TCollision : Component
         {
             DrawEditColliderButton(ref collision.Editable);
-
-            DrawGarbageField(collision);
         }
     }
 }

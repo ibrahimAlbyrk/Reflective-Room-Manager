@@ -8,6 +8,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
 {
     using Utilities;
     
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(CollisionCapsule3D))]
     public class CollisionCapsule3DEditor : CollisionBaseEditor<CollisionCapsule3D>
     {
@@ -26,10 +27,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
         protected override void DrawInspector(CollisionCapsule3D myTarget)
         {
             EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
-
-            myTarget.Center = EditorGUILayout.Vector3Field("Center: ", myTarget.Center);
-            myTarget.Radius = EditorGUILayout.FloatField("Radius: ", myTarget.Radius);
-            myTarget.Height = EditorGUILayout.FloatField("Height: ", myTarget.Height);
+            
             myTarget.DirType = EditorGUILayout.Popup("Direction: ", myTarget.DirType, dirTypeOptions);
 
             myTarget.Dirs = myTarget.DirType switch

@@ -3,6 +3,8 @@ using REFLECTIVE.Runtime.Physic.Collision;
 
 namespace REFLECTIVE.Editor.Physic.Collision
 {
+    using Editor.Utilities;
+    
     [CanEditMultipleObjects]
     public abstract class CollisionBaseEditor<TargetType> : UnityEditor.Editor where TargetType : UnityEngine.Object
     {
@@ -11,6 +13,8 @@ namespace REFLECTIVE.Editor.Physic.Collision
             var _target = (TargetType)target;
             
             DrawInspector(_target);
+            
+            CustomEditorUtilities.DrawDefaultInspector(serializedObject);
             
             Undo.RecordObject(_target, "Change Collider Value");
             

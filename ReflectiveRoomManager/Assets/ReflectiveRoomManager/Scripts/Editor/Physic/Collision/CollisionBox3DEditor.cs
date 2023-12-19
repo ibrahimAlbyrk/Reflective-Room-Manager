@@ -6,15 +6,13 @@ namespace REFLECTIVE.Editor.Physic.Collision
 {
     using Utilities;
     
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(CollisionBox3D))]
     public class CollisionBox3DEditor : CollisionBaseEditor<CollisionBox3D>
     {
         protected override void DrawInspector(CollisionBox3D myTarget)
         {
             EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
-            
-            myTarget.Center = EditorGUILayout.Vector3Field("Center: ", myTarget.Center);
-            myTarget.Size = EditorGUILayout.Vector3Field("Size: ", myTarget.Size);
         }
         
         protected override void DrawCollision(CollisionBox3D myTarget)
