@@ -51,6 +51,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.RequestJoinRoom(roomName);
         }
 
+        public static void ExitRoom()
+        {
+            RoomManagerBase.RequestExitRoom();
+        }
+        
         public static void ExitRoom(bool isDisconnected)
         {
             RoomManagerBase.RequestExitRoom(isDisconnected);
