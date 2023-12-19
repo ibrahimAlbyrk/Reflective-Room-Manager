@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 {
+    using Utilities;
+    
     using Runtime.NETWORK.Room;
     using Runtime.NETWORK.Room.Loader;
     using Runtime.NETWORK.Room.Service;
@@ -27,6 +29,8 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 
         public override void OnInspectorGUI()
         {
+            CustomEditorUtilities.DrawReflectionTitle("REFLECTIVE ROOM MANAGER");
+            
             var roomManager = (RoomManagerBase)target;
 
             if (!roomManager.gameObject.TryGetComponent(out SceneInterestManagement _))
@@ -44,7 +48,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                 GUI.enabled = false;
             }
             
-            DrawDefaultInspector(); // Draw the default inspector
+            CustomEditorUtilities.DrawDefaultInspector(serializedObject);
             
             GUI.enabled = true;
 
