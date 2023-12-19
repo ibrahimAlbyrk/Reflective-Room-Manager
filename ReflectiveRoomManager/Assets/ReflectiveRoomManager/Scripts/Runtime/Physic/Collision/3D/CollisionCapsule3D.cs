@@ -4,11 +4,10 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
 {
     public class CollisionCapsule3D : Collision3D
     {
-        [Header("Settings")]
         [SerializeField] private float _radius = .5f;
         [SerializeField] private float _height  = 2;
 
-        public int DirType = 1;
+        public int DirType { get; set; } = 1;
 
         public Vector3[] Dirs { get; set; } =
         {

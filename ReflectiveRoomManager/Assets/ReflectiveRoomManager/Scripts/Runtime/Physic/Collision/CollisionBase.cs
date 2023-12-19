@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.Physic.Collision
 {
-    [DisallowMultipleComponent]
     public abstract class CollisionBase<TCollider, PScene> : MonoBehaviour, IEditableForEditor where TCollider : Component
     {
         public event Action<TCollider> OnCollisionEnter;
@@ -14,11 +13,9 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         
         [HideInInspector] public bool Editable;
 
-        [Header("Configuration")]
         [SerializeField] protected LayerMask m_layer = ~0;
         [SerializeField] public int GarbageColliderSize = 3;
 
-        [Header("Settings")]
         [SerializeField] public Vector3 Center;
         
         protected PScene m_physicsScene;

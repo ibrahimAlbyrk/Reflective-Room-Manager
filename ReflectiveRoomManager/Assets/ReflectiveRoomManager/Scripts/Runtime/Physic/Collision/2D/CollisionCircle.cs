@@ -6,7 +6,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
     
     public class CollisionCircle : Collision2D
     {
-        [Header("Settings")]
         [SerializeField] private float _radius = .5f;
         
         public float Radius

@@ -4,10 +4,9 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
 {
     public class CollisionCapsule2D : Collision2D
     {
-        [Header("Settings")]
         [SerializeField] private Vector2 _size = new (.5f, 2);
 
-        public int DirType = 1;
+        public int DirType { get; set; } = 1;
 
         public CapsuleDirection2D Dir { get; set; } = CapsuleDirection2D.Vertical;
 

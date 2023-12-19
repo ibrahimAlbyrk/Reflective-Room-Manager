@@ -6,7 +6,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
     
     public class CollisionSphere : Collision3D
     {
-        [Header("Settings")]
         [SerializeField] private float _radius = .5f;
         
         public float Radius

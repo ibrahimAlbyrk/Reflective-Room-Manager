@@ -4,7 +4,6 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D3
 {
     public class CollisionBox3D : Collision3D
     {
-        [Header("Settings")]
         [SerializeField] private Vector3 _size = new(1, 1, 1);
 
         public Vector3 Size
