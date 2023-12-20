@@ -70,11 +70,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             if (GUILayout.Button("Create Room"))
             {
                 var roomInfo = new RoomInfo
-                (
-                    _roomNameField,
-                    RoomManagerBase.Instance.RoomScene,
-                    int.TryParse(_maxPlayers, out var result) ? result : 2
-                );
+                {
+                    RoomName = _roomNameField,
+                    SceneName = RoomManagerBase.Instance.RoomScene,
+                    MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2
+                };
                 
                 if(_isServer)
                     RoomServer.CreateRoom(roomInfo);

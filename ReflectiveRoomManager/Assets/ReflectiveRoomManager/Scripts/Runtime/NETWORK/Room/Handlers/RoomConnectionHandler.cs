@@ -38,9 +38,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Handlers
             ReflectiveConnectionManager.roomConnections.OnClientRoomListRemove.AddListener(callback);
         }
         
-        internal static void OnClientConnectionMessage(Action<int> callback)
+        internal static void OnClientRoomIDMessage(Action<uint> callback)
         {
-            ReflectiveConnectionManager.roomConnections.OnClientConnectionMessage.AddListener(callback);
+            ReflectiveConnectionManager.roomConnections.OnClientRoomIDMessage.AddListener(callback);
         }
     }
 }

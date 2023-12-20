@@ -136,7 +136,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             if (NetworkClient.connection == null) return;
 
-            var roomInfo = new RoomInfo(roomName);
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName
+            };
 
             var serverRoomMessage = new ServerRoomMessage(ServerRoomState.Join, roomInfo);
 

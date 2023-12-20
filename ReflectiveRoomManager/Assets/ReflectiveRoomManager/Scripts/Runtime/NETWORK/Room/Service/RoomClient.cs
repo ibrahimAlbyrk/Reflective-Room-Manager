@@ -28,21 +28,38 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
                 data.Add(key, value);
             }
 
-            var roomInfo = new RoomInfo(roomName, sceneName, maxPlayers, data);
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName,
+                SceneName = sceneName,
+                MaxPlayers = maxPlayers,
+                CustomData = data
+            };
 
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }
         
         public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData)
         {
-            var roomInfo = new RoomInfo(roomName, sceneName, maxPlayers, customData);
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName,
+                SceneName = sceneName,
+                MaxPlayers = maxPlayers,
+                CustomData = customData
+            };
 
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }
 
         public static void CreateRoom(string roomName, string sceneName, int maxPlayers)
         {
-            var roomInfo = new RoomInfo(roomName, sceneName, maxPlayers);
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName,
+                SceneName = sceneName,
+                MaxPlayers = maxPlayers,
+            };
             
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }

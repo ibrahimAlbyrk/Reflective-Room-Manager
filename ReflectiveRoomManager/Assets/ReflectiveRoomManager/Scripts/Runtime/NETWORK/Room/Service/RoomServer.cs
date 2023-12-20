@@ -1,4 +1,5 @@
-﻿using Mirror;
+﻿using System.Collections.Generic;
+using Mirror;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
@@ -12,9 +13,52 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         {
             RoomManagerBase.Instance?.CreateRoom(roomInfo);
         }
-        
+
         public static void CreateRoom(NetworkConnectionToClient conn, RoomInfo roomInfo)
         {
+            RoomManagerBase.Instance?.CreateRoom(roomInfo, conn);
+        }
+
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
+        {
+            CreateRoom(null, roomName, sceneName, maxPlayers, customData);
+        }
+
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = default)
+        {
+            CreateRoom(null, roomName, sceneName, maxPlayers, customData);
+        }
+
+        public static void CreateRoom(NetworkConnectionToClient conn, string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
+        {
+            var data = new Dictionary<string, string>();
+
+            foreach (var (key, value) in customData)
+            {
+                data.Add(key, value);
+            }
+            
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName,
+                SceneName = sceneName,
+                MaxPlayers = maxPlayers,
+                CustomData = data
+            };
+            
+            RoomManagerBase.Instance?.CreateRoom(roomInfo, conn);
+        }
+
+        public static void CreateRoom(NetworkConnectionToClient conn, string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = default)
+        {
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName,
+                SceneName = sceneName,
+                MaxPlayers = maxPlayers,
+                CustomData = customData
+            };
+            
             RoomManagerBase.Instance?.CreateRoom(roomInfo, conn);
         }
 
