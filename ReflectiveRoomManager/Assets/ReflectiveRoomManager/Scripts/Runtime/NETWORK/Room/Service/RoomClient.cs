@@ -19,6 +19,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         
         #region Transaction Methods
 
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers)
+        {
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName,
+                SceneName = sceneName,
+                MaxPlayers = maxPlayers,
+            };
+            
+            RoomManagerBase.RequestCreateRoom(roomInfo);
+        }
+
         public static void CreateRoom(string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
         {
             var data = new Dictionary<string, string>();
@@ -38,7 +50,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }
-        
+
         public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData)
         {
             var roomInfo = new RoomInfo
@@ -52,18 +64,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }
 
-        public static void CreateRoom(string roomName, string sceneName, int maxPlayers)
-        {
-            var roomInfo = new RoomInfo
-            {
-                RoomName = roomName,
-                SceneName = sceneName,
-                MaxPlayers = maxPlayers,
-            };
-            
-            RoomManagerBase.RequestCreateRoom(roomInfo);
-        }
-        
         public static void JoinRoom(string roomName)
         {
             RoomManagerBase.RequestJoinRoom(roomName);
