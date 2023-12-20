@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using UnityEngine;
 using System.Collections.Generic;
+using REFLECTIVE.Runtime.Identifier;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -65,6 +66,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected RoomEventManager m_eventManager;
 
         protected List<Room> m_rooms = new();
+        
+        protected UniqueIdentifier m_uniqueIdentifier;
 
         private static RoomManagerBase _singleton;
         private readonly List<RoomInfo> _roomListInfos = new();

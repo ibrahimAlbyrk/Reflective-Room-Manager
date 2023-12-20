@@ -5,6 +5,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Scenes;
     using Events;
     using Handlers;
+    using Identifier;
 
     [DisallowMultipleComponent]
     public abstract partial class RoomManagerBase : MonoBehaviour
@@ -18,6 +19,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             m_eventManager = new RoomEventManager();
 
+            m_uniqueIdentifier = new UniqueIdentifier(8);
+
             //SERVER SIDE
             NetworkConnectionHandler.OnServerStart(OnStartServer);
             NetworkConnectionHandler.OnServerStop(OnStopServer);
@@ -30,7 +33,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomConnectionHandler.OnServerCreateRoom(CreateRoom);
             RoomConnectionHandler.OnServerJoinRoom(JoinRoom);
             RoomConnectionHandler.OnServerExitRoom(ExitRoom);
-            
+
+            m_eventManager.OnServerJoinedRoom += SendRoomIDToClient;
             m_eventManager.OnServerJoinedRoom += RoomSceneSynchronizer.DoSyncScene;
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
 
@@ -44,7 +48,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RoomConnectionHandler.OnClientRoomListAdd(AddRoomList);
             RoomConnectionHandler.OnClientRoomListUpdate(UpdateRoomList);
             RoomConnectionHandler.OnClientRoomListRemove(RemoveRoomList);
-            RoomConnectionHandler.OnClientConnectionMessage(GetConnectionMessageForClient);
+
+            RoomConnectionHandler.OnClientRoomIDMessage(GetRoomIDForClient);
         }
     }
 }

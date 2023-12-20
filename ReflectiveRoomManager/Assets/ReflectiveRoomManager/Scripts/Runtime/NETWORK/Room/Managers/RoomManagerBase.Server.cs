@@ -28,8 +28,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected virtual void OnServerConnect(NetworkConnection conn)
         {
             SendUpdateRoomListForClient(conn);
-
-            SendConnectionMessageToClient(conn);
         }
 
         protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)

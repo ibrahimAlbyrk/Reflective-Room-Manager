@@ -66,13 +66,35 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         /// <summary>
+        /// The function returns information about the room to which id belongs
+        /// </summary>
+        /// <remarks>Only works on server</remarks>
+        /// <param name="ID"></param>
+        /// <returns>Information about the room where the "connection" is located.</returns>
+        public Room GetRoomOfID(uint ID)
+        {
+            return m_rooms.FirstOrDefault(room => room.ID == ID);
+        }
+        
+        /// <summary>
+        /// The function returns information about the room info to which id belongs
+        /// </summary>
+        /// <remarks>Only works on client</remarks>
+        /// <param name="ID"></param>
+        /// <returns>Information about the room info where the "connection" is located.</returns>
+        public RoomInfo GetRoomInfoOfID(uint ID)
+        {
+            return _roomListInfos.FirstOrDefault(room => room.ID == ID);
+        }
+
+        /// <summary>
         /// The function return information about the room where the "connection ID" is located
         /// </summary>
         /// <remarks>Only works on client</remarks>
         /// <returns>Information about the room where the "connection ID" is located.</returns>
         public RoomInfo GetRoomOfClient()
         {
-            return _roomListInfos.FirstOrDefault(room => room.ConnectionIds.Any(id => id == RoomClient.ID));
+            return _roomListInfos.FirstOrDefault(room => room.ID == RoomClient.CurrentRoomID);
         }
 
         /// <summary>
@@ -196,6 +218,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="conn"></param>
         /// <param name="roomName"></param>
         internal abstract void JoinRoom(NetworkConnection conn, string roomName);
+
+        /// <summary>
+        /// Joins the client into the room with the specified room' ID
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="roomID"></param>
+        internal abstract void JoinRoom(NetworkConnection conn, uint roomID);
 
         /// <summary>
         /// It works on the server side. Deletes all rooms and removes all customers from the rooms.

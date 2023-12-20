@@ -4,7 +4,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 {
     internal static class RoomSceneSynchronizer
     {
-        internal static void DoSyncScene(NetworkConnection conn)
+        internal static void DoSyncScene(NetworkConnection conn, uint roomID)
         {
             var room = RoomManagerBase.Instance.GetRoomOfPlayer(conn);
 

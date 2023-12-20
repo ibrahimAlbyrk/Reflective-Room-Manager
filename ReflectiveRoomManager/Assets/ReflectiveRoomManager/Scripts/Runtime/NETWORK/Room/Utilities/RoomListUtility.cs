@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
 {
@@ -12,11 +11,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
         {
             return new RoomInfo
             {
+                ID = room.ID,
                 RoomName = room.RoomName,
                 MaxPlayers = room.MaxPlayers,
                 CurrentPlayers = room.CurrentPlayers,
-                CustomData = room.GetCustomData(),
-                ConnectionIds = room.Connections.Select(conn => conn.connectionId).ToList()
+                CustomData = room.GetCustomData()
             };
         }
         

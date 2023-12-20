@@ -1,8 +1,8 @@
-﻿using Mirror;
+﻿using System;
+using Mirror;
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
-using REFLECTIVE.Runtime.NETWORK.Connection.Manager;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -10,14 +10,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Loader;
     using Container;
     using Player.Utilities;
+    using Connection.Manager;
     using SceneManagement.Manager;
 
     /// <summary>
     /// Represents a room in a networked game session.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class Room
     {
+        public uint ID;
+        
         public bool IsServer;
         
         public string RoomName;

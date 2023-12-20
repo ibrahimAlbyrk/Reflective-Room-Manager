@@ -10,9 +10,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         #region Public Variables
 
         /// <summary>
-        /// Connection ID of the client connecting to the room
+        /// ID of the room where the client is joined.
+        /// <remarks>Returns -1 if the client is not in the room</remarks>
         /// </summary>
-        public static int ID;
+        public static uint CurrentRoomID;
 
         #endregion
         

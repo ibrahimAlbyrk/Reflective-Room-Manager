@@ -23,7 +23,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         public readonly ConnectionEvent<RoomInfo> OnClientRoomListUpdate = new();
         public readonly ConnectionEvent<RoomInfo> OnClientRoomListRemove = new();
         
-        public readonly ConnectionEvent<int> OnClientConnectionMessage = new();
+        public readonly ConnectionEvent<uint> OnClientRoomIDMessage = new(false);
         
         public readonly ConnectionEvent OnClientCreatedRoom = new(false);
         public readonly ConnectionEvent OnClientJoinedRoom = new(false);
@@ -40,7 +40,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         {
             NetworkClient.RegisterHandler<ClientRoomMessage>(OnReceivedRoomMessageViaClient);
             NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
-            NetworkClient.RegisterHandler<ClientConnectionMessage>(OnReceivedConnectionMessageViaClient);
+            NetworkClient.RegisterHandler<ClientRoomIDMessage>(OnReceivedRoomIDViaClient);
         }
 
         private void OnRoomListChangeForClient(RoomListChangeMessage msg)
@@ -65,9 +65,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         /// Gets the connection information of the client connecting to the server
         /// </summary>
         /// <param name="msg"></param>
-        private void OnReceivedConnectionMessageViaClient(ClientConnectionMessage msg)
+        private void OnReceivedRoomIDViaClient(ClientRoomIDMessage msg)
         {
-            OnClientConnectionMessage.Call(msg.ConnectionID);
+            OnClientRoomIDMessage.Call(msg.RoomID);
         }
         
         /// <summary>

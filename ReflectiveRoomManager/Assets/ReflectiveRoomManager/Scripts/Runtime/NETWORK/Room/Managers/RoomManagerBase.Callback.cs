@@ -10,13 +10,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     
     public abstract partial class RoomManagerBase
     {
-        private static void GetConnectionMessageForClient(int connectionID) => RoomClient.ID = connectionID;
+        private static void GetRoomIDForClient(uint roomID) => RoomClient.CurrentRoomID = roomID;
 
-        private static void SendConnectionMessageToClient(NetworkConnection conn)
+        private static void SendRoomIDToClient(NetworkConnection conn, uint roomID)
         {
-            conn.Send(new ClientConnectionMessage
+            conn.Send(new ClientRoomIDMessage
             {
-                ConnectionID = conn.connectionId
+                RoomID = roomID
             });
         }
 

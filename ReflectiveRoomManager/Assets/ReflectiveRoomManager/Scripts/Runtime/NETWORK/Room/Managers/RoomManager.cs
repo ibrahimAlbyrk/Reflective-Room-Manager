@@ -33,7 +33,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             var isServer = conn is null;
 
-            var room = new Room(roomName, maxPlayers, isServer);
+            var room = new Room(roomName, maxPlayers, isServer)
+            {
+                ID = m_uniqueIdentifier.CreateID()
+            };
 
             room.SetCustomData(roomInfo.CustomData);
             
@@ -78,7 +81,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
 
-            m_eventManager.Invoke_OnServerJoinedClient(conn);
+            m_eventManager.Invoke_OnServerJoinedClient(conn, room.ID);
         }
         
         internal override void JoinRoom(NetworkConnection conn, string roomName)
@@ -86,6 +89,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
 
            JoinRoom(conn, room);
+        }
+
+        internal override void JoinRoom(NetworkConnection conn, uint roomID)
+        {
+            var room = m_rooms.FirstOrDefault(r => r.ID == roomID);
+            
+            JoinRoom(conn, room);
         }
 
         internal override void RemoveAllRoom(bool forced = false)
