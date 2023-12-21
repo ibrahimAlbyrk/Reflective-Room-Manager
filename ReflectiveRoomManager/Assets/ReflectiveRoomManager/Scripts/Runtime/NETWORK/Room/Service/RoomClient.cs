@@ -26,6 +26,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
                 RoomName = roomName,
                 SceneName = sceneName,
                 MaxPlayers = maxPlayers,
+                CustomData = new Dictionary<string, string>()
             };
             
             RoomManagerBase.RequestCreateRoom(roomInfo);
@@ -58,7 +59,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
                 RoomName = roomName,
                 SceneName = sceneName,
                 MaxPlayers = maxPlayers,
-                CustomData = customData
+                CustomData = customData ?? new Dictionary<string, string>()
             };
 
             RoomManagerBase.RequestCreateRoom(roomInfo);

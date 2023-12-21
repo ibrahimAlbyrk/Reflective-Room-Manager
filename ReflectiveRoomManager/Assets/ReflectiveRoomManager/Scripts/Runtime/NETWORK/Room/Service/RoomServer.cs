@@ -24,8 +24,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             CreateRoom(null, roomName, sceneName, maxPlayers, customData);
         }
 
-        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = default)
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = null)
         {
+            customData ??= new Dictionary<string, string>();
+
             CreateRoom(null, roomName, sceneName, maxPlayers, customData);
         }
 
@@ -49,8 +51,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.Instance?.CreateRoom(roomInfo, conn);
         }
 
-        public static void CreateRoom(NetworkConnectionToClient conn, string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = default)
+        public static void CreateRoom(NetworkConnectionToClient conn, string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = null)
         {
+            customData ??= new Dictionary<string, string>();
+            
             var roomInfo = new RoomInfo
             {
                 RoomName = roomName,
