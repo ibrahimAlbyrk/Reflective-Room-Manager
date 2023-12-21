@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 770b51866a01443895ef45cc17779e76, type: 3}
+  m_Name: ShinkingArea_MapGenerator_SO
+  m_EditorClassIdentifier: Assembly-CSharp:_Project.Scripts.Game:MapGeneratorData
+  GameAreaRadius: 1000
+  AIPrefabs:
+  - {fileID: 3415335726005022911, guid: bd96e4e9d82995a4cb006ced5eb303f1, type: 3}
+  AIFuelStationCountRange: {x: 0, y: 0}
+  AIFuelStationSpawnRange: 50
+  AIFuelStationPatrolRange: 250
+  AIFuelStationDetectionRange: 200
+  AIAreaCountRange: {x: 10, y: 20}
+  AIAreaPatronRange: 700
+  AIAreaDetectionRange: 300
+  EnvironmentPrefabs:
+  - {fileID: 785978361735331981, guid: 922af1eb9048daa4d926e0ff16c0d834, type: 3}
+  - {fileID: 8567117118561283414, guid: 6a658eca879b04a479c5bda60052d85c, type: 3}
+  - {fileID: 5342654810793714146, guid: 125aa563173ada949b560282d2d578e6, type: 3}
+  - {fileID: 3030658056225912414, guid: d9d76fce2b7f1e540ade4a37e5ffcfa8, type: 3}
+  EnvironmentMinSpawnRange: 2500
+  EnvironmentMaxSpawnRange: 7000
+  EnvironmentCount: 20
+  MeteorPrefabs:
+  - {fileID: 1169622286159614, guid: b3c31f6b19e12ab43af383150930c5d2, type: 3}
+  - {fileID: 1169622286159614, guid: bf8ceffe438fec2489e148cee283011f, type: 3}
+  MeteorCount: 50
+  FuelStationPrefabs:
+  - {fileID: 4849306525670135010, guid: a2643645ab2aa54458be7c9f4ace3792, type: 3}
+  FuelStationCount: 10
+  FeaturePrefabs:
+  - {fileID: 1155164465232224481, guid: 7e5e551eb4e439e4fa8f96f4e5e55e23, type: 3}
+  FeatureCount: 30
+  CollectiblePrefabs:
+  - {fileID: 3580850165668990844, guid: 6d09f1047ed7fb244a255fa66291cb94, type: 3}
+  - {fileID: 4448123184397291684, guid: d18be603c12f9784d8fe93db62320530, type: 3}
+  CollectibleCount: 25

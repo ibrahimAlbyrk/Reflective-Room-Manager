@@ -5,17 +5,18 @@ TagManager:
   serializedVersion: 2
   tags:
   - PlayerCamera
+  - Spaceship
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Coin
+  - Obstacle
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Feature
+  - FuelStation
+  - Environment
+  - Coin
   - 
   - 
   - 

@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2740181535448939297
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1931145918173070026}
+  - component: {fileID: 3158045861209017342}
+  - component: {fileID: 8206328668146939496}
+  - component: {fileID: 6886150743469750107}
+  m_Layer: 0
+  m_Name: GameManagar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1931145918173070026
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2740181535448939297}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3158045861209017342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2740181535448939297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 3927202180
+  serverOnly: 0
+  visible: 0
+  hasSpawned: 0
+--- !u!114 &8206328668146939496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2740181535448939297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f09a6882017d4b9682386b768c5b47bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _modManager: {fileID: 6886150743469750107}
+--- !u!114 &6886150743469750107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2740181535448939297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bcc352c2c01497ca627a9ccbc82ff80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _openWorldMod:
+    _mapGeneratorData: {fileID: 11400000, guid: a40daf6fa3dae6f4fbfbd16c0d362cf7,
+      type: 2}
+    _contentNames:
+    - Environment
+    - Meteor
+    - FuelStation
+    - AI
+    - Feature
+    - Collectible
+    _iteratorInterval: 30
+    _iteratorTimer: 0
+  _shrinkingAreaMod:
+    _mapGeneratorData: {fileID: 11400000, guid: b505c12f4f99d224d9847b0dae3d9b6f,
+      type: 2}
+    _contentNames:
+    - Environment
+    - Meteor
+    - FuelStation
+    - AI
+    - Feature
+    - Collectible
+    _iteratorInterval: 15
+    _iteratorTimer: 0
+    _shrinkingAreaSystem: {fileID: 348245455586494014, guid: f95e39f01bb72b142897581fe459d219,
+      type: 3}
+    gameLobbySystem: {fileID: 4028255132603968696, guid: ad1b4c26df1f6154a9f5d054f8650134,
+      type: 3}

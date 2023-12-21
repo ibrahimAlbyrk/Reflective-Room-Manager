@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c9a9e6db612421aa8d0522a90fbd6d1, type: 3}
+  m_Name: FireFeature_01
+  m_EditorClassIdentifier: 
+  Name: FireFeature_01
+  Duration: 15
+  Icon: {fileID: 21300000, guid: 5b6c9a106da2e134d816b523f402d62c, type: 3}
+  IncreaseBulletCountRange: {x: 2, y: 4}
+  IncreaseTargetDistanceRange: {x: 50, y: 300}
+  IncreaseSpeedRange: {x: 200, y: 500}
