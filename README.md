@@ -41,6 +41,6 @@ Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to
 |  **Room Container**                     | Modular and generic singleton system for room systems using additive scene design              |
 |  **Scene Management**                   | A modular, convenient and comprehensive Scene Management system for additive and single scenes |
 |  **Physics Isolation**                  | Support for Additive Scenes with Physics Isolation (battle instances, levels, etc.)            |
-|  **Examples**                           | Several complete Examples included. *(so soon)*                                                |
+|  **Examples**                           | Several complete Examples included.                                                            |
 
 ---
