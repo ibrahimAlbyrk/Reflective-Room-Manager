@@ -9,7 +9,7 @@
   <a href="https://discord.gg/MMutVRg8Jg"><img src="https://img.shields.io/discord/1167179553836380270?style=for-the-badge&label=Discord&labelColor=white&color=gray" alt="Discord"></a>
 </p>
 
-*No one changed the world by doing what the world told them*
+*"No one changed the world by doing what the world told them"*
 
 # Reflective Room Manager
 Reflective Room Manager is an easy-to-use, modular and adaptable advanced room system for Unity and Mirror.
