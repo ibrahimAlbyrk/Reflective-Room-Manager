@@ -1,12 +1,14 @@
 ﻿using UnityEditor;
-using REFLECTIVE.Runtime.Physic.Collision;
+using UnityEngine;
 
 namespace REFLECTIVE.Editor.Physic.Collision
 {
     using Editor.Utilities;
     
+    using Runtime.Physic.Collision;
+    
     [CanEditMultipleObjects]
-    public abstract class CollisionBaseEditor<TargetType> : UnityEditor.Editor where TargetType : UnityEngine.Object
+    public abstract class CollisionBaseEditor<TargetType> : UnityEditor.Editor where TargetType : Object
     {
         public override void OnInspectorGUI()
         {
@@ -16,9 +18,12 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             CustomEditorUtilities.DrawDefaultInspector(serializedObject);
             
-            Undo.RecordObject(_target, "Change Collider Value");
+            if (GUI.changed)
+            {
+                Undo.RecordObject(_target, "Changed Collider");
             
-            EditorUtility.SetDirty(target);
+                EditorUtility.SetDirty(target);   
+            }
         }
 
         protected virtual void OnSceneGUI()
