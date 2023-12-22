@@ -44,6 +44,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             NetworkConnectionHandler.OnClientConnect(OnClientConnect);
             NetworkConnectionHandler.OnClientDisconnect(OnClientDisconnect);
+            NetworkConnectionHandler.OnClientDisconnect(RemoveAllRoomList);
             
             RoomConnectionHandler.OnClientRoomListAdd(AddRoomList);
             RoomConnectionHandler.OnClientRoomListUpdate(UpdateRoomList);

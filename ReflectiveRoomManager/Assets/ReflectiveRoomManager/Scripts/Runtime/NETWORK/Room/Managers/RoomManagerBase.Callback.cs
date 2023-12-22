@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using System.Linq;
+using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
@@ -55,6 +56,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private void RemoveRoomList(RoomInfo roomInfo)
         {
             _roomListInfos.RemoveAll(info => info.ID == roomInfo.ID);
+        }
+
+        private void RemoveAllRoomList()
+        {
+            _roomListInfos.Clear();
         }
     }
 }

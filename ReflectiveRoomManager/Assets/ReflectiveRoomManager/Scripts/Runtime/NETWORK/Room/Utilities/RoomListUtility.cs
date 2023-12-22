@@ -19,7 +19,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             };
         }
         
-        public static void UpdateRoomToList(ref List<Room> rooms, Room room)
+        public static void UpdateRoomToList(List<Room> rooms, Room room)
         {
             var index = rooms.FindIndex(info => info.RoomName == room.RoomName);
             
@@ -30,7 +30,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             RoomMessageUtility.SenRoomUpdateMessage(roomList, RoomMessageState.Update);
         }
         
-        public static void AddRoomToList(ref List<Room> rooms, Room room)
+        public static void AddRoomToList(List<Room> rooms, Room room)
         {
             rooms.Add(room);
             
@@ -39,7 +39,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             RoomMessageUtility.SenRoomUpdateMessage(roomList, RoomMessageState.Add);
         }
         
-        public static void RemoveRoomToList(ref List<Room> rooms, Room room)
+        public static void RemoveRoomToList(List<Room> rooms, Room room)
         {
             if (!rooms.Remove(room)) return;
 

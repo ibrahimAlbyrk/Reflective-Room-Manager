@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Mirror;
+﻿using Mirror;
 using System.Linq;
 using UnityEngine;
 

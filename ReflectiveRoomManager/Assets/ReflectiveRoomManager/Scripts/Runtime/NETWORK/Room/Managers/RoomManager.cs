@@ -40,7 +40,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             room.SetCustomData(roomInfo.CustomData);
             
-            RoomListUtility.AddRoomToList(ref m_rooms, room);
+            RoomListUtility.AddRoomToList(m_rooms, room);
             
             //If it is a client, add in to the room
             if (!isServer)
@@ -126,7 +126,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 RoomMessageUtility.SendRoomMessage(connection, ClientRoomState.Removed);
             });
             
-            RoomListUtility.RemoveRoomToList(ref m_rooms, room);
+            RoomListUtility.RemoveRoomToList(m_rooms, room);
             
             RoomContainer.Listener.RemoveRoomListenerHandlers(room.RoomName);
         }
@@ -154,7 +154,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (exitedRoom.CurrentPlayers < 1 && !exitedRoom.IsServer)
                 RemoveRoom(exitedRoom);
             else
-                RoomListUtility.UpdateRoomToList(ref m_rooms,exitedRoom);
+                RoomListUtility.UpdateRoomToList(m_rooms,exitedRoom);
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
             
