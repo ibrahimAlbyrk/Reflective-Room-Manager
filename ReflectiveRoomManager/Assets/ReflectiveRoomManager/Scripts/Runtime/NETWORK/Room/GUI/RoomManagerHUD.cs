@@ -72,6 +72,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             {
                 var roomInfo = new RoomInfo
                 {
+                    RoomName = _roomNameField,
                     SceneName = RoomManagerBase.Instance.RoomScene,
                     MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2,
                 };
