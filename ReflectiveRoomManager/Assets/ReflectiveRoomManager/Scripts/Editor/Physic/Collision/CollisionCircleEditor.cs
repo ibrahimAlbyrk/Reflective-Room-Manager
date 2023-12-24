@@ -28,11 +28,17 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             var transform = myTarget.transform;
 
-            var center = transform.TransformPoint(myTarget.Center);
+            var center = myTarget.Center;
             
             var radius = CollisionTransformUtilities.GetRadius2D(transform, myTarget.Radius);
             
+            var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+
+            Handles.matrix = matrix;
+            
             Handles.DrawWireDisc(center, -transform.forward, radius);
+
+            Handles.matrix = Matrix4x4.identity;
         }
 
         protected override void DrawEditableHandles(CollisionCircle myTarget)
@@ -45,6 +51,8 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
             var transform = myTarget.transform;
             
+            var radius = CollisionTransformUtilities.GetRadius2D(transform, myTarget.Radius);
+            
             var boxDirections = new []
             {
                 Vector3.up,
@@ -54,25 +62,34 @@ namespace REFLECTIVE.Editor.Physic.Collision
             };
         
             var boxCenter = myTarget.Center;
-            var tempSize = myTarget.Radius;
+            var tempSize = radius;
+            
+            var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+
+            Handles.matrix = matrix;
         
             foreach (var handleDirection in boxDirections)
             {
-                var handlePosition = transform.TransformPoint(boxCenter + handleDirection * tempSize);
+                var handlePosition = boxCenter + handleDirection * tempSize;
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
                 
-                var directionChange = newHandlePosition - transform.TransformPoint(boxCenter);
-                var changeOnHandleDirection = Vector3.Project(directionChange, transform.TransformDirection(handleDirection));
+                var directionChange = newHandlePosition - boxCenter;
+                var changeOnHandleDirection = Vector3.Project(directionChange, handleDirection);
         
                 var newSizeValue = changeOnHandleDirection.magnitude;
         
                 tempSize = newSizeValue;
             }
+
+            Handles.matrix = Matrix4x4.identity;
         
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(myTarget, "Edited Collider");
-                myTarget.Radius = tempSize;
+                
+                var transformRadius = CollisionTransformUtilities.GetTransformRadius2D(transform);
+                
+                myTarget.Radius = tempSize / transformRadius;
             }
         }
     }

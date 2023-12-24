@@ -49,7 +49,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
             else Handles.color = EditorCollisionDrawUtilities.DisableColor;
             
             EditorGUI.BeginChangeCheck();
-
+            
             var boxDirections = new []
             {
                 Vector3.up,
@@ -63,15 +63,20 @@ namespace REFLECTIVE.Editor.Physic.Collision
             var transform = myTarget.transform;
             
             var boxCenter = myTarget.Center;
-            var tempSize = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
+            var tempSize = Vector3.Scale(transform.localScale * .5f, myTarget.Size);
 
+            var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+
+            Handles.matrix = matrix;
+            
             for (var i = 0; i < boxDirections.Length; i++)
             {
                 var handleDirection = boxDirections[i];
-                var handlePosition = transform.TransformPoint(boxCenter + Vector3.Scale(handleDirection, tempSize) * 0.5f);
+                
+                var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize);
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
 
-                var newSizeValue = (newHandlePosition - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
+                var newSizeValue = Vector3.Dot(newHandlePosition - boxCenter, handleDirection);
 
                 switch (i)
                 {
@@ -89,14 +94,16 @@ namespace REFLECTIVE.Editor.Physic.Collision
                         break;
                 }
             }
+            
+            Handles.matrix = Matrix4x4.identity;
 
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(myTarget, "Edited Collider");
                 myTarget.Size = new Vector3(
-                    tempSize.x / myTarget.transform.localScale.x,
-                    tempSize.y / myTarget.transform.localScale.y,
-                    tempSize.z / myTarget.transform.localScale.z);
+                    tempSize.x / (myTarget.transform.localScale.x * .5f),
+                    tempSize.y / (myTarget.transform.localScale.y * .5f),
+                    tempSize.z / (myTarget.transform.localScale.z * .5f));
             }
         }
     }

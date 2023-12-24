@@ -80,12 +80,18 @@ namespace REFLECTIVE.Editor.Physic.Collision
 
         private static void DrawAxisEdit(CollisionCapsule3D myTarget, Vector3 up)
         {
+            var matrix = Matrix4x4.TRS(myTarget.transform.position, myTarget.transform.rotation, Vector3.one);
+
+            Handles.matrix = matrix;
+            
             DrawHandlesForDirection(myTarget, Vector3.up, up);
             DrawHandlesForDirection(myTarget, -Vector3.up, up);
             DrawHandlesForDirection(myTarget, Vector3.right, up);
             DrawHandlesForDirection(myTarget, -Vector3.right, up);
             DrawHandlesForDirection(myTarget, Vector3.forward, up);
             DrawHandlesForDirection(myTarget, -Vector3.forward, up);
+
+            Handles.matrix = Matrix4x4.identity;
         }
         
         private static void DrawXAxisEdit(CollisionCapsule3D myTarget)
@@ -108,14 +114,14 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             var boxCenter = myTarget.Center;
             
-            var size = GetSizeForAxis(myTarget.transform, myTarget.Radius, myTarget.Height);
+            var size = GetSizeForAxis(transform, myTarget.Radius, myTarget.Height);
 
             var viewTransform = SceneView.lastActiveSceneView.camera.transform;
             
             var sizeMultiplier = direction == up || direction == -up ? size.y * .5f : size.x;
             
             var tempSize = sizeMultiplier * Vector3.one;
-            var handlePosition = transform.TransformPoint(boxCenter + Vector3.Scale(direction, tempSize));
+            var handlePosition = boxCenter + Vector3.Scale(direction, tempSize);
             var pointToCamera = (handlePosition - viewTransform.position).normalized;
 
             Handles.color = (Vector3.Dot(pointToCamera, direction) < 0) ?
@@ -130,9 +136,9 @@ namespace REFLECTIVE.Editor.Physic.Collision
             
             Undo.RecordObject(myTarget, "Edited Collider");
             
-            var newSizeValue = (newHandlePosition - transform.TransformPoint(boxCenter)).magnitude * 2.0f;
+            var newSizeValue = Vector3.Dot(newHandlePosition - boxCenter, direction) * 2.0f;
 
-            var scale = myTarget.transform.localScale;
+            var scale = transform.localScale;
             
             if (direction == up || direction == -up)
             {
@@ -158,24 +164,19 @@ namespace REFLECTIVE.Editor.Physic.Collision
             var size = GetSizeForAxis(myTarget.transform, myTarget.Radius, myTarget.Height);
             
             var (point0, point1) = GetPointsForAxis(myTarget, direction, size);
+            
+            var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
 
-            point0 = transform.TransformPoint(point0);
-            point1 = transform.TransformPoint(point1);
+            Handles.matrix = matrix;
             
             // Draws the vertical lines of the capsule
             foreach (var dir in dirs)
             {
-                var d = myTarget.transform.TransformDirection(dir);
-                
-                var pos1 = point0 + d * size.x;
-                var pos2 = point1 + d * size.x;
+                var pos1 = point0 + dir * size.x;
+                var pos2 = point1 + dir * size.x;
                 
                 Handles.DrawLine(pos1, pos2);
             }
-            
-            up = transform.TransformDirection(up);
-            forward = transform.TransformDirection(forward);
-            direction = transform.TransformDirection(direction);
             
             // Draw front and back part of the capsule
             Handles.DrawWireDisc(point0, direction, size.x);
@@ -186,6 +187,8 @@ namespace REFLECTIVE.Editor.Physic.Collision
             Handles.DrawWireDisc(point1, direction, size.x);
             Handles.DrawWireArc(point1, -up, -forward, 180, size.x);
             Handles.DrawWireArc(point1, -forward, -up, -180, size.x);
+            
+            Handles.matrix = Matrix4x4.identity;
         }
         
         private static void DrawXAxisCollision(CollisionCapsule3D myTarget)
