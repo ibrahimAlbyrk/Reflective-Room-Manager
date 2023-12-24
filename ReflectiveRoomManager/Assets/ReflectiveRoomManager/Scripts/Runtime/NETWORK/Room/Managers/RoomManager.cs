@@ -86,7 +86,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         internal override void JoinRoom(NetworkConnection conn, string roomName)
         {
-            var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName);
+            var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName && !r.IsPrivate);
 
            JoinRoom(conn, room);
         }

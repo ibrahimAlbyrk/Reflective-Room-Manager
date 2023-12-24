@@ -42,7 +42,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <returns>The RoomInfo object containing information about the room. Returns null if the room does not exist.</returns>
         public RoomInfo GetRoomInfo(string roomName)
         {
-            var roomInfo = _roomListInfos.FirstOrDefault(roomInfo => roomInfo.RoomName == roomName);
+            var roomInfo = _roomListInfos.FirstOrDefault(roomInfo => roomInfo.RoomName == roomName && !roomInfo.IsPrivate);
 
             return roomInfo;
         }
@@ -52,7 +52,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <remarks>Only works on client</remarks>
         /// <returns></returns>
-        public IEnumerable<RoomInfo> GetRoomInfos() => _roomListInfos;
+        public IEnumerable<RoomInfo> GetRoomInfos() => _roomListInfos.Where(roomInfo => !roomInfo.IsPrivate);
 
         /// <summary>
         /// The function return information about the room where the "connection" is located

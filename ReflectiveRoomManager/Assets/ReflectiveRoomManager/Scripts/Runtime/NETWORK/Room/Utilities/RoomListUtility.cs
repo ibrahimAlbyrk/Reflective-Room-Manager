@@ -12,6 +12,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             return new RoomInfo
             {
                 ID = room.ID,
+                IsPrivate = room.IsPrivate,
                 RoomName = room.RoomName,
                 MaxPlayers = room.MaxPlayers,
                 CurrentPlayers = room.CurrentPlayers,

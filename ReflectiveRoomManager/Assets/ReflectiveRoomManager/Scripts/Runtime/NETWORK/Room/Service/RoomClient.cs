@@ -19,11 +19,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         
         #region Transaction Methods
 
-        public static void CreateRoom(string roomName, string sceneName, int maxPlayers)
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, bool isPrivate = false)
         {
             var roomInfo = new RoomInfo
             {
                 RoomName = roomName,
+                IsPrivate = isPrivate,
                 SceneName = sceneName,
                 MaxPlayers = maxPlayers,
                 CustomData = new Dictionary<string, string>()
@@ -33,6 +34,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         }
 
         public static void CreateRoom(string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
+        {
+            CreateRoom(roomName, sceneName, maxPlayers,false,  customData);
+        }
+        
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, bool isPrivate, params (string, string)[] customData)
         {
             var data = new Dictionary<string, string>();
 
@@ -44,6 +50,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             var roomInfo = new RoomInfo
             {
                 RoomName = roomName,
+                IsPrivate = isPrivate,
                 SceneName = sceneName,
                 MaxPlayers = maxPlayers,
                 CustomData = data
@@ -51,12 +58,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
             RoomManagerBase.RequestCreateRoom(roomInfo);
         }
-
+        
         public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData)
+        {
+            CreateRoom(roomName, sceneName, maxPlayers, false, customData);
+        }
+
+        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, bool isPrivate, Dictionary<string, string> customData)
         {
             var roomInfo = new RoomInfo
             {
                 RoomName = roomName,
+                IsPrivate = isPrivate,
                 SceneName = sceneName,
                 MaxPlayers = maxPlayers,
                 CustomData = customData ?? new Dictionary<string, string>()
