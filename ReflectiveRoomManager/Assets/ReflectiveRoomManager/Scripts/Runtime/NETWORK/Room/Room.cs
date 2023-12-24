@@ -20,7 +20,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     public class Room
     {
         public uint ID;
-        
+
+        public bool IsPrivate;
         public bool IsServer;
         
         public string RoomName;

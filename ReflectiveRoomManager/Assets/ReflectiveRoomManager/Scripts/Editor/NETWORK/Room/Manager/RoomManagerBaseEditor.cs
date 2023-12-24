@@ -130,7 +130,8 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     
                     if (roomFoldouts[i])
                     {
-                        GUILayout.Label($"Some Infos (soon)", EditorStyles.label);
+                        GUILayout.Label($"Room ID: {room.ID}", EditorStyles.label);
+                        GUILayout.Label($"Room Is Private: {room.IsPrivate}", EditorStyles.label);
                     }
 
                     EditorGUILayout.EndVertical();

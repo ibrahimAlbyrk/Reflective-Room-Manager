@@ -6,6 +6,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Structs
     public struct RoomInfo
     {
         public uint ID;
+
+        public bool IsPrivate;
         
         public string RoomName;
         public string SceneName;
