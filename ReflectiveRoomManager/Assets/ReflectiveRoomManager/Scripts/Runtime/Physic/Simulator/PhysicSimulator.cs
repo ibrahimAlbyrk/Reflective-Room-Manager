@@ -1,7 +1,5 @@
-﻿using System;
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Physic
 {
@@ -27,15 +25,9 @@ namespace REFLECTIVE.Runtime.Physic
                 return;
             }
 
-            var physicsMode = RoomManagerBase.Instance.PhysicsMode; 
-            
-            _simulator = physicsMode switch
-            {
-                LocalPhysicsMode.Physics3D => new Simulator3D(gameObject),
-                LocalPhysicsMode.Physics2D => new Simulator2D(gameObject),
-                LocalPhysicsMode.None => null,
-                _ => throw new ArgumentException()
-            };
+            var physicsMode = RoomManagerBase.Instance.PhysicsMode;
+
+            _simulator = PhysicSimulatorFactory.Create(gameObject, physicsMode);
             
             _simulator?.OnAwake();
         }
