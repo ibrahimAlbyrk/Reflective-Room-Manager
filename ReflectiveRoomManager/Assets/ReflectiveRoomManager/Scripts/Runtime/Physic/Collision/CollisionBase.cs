@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.Physic.Collision
 {
-    public abstract class CollisionBase<TCollider, PScene> : MonoBehaviour, IEditableForEditor where TCollider : Component
+    public abstract class CollisionBase<TCollider, TPhysicScene> : MonoBehaviour, IEditableForEditor where TCollider : Component
     {
         public event Action<TCollider> OnCollisionEnter;
         public event Action<TCollider> OnCollisionStay;
@@ -18,7 +18,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         [SerializeField] public Vector3 Center;
         
-        protected PScene m_physicsScene;
+        protected TPhysicScene m_physicsScene;
 
         protected TCollider[] m_garbageColliders;
         
@@ -30,7 +30,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             Editable = !Editable;
         }
 
-        public void UpdatePhysicScene(PScene physicsScene)
+        public void UpdatePhysicScene(TPhysicScene physicsScene)
         {
             m_physicsScene = physicsScene;
         }
@@ -60,7 +60,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             HandleContinuedCollisions(m_garbageColliders);
             HandleCollisionsExit(m_garbageColliders);
 
-            handleColliderCleaner();
+            HandleColliderCleaner();
         }
 
         private void SetCollidersCapacity()
@@ -69,7 +69,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             m_garbageColliders = new TCollider[GarbageColliderSize];
         }
 
-        private void handleColliderCleaner()
+        private void HandleColliderCleaner()
         {
             //COLLIDER
             for (var i = _colliders.Count - 1; i >= 0; i--)
