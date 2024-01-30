@@ -71,7 +71,11 @@ namespace REFLECTIVE.Editor.Physic.Collision
             foreach (var handleDirection in boxDirections)
             {
                 var handlePosition = boxCenter + handleDirection * tempSize;
-                var newHandlePosition = Handles.FreeMoveHandle(handlePosition, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
+                
+#pragma warning disable CS0618 // Type or member is obsolete
+                var newHandlePosition = Handles.FreeMoveHandle(handlePosition,
+                    Quaternion.identity, 0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
+#pragma warning restore CS0618 // Type or member is obsolete
                 
                 var directionChange = newHandlePosition - boxCenter;
                 var changeOnHandleDirection = Vector3.Project(directionChange, handleDirection);
