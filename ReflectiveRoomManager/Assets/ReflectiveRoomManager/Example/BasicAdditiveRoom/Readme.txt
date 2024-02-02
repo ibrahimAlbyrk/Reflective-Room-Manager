@@ -1,0 +1,1 @@
+Setup details at https://reflective-roommanager.gitbook.io/docs/examples/basic-additive-room
