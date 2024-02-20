@@ -37,6 +37,7 @@ jobs:
           path: ReflectiveRoomManager.unitypackage
           
       - name: Release
+        run: npm init
         uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
