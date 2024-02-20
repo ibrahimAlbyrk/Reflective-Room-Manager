@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using UnityEngine;
 using REFLECTIVE.Runtime.Extensions;
+using REFLECTIVE.Runtime.NETWORK.Room;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
 
 namespace Examples.Basic.Character
@@ -9,6 +10,8 @@ namespace Examples.Basic.Character
 
     public class SimpleCharacterController : NetworkBehaviour
     {
+        public static SimpleCharacterController Local;
+        
         [SyncVar] public int ID;
         
         public float speed = 10f;
@@ -19,7 +22,13 @@ namespace Examples.Basic.Character
 
         private CoinSpawner _coinSpawner;
         private ScoreManager _scoreManager;
-        
+
+        public override void OnStartClient()
+        {
+            if (isOwned)
+                Local = this;
+        }
+
         [ServerCallback]
         private void Start()
         {
@@ -28,8 +37,9 @@ namespace Examples.Basic.Character
             _collision3D.OnCollisionEnter += CollectCoin;
 
             SetManagers();
-
-            ID = NetworkManager.singleton.numPlayers;
+            
+            var room = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
+            ID = room.CurrentPlayers;
         }
         
         [ClientCallback]

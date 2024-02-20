@@ -81,7 +81,7 @@ MonoBehaviour:
     deliveryTimeEmaDuration: 2
   evaluationMethod: 0
   evaluationInterval: 3
-  timeInterpolationGui: 1
+  timeInterpolationGui: 0
   IsAutoPrefabSearcher: 0
   IsFolderSearch: 1
   SpawnablePrefabsPath: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Resources/SpawnablePrefabs

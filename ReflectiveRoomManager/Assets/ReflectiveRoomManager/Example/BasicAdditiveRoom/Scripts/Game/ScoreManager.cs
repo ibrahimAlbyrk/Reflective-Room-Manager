@@ -3,10 +3,11 @@ using Mirror;
 using UnityEngine;
 using System.Collections.Generic;
 using REFLECTIVE.Runtime.Singleton;
-using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
 namespace Examples.Basic.Game
 {
+    using Character;
+    
     public class ScoreManager : RoomSingleton<ScoreManager>
     {
         [SerializeField] private TMP_Text _scoresText;
@@ -30,6 +31,7 @@ namespace Examples.Basic.Game
             _scores[id] += score;
         }
         
+        [ClientCallback]
         private void UpdateText()
         {
             _scoresText.text = string.Empty;
@@ -37,7 +39,7 @@ namespace Examples.Basic.Game
             foreach (var (ID, coin ) in _scores)
             {
                 // If id equals current client
-                if (ID == RoomClient.CurrentRoomID)
+                if (ID == SimpleCharacterController.Local.ID)
                 {
                     _scoresText.text += $"<color=green>Player {ID}, Coin: {coin:000}</color>";
                 }
