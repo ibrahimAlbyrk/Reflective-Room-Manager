@@ -20,6 +20,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 RoomID = roomID
             });
         }
+        
+        private static void SendRoomIDToClientForReset(NetworkConnection conn)
+        {
+            conn.Send(new ClientRoomIDMessage
+            {
+                RoomID = 0
+            });
+        }
 
         private void SendUpdateRoomListForClient(NetworkConnection conn)
         {

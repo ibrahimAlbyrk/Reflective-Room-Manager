@@ -37,7 +37,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_eventManager.OnServerJoinedRoom += SendRoomIDToClient;
             m_eventManager.OnServerJoinedRoom += RoomSceneSynchronizer.DoSyncScene;
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
-            m_eventManager.OnServerExitedRoom += conn => SendRoomIDToClient(conn, 0);
+            m_eventManager.OnServerExitedRoom += SendRoomIDToClientForReset;
 
             //CLIENT SIDE
             NetworkConnectionHandler.OnClientStart(OnStartClient);
