@@ -3,7 +3,10 @@ name: Semantic Release
 on:
   workflow_dispatch:
   workflow_call:
-    
+
+permissions:
+  contents: write
+
 jobs:
   SemanticRelease:
     name: Semantic Release
@@ -40,4 +43,4 @@ jobs:
             @semantic-release/git
           branch: main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN}}
