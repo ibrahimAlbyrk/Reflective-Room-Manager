@@ -45,4 +45,4 @@ jobs:
             @semantic-release/git
           branch: main
         env:
-          GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
