@@ -37,5 +37,5 @@ jobs:
   Release:
     name: Semantic Release
     if: github.event_name == 'push'
-    uses: ./.github/workflows/semantic.yml
+    uses: ./.github/workflows/Semantic.yml
     secrets: inherit
