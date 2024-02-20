@@ -65,12 +65,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         protected RoomEventManager m_eventManager;
 
-        protected List<Room> m_rooms = new();
+        protected readonly List<Room> m_rooms = new();
         
         protected UniqueIdentifier m_uniqueIdentifier;
 
         private static RoomManagerBase _singleton;
-        private List<RoomInfo> _roomListInfos = new();
+        private readonly List<RoomInfo> _roomListInfos = new();
 
         private IRoomLoader _roomLoader;
 
