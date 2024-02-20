@@ -10,7 +10,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Events;
     using Structs;
     
-    public abstract partial class RoomManagerBase
+    public abstract partial class RoomManagerBase 
     {
         #region Serialize Variables
 
