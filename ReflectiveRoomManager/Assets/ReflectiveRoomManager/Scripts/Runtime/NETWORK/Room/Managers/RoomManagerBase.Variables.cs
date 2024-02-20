@@ -70,7 +70,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected UniqueIdentifier m_uniqueIdentifier;
 
         private static RoomManagerBase _singleton;
-        private readonly List<RoomInfo> _roomListInfos = new();
+        private List<RoomInfo> _roomListInfos = new();
 
         private IRoomLoader _roomLoader;
 

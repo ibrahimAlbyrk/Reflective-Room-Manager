@@ -142,7 +142,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             var exitedRoom = m_rooms.FirstOrDefault(room => room.RemoveConnection(conn));
             
-            if (exitedRoom == null)
+            if (exitedRoom == null) 
             {
                 // Handle exit failed (user not in any room).
                 

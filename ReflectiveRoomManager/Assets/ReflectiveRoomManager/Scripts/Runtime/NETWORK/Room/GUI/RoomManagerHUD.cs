@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Mirror;
+﻿using Mirror;
 using System.Linq;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 {
@@ -29,7 +29,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         {
             if (!NetworkClient.active && !NetworkServer.active) return;
 
-            _isServer = !NetworkClient.isConnected && NetworkServer.active;
+            _isServer = !NetworkClient.isConnected && NetworkServer.active; 
             
             var roomManager = RoomManagerBase.Instance;
             
