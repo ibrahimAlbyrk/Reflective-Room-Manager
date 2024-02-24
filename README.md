@@ -25,6 +25,8 @@ Check out our [Documentation](https://reflective-roommanager.gitbook.io/docs) to
 ---
 ## Used Packaged
 - [Mirror](https://assetstore.unity.com/packages/tools/network/mirror-129321)* (reqiured)
+- [Dotween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676) (reqiured for space shooter example)
+- [Unity's Post Processing](https://docs.unity3d.com/Packages/com.unity.postprocessing@3.4/manual/index.html) (reqiured for space shooter example)
 - [FastScriptReload](https://assetstore.unity.com/packages/tools/utilities/fast-script-reload-239351)
 - [Quantum Console](https://assetstore.unity.com/packages/tools/utilities/quantum-console-211046)
 
