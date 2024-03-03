@@ -1,7 +1,6 @@
 ﻿using Mirror;
 using UnityEngine;
 using System.Collections.Generic;
-using REFLECTIVE.Runtime.Identifier;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -9,6 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Loader;
     using Events;
     using Structs;
+    using Identifier;
     
     public abstract partial class RoomManagerBase
     {
