@@ -24,7 +24,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
-            if (m_rooms.Any(room => room.RoomName == roomName))
+            if (m_rooms.Any(room => room.Name == roomName))
             {
                 Debug.LogWarning("There is already a room with this name");
                 
@@ -86,7 +86,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         internal override void JoinRoom(NetworkConnection conn, string roomName)
         {
-            var room = m_rooms.FirstOrDefault(r => r.RoomName == roomName && !r.IsPrivate);
+            var room = m_rooms.FirstOrDefault(r => r.Name == roomName && !r.IsPrivate);
 
            JoinRoom(conn, room);
         }
@@ -128,12 +128,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             RoomListUtility.RemoveRoomToList(m_rooms, room);
             
-            RoomContainer.Listener.RemoveRoomListenerHandlers(room.RoomName);
+            RoomContainer.Listener.RemoveRoomListenerHandlers(room.Name);
         }
 
         internal override void RemoveRoom(string roomName, bool forced = false)
         {
-            var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
+            var room = m_rooms.FirstOrDefault(room => room.Name == roomName);
             
             RemoveRoom(room, forced);
         }

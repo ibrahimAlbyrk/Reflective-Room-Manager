@@ -155,9 +155,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 UnityEngine.GUI.Box(new Rect(0, 25, 200f, height), "", backgroundStyle);
                 _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
             
-                foreach (var room in rooms.Where(room => GUILayout.Button($"{room.RoomName} - {room.CurrentPlayers}/{room.MaxPlayers}")))
+                foreach (var room in rooms.Where(room => GUILayout.Button($"{room.Name} - {room.CurrentPlayers}/{room.MaxPlayers}")))
                 {
-                    RoomServer.RemoveRoom(room.RoomName, forced:true);
+                    RoomServer.RemoveRoom(room.Name, forced:true);
                 }
             }
             else

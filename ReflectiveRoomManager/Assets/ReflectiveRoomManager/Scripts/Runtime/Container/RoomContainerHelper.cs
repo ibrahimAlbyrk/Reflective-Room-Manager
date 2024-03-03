@@ -63,7 +63,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
             
             if (room == null) return;
             
-            RoomContainer.Listener.RegisterListener<T>(room.RoomName, sceneListener);
+            RoomContainer.Listener.RegisterListener<T>(room.Name, sceneListener);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
 
             if (room == null) return;
             
-            RoomContainer.Listener.UnRegisterListener<T>(room.RoomName, sceneListener);
+            RoomContainer.Listener.UnRegisterListener<T>(room.Name, sceneListener);
         }
 
         #endregion

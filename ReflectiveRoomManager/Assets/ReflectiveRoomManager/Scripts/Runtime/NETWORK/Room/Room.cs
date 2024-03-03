@@ -18,7 +18,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public bool IsPrivate;
         public bool IsServer;
         
-        public string RoomName;
+        public string Name;
 
         public Scene Scene;
         
@@ -32,13 +32,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <summary>
         /// Represents a room in a network game.
         /// </summary>
-        /// <param name="roomName">The name of the room.</param>
+        /// <param name="name">The name of the room.</param>
         /// <param name="maxPlayers">The maximum number of players allowed in the room.</param>
         /// <param name="isServer">A flag indicating whether this room is a server.</param>
-        internal Room(string roomName, int maxPlayers, bool isServer)
+        internal Room(string name, int maxPlayers, bool isServer)
         {
             IsServer = isServer;
-            RoomName = roomName;
+            Name = name;
             MaxPlayers = maxPlayers;
             CurrentPlayers = 0;
             Connections = new List<NetworkConnection>();

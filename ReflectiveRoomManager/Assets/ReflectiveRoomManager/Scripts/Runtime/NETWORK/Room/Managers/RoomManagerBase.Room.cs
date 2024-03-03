@@ -29,7 +29,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <returns>The room object if found, otherwise null.</returns>
         public Room GetRoom(string roomName)
         {
-            var room = m_rooms.FirstOrDefault(room => room.RoomName == roomName);
+            var room = m_rooms.FirstOrDefault(room => room.Name == roomName);
 
             return room;
         }

@@ -13,7 +13,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             {
                 ID = room.ID,
                 IsPrivate = room.IsPrivate,
-                RoomName = room.RoomName,
+                RoomName = room.Name,
                 MaxPlayers = room.MaxPlayers,
                 CurrentPlayers = room.CurrentPlayers,
                 CustomData = room.GetCustomData()
@@ -22,7 +22,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
         
         public static void UpdateRoomToList(List<Room> rooms, Room room)
         {
-            var index = rooms.FindIndex(info => info.RoomName == room.RoomName);
+            var index = rooms.FindIndex(info => info.Name == room.Name);
             
             rooms[index] = room;
             

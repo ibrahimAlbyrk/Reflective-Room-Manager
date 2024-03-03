@@ -96,7 +96,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     switch (searchType)
                     {
                         case 0 when !string.IsNullOrEmpty(searchFilter):
-                            if(!room.RoomName.Contains(searchFilter))
+                            if(!room.Name.Contains(searchFilter))
                                 continue;
                             
                             break;
@@ -114,7 +114,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
 
                     GUILayout.BeginHorizontal();
                     
-                    roomFoldouts[i] = EditorGUILayout.Foldout(roomFoldouts[i], $"Room Name: {room.RoomName}");
+                    roomFoldouts[i] = EditorGUILayout.Foldout(roomFoldouts[i], $"Room Name: {room.Name}");
 
                     var removeButtonStyle = new GUIStyle(EditorStyles.toolbarButton)
                     {
@@ -124,7 +124,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     GUILayout.Label($"{room.CurrentPlayers}/{room.MaxPlayers}", roomInfoStyle);
                     
                     if (GUILayout.Button("Remove", removeButtonStyle))
-                        RoomServer.RemoveRoom(room.RoomName, true);
+                        RoomServer.RemoveRoom(room.Name, true);
                     
                     GUILayout.EndHorizontal();
                     
