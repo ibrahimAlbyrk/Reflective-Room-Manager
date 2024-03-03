@@ -9,8 +9,6 @@ namespace Examples.Basic.Network.Room
     {
         [SerializeField] private GameObject _gamePlayerPrefab;
         [SerializeField] private GameObject _lobbyPlayerPrefab;
-        
-        private int _playerCount;
 
         //If true, it creates a player object for your player in the lobby when you leave the room.
         //If your project has such a design, mark it.
