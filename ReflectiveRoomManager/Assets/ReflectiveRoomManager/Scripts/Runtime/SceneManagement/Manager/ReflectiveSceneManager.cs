@@ -1,5 +1,4 @@
 ﻿using System;
-using REFLECTIVE.Runtime.NETWORK.Room.Loader;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,6 +6,7 @@ namespace REFLECTIVE.Runtime.SceneManagement.Manager
 {
     using Processor;
     using NETWORK.Room;
+    using NETWORK.Room.Loader;
     using Processor.Factory;
     
     public static class ReflectiveSceneManager
