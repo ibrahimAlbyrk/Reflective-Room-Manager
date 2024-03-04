@@ -52,9 +52,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private void UpdateRoomList(RoomInfo roomInfo)
         {
-            var room = _roomListInfos.FirstOrDefault(info => info.ID == roomInfo.ID);
-
-            var index = _roomListInfos.IndexOf(room);
+            var index = _roomListInfos.FindIndex(info => info.ID == roomInfo.ID);
 
             if (index < 0) return;
 
