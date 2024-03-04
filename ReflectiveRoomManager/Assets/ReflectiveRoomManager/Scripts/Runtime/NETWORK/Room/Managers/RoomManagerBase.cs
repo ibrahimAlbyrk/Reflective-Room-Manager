@@ -4,8 +4,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Scenes;
     using Events;
-    using Handlers;
     using Identifier;
+    using Connection.Manager;
 
     [DisallowMultipleComponent]
     public abstract partial class RoomManagerBase : MonoBehaviour
@@ -22,17 +22,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_uniqueIdentifier = new UniqueIdentifier(8);
 
             //SERVER SIDE
-            NetworkConnectionHandler.OnServerStart(OnStartServer);
-            NetworkConnectionHandler.OnServerStop(OnStopServer);
+            ReflectiveConnectionManager.networkConnections.OnServerStarted.AddListener(OnStartServer);
+            ReflectiveConnectionManager.networkConnections.OnServerStopped.AddListener(OnStopServer);
+            ReflectiveConnectionManager.networkConnections.OnServerStopped.AddListener(() => RemoveAllRoom(true));
             
-            NetworkConnectionHandler.OnServerStop(() => RemoveAllRoom(true));
-            
-            NetworkConnectionHandler.OnServerConnect(OnServerConnect);
-            NetworkConnectionHandler.OnServerDisconnect(OnServerDisconnect);
+            ReflectiveConnectionManager.networkConnections.OnServerConnected.AddListener(OnServerConnect);
+            ReflectiveConnectionManager.networkConnections.OnServerDisconnected.AddListener(OnServerDisconnect);
 
-            RoomConnectionHandler.OnServerCreateRoom(CreateRoom);
-            RoomConnectionHandler.OnServerJoinRoom(JoinRoom);
-            RoomConnectionHandler.OnServerExitRoom(ExitRoom);
+            ReflectiveConnectionManager.roomConnections.OnServerCreateRoom.AddListener(CreateRoom);
+            ReflectiveConnectionManager.roomConnections.OnServerJoinRoom.AddListener(JoinRoom);
+            ReflectiveConnectionManager.roomConnections.OnServerExitRoom.AddListener(ExitRoom);
 
             m_eventManager.OnServerJoinedRoom += SendRoomIDToClient;
             m_eventManager.OnServerJoinedRoom += RoomSceneSynchronizer.DoSyncScene;
@@ -40,18 +39,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_eventManager.OnServerExitedRoom += SendRoomIDToClientForReset;
 
             //CLIENT SIDE
-            NetworkConnectionHandler.OnClientStart(OnStartClient);
-            NetworkConnectionHandler.OnClientStop(OnStopClient);
-
-            NetworkConnectionHandler.OnClientConnect(OnClientConnect);
-            NetworkConnectionHandler.OnClientDisconnect(OnClientDisconnect);
-            NetworkConnectionHandler.OnClientDisconnect(RemoveAllRoomList);
+            ReflectiveConnectionManager.networkConnections.OnClientStarted.AddListener(OnStartClient);
+            ReflectiveConnectionManager.networkConnections.OnClientStarted.AddListener(OnStopClient);
             
-            RoomConnectionHandler.OnClientRoomListAdd(AddRoomList);
-            RoomConnectionHandler.OnClientRoomListUpdate(UpdateRoomList);
-            RoomConnectionHandler.OnClientRoomListRemove(RemoveRoomList);
+            ReflectiveConnectionManager.networkConnections.OnClientConnected.AddListener(OnStopClient);
+            ReflectiveConnectionManager.networkConnections.OnClientDisconnected.AddListener(OnClientDisconnect);
+            ReflectiveConnectionManager.networkConnections.OnClientDisconnected.AddListener(RemoveAllRoomList);
+            
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListAdd.AddListener(AddRoomList);
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListUpdate.AddListener(UpdateRoomList);
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListRemove.AddListener(RemoveRoomList);
 
-            RoomConnectionHandler.OnClientRoomIDMessage(GetRoomIDForClient);
+            ReflectiveConnectionManager.roomConnections.OnClientRoomIDMessage.AddListener(GetRoomIDForClient);
         }
     }
 }
