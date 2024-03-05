@@ -15,6 +15,9 @@ namespace REFLECTIVE.Runtime.Container
         public static readonly ListenerContainer Listener = new();
     }
 
+    /// <summary>
+    /// Provides functionality for managing and storing singleton objects associated with scenes.
+    /// </summary>
     internal class SingletonContainer
     {
         private readonly Dictionary<Scene, RoomSingletonData> _data = new();
@@ -88,12 +91,24 @@ namespace REFLECTIVE.Runtime.Container
         }
     }
 
+    /// <summary>
+    /// Provides functionality to manage and invoke room listeners.
+    /// </summary>
     internal class ListenerContainer
     {
+        /// <summary>
+        /// Provides functionality to manage and invoke room listeners for a specific room.
+        /// </summary>
         private class RoomListenersHandler
         {
             private readonly Dictionary<Type, List<IRoomListener>> listeners = new();
 
+            /// <summary>
+            /// Retrieves a list of listeners of type T for a specific room.
+            /// </summary>
+            /// <typeparam name="T">The type of the listeners to retrieve.</typeparam>
+            /// <param name="roomName">The name of the room.</param>
+            /// <returns>The list of listeners of type T for the specified room. Returns null if there are no listeners of type T for the room.</returns>
             public List<T> GetListeners<T>()
             {
                 if (!listeners.TryGetValue(typeof(T), out var list))
@@ -102,6 +117,12 @@ namespace REFLECTIVE.Runtime.Container
                 return list.Cast<T>().ToList();
             }
 
+            /// <summary>
+            /// Adds a listener of type T to the specified room.
+            /// </summary>
+            /// <typeparam name="T">The type of the listener to be added.</typeparam>
+            /// <param name="roomName">The name of the room.</param>
+            /// <param name="listener">The listener to be added.</param>
             public void AddListener<T>(IRoomListener listener)
             {
                 if (!listeners.TryGetValue(typeof(T), out var list))
@@ -113,6 +134,11 @@ namespace REFLECTIVE.Runtime.Container
                 list.Add(listener);
             }
 
+            /// <summary>
+            /// Removes a listener of type T from the specified room.
+            /// </summary>
+            /// <typeparam name="T">The type of the listener to be removed.</typeparam>
+            /// <param name="listener">The listener to be removed.</param>
             public void RemoveListener<T>(IRoomListener listener)
             {
                 if (listeners.TryGetValue(typeof(T), out var list))
@@ -122,8 +148,16 @@ namespace REFLECTIVE.Runtime.Container
             }
         }
 
+        /// <summary>
+        /// The ListenerContainer class handles the registration, unregistration, and calling of room listeners.
+        /// </summary>
         private readonly Dictionary<string, RoomListenersHandler> _listenerHandlers = new();
-        
+
+        /// <summary>
+        /// Calls the scene change listeners for a specific room when the scene is changed.
+        /// </summary>
+        /// <param name="roomName">The name of the room.</param>
+        /// <param name="scene">The new scene that has been changed to.</param>
         internal void CallSceneChangeListeners(string roomName, Scene scene)
         {
             if (!HasRoom(roomName)) return;
@@ -137,14 +171,20 @@ namespace REFLECTIVE.Runtime.Container
                 listener?.OnRoomSceneChanged(scene);
             }
         }
-
+        
         internal void RemoveRoomListenerHandlers(string roomName)
         {
             if (!HasRoom(roomName)) return;
 
             _listenerHandlers.Remove(roomName);
         }
-        
+
+        /// <summary>
+        /// Registers a listener of type T to the specified room.
+        /// </summary>
+        /// <param name="roomName">The name of the room to register the listener to.</param>
+        /// <param name="listener">The listener to be registered.</param>
+        /// <typeparam name="T">The type of the listener to be registered.</typeparam>
         internal void RegisterListener<T>(string roomName, IRoomListener listener)
         {
             if (!HasRoom(roomName))
@@ -159,14 +199,20 @@ namespace REFLECTIVE.Runtime.Container
             
             _listenerHandlers[roomName].AddListener<T>(listener);
         }
-        
+
+        /// <summary>
+        /// Unregisters a room listener of type T from the specified room.
+        /// </summary>
+        /// <typeparam name="T">The type of the room listener to unregister.</typeparam>
+        /// <param name="roomName">The name of the room.</param>
+        /// <param name="listener">The room listener to unregister.</param>
         internal void UnRegisterListener<T>(string roomName, IRoomListener listener)
         {
             if (!HasRoom(roomName)) return;
-            
+
             _listenerHandlers[roomName].RemoveListener<T>(listener);
         }
-
+        
         private List<T> GetListeners<T>(string roomName) where T : IRoomListener
         {
             return _listenerHandlers[roomName].GetListeners<T>();
