@@ -1,14 +1,16 @@
 ﻿using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using REFLECTIVE.Runtime.Extensions;
 using REFLECTIVE.Runtime.NETWORK.Room;
+using REFLECTIVE.Runtime.NETWORK.Room.Listeners;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
 
 namespace Examples.Basic.Character
 {
     using Game;
 
-    public class SimpleCharacterController : NetworkBehaviour
+    public class SimpleCharacterController : NetworkBehaviour, IRoomSceneListener
     {
         public static SimpleCharacterController Local;
         
@@ -22,6 +24,13 @@ namespace Examples.Basic.Character
 
         private CoinSpawner _coinSpawner;
         private ScoreManager _scoreManager;
+        
+        public void OnRoomSceneChanged(Scene scene)
+        {
+            SetManagers();
+            
+            _collision3D.UpdatePhysicScene(scene.GetPhysicsScene());
+        }
 
         public override void OnStartClient()
         {
@@ -40,6 +49,8 @@ namespace Examples.Basic.Character
             
             var room = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
             ID = room.CurrentPlayers;
+            
+            gameObject.RoomContainer().RegisterListener<IRoomSceneListener>(this);
         }
         
         [ClientCallback]
