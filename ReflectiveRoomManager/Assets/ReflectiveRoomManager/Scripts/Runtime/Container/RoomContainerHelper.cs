@@ -7,11 +7,11 @@ namespace REFLECTIVE.Runtime.Container.Helper
     
     public class RoomContainerHelper
     {
-        private readonly Scene _scene;
+        internal Scene Scene;
 
         public RoomContainerHelper(Scene scene)
         {
-            _scene = scene;
+            Scene = scene;
         }
 
         #region Singleton
@@ -24,7 +24,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <returns>True if the singleton instance was successfully added, otherwise false.</returns>
         public bool AddSingleton<T>(T value) where T : class
         {
-            return RoomContainer.Singleton.Add(_scene, value);
+            return RoomContainer.Singleton.Add(Scene, value);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <returns>True if the removal was successful, False otherwise.</returns>
         public bool RemoveSingleton<T>(T element = null) where T : class
         {
-            return RoomContainer.Singleton.Remove<T>(_scene);
+            return RoomContainer.Singleton.Remove<T>(Scene);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <returns>The singleton instance of type <typeparamref name="T"/>.</returns>
         public T GetSingleton<T>() where T : class
         {
-            return RoomContainer.Singleton.Get<T>(_scene);
+            return RoomContainer.Singleton.Get<T>(Scene);
         }
 
         #endregion
@@ -59,7 +59,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <param name="sceneListener">The listener object that implements the IRoomListener interface.</param>
         public void RegisterListener<T>(IRoomListener sceneListener) where T : IRoomListener
         {
-            var room = RoomManagerBase.Instance.GetRoomOfScene(_scene);
+            var room = RoomManagerBase.Instance.GetRoomOfScene(Scene);
             
             if (room == null) return;
             
@@ -73,7 +73,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <param name="sceneListener">The listener to unregister.</param>
         public void UnRegisterListener<T>(IRoomListener sceneListener) where T : IRoomListener
         {
-            var room = RoomManagerBase.Instance.GetRoomOfScene(_scene);
+            var room = RoomManagerBase.Instance.GetRoomOfScene(Scene);
 
             if (room == null) return;
             
