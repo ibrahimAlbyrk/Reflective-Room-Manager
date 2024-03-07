@@ -96,6 +96,8 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             for (var i = colliders.Length - 1; i >= 0; i--)
             {
                 var coll = colliders[i];
+
+                if (coll == null) continue;
                 
                 if (_colliders.Contains(coll)) continue;
 
@@ -112,7 +114,9 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         {
             foreach (var coll in _colliders)
             {
-                if (!colliders.Contains(coll) || coll == null) continue;
+                if (coll == null) continue;
+                
+                if (!colliders.Contains(coll)) continue;
 
                 HandleCollisionStay(coll);
             }
@@ -128,6 +132,8 @@ namespace REFLECTIVE.Runtime.Physic.Collision
             for (var i = _colliders.Count - 1; i >= 0; i--)
             {
                 var coll = _colliders[i];
+                
+                if (coll == null) continue;
                 
                 if (colliders.Contains(coll)) continue;
 
