@@ -21,6 +21,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] private LocalPhysicsMode _physicsMode = LocalPhysicsMode.Physics3D;
         [SerializeField] [Scene] private string _lobbyScene;
         [SerializeField] [Scene] private string _roomScene;
+        [SerializeField] [Scene] private string _clientContainerScene;
         
         [Header("Room Info")]
         [Tooltip("Maximum number of rooms that can be on the server")]
@@ -58,6 +59,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;
+        public string ClientContainerScene => _clientContainerScene;
         
         #endregion
 
