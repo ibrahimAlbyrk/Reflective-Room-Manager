@@ -6,6 +6,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
 {
     using Data;
     using Room.Enums;
+    using Room.Scenes;
     using Room.Structs;
     
     public class RoomConnections
@@ -19,9 +20,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         public readonly ConnectionEvent<Scene> OnServerRoomSceneChanged = new(false);
 
         //CLIENT SIDE
-        public readonly ConnectionEvent<RoomInfo> OnClientRoomListAdd = new();
-        public readonly ConnectionEvent<RoomInfo> OnClientRoomListUpdate = new();
-        public readonly ConnectionEvent<RoomInfo> OnClientRoomListRemove = new();
+        public readonly ConnectionEvent<RoomInfo> OnClientRoomListAdd = new(false);
+        public readonly ConnectionEvent<RoomInfo> OnClientRoomListUpdate = new(false);
+        public readonly ConnectionEvent<RoomInfo> OnClientRoomListRemove = new(false);
         
         public readonly ConnectionEvent<uint> OnClientRoomIDMessage = new(false);
         
@@ -30,6 +31,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         public readonly ConnectionEvent OnClientRemovedRoom = new(false);
         public readonly ConnectionEvent OnClientExitedRoom = new(false);
         public readonly ConnectionEvent OnClientFailedRoom = new(false);
+        
+        public readonly ConnectionEvent<SceneLoadMessage> OnClientSceneLoaded = new(false);
 
         internal void AddRegistersForServer()
         {
@@ -41,6 +44,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
             NetworkClient.RegisterHandler<ClientRoomMessage>(OnReceivedRoomMessageViaClient);
             NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
             NetworkClient.RegisterHandler<ClientRoomIDMessage>(OnReceivedRoomIDViaClient);
+            NetworkClient.RegisterHandler<SceneLoadMessage>(OnReceivedSceneLoadMessage);
         }
 
         private void OnRoomListChangeForClient(RoomListChangeMessage msg)
@@ -68,6 +72,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         private void OnReceivedRoomIDViaClient(ClientRoomIDMessage msg)
         {
             OnClientRoomIDMessage.Call(msg.RoomID);
+        }
+
+        private void OnReceivedSceneLoadMessage(SceneLoadMessage msg)
+        {
+            OnClientSceneLoaded?.Call(msg);
         }
         
         /// <summary>
