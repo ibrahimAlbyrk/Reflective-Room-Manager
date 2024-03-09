@@ -50,6 +50,7 @@ MonoBehaviour:
   _physicsMode: 2
   _lobbyScene: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/Lobby_Scene.unity
   _roomScene: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/Game_Scene.unity
+  _clientContainerScene: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/ClientContainer_Scene.unity
   _maxRoomCount: 10
   _maxPlayerCountPerRoom: 5
   _RoomLoaderType: 2
