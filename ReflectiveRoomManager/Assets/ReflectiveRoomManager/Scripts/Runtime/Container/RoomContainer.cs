@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.Container
@@ -107,7 +108,6 @@ namespace REFLECTIVE.Runtime.Container
             /// Retrieves a list of listeners of type T for a specific room.
             /// </summary>
             /// <typeparam name="T">The type of the listeners to retrieve.</typeparam>
-            /// <param name="roomName">The name of the room.</param>
             /// <returns>The list of listeners of type T for the specified room. Returns null if there are no listeners of type T for the room.</returns>
             public List<T> GetListeners<T>()
             {
@@ -121,7 +121,6 @@ namespace REFLECTIVE.Runtime.Container
             /// Adds a listener of type T to the specified room.
             /// </summary>
             /// <typeparam name="T">The type of the listener to be added.</typeparam>
-            /// <param name="roomName">The name of the room.</param>
             /// <param name="listener">The listener to be added.</param>
             public void AddListener<T>(IRoomListener listener)
             {
@@ -129,6 +128,7 @@ namespace REFLECTIVE.Runtime.Container
                 {
                     list = new List<IRoomListener> { listener };
                     listeners[typeof(T)] = list;
+                    return;
                 }
                 
                 list.Add(listener);
@@ -165,7 +165,7 @@ namespace REFLECTIVE.Runtime.Container
             var listeners = GetListeners<IRoomSceneListener>(roomName);
 
             if (listeners == null) return;
-
+            
             foreach (var listener in listeners)
             {
                 listener?.OnRoomSceneChanged(scene);
