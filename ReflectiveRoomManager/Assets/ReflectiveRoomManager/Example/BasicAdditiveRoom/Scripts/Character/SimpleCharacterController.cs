@@ -1,4 +1,5 @@
 ﻿using Mirror;
+using REFLECTIVE.Runtime.Container;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using REFLECTIVE.Runtime.Extensions;
@@ -24,8 +25,10 @@ namespace Examples.Basic.Character
 
         private CoinSpawner _coinSpawner;
         private ScoreManager _scoreManager;
+
+        private string _roomName;
         
-        public void OnRoomSceneChanged(Scene scene)
+        public void OnRoomSceneChanged(Scene scene)  
         {
             SetManagers();
             
@@ -49,8 +52,16 @@ namespace Examples.Basic.Character
             
             var room = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
             ID = room.CurrentPlayers;
+
+            _roomName = room.Name;
             
             gameObject.RoomContainer().RegisterListener<IRoomSceneListener>(this);
+        }
+
+        [ServerCallback]
+        private void OnDestroy()
+        {
+            RoomContainer.Listener.UnRegisterListener<IRoomSceneListener>(_roomName, this);
         }
         
         [ClientCallback]
@@ -59,7 +70,9 @@ namespace Examples.Basic.Character
             if (!isOwned) return;
 
             if (_camTransform == null)
-                _camTransform = GameObject.FindGameObjectWithTag("PlayerCamera").transform;
+                _camTransform = GameObject.FindGameObjectWithTag("PlayerCamera")?.transform;
+
+            if (_camTransform == null) return;
 
             var xMovement = Input.GetAxisRaw("Horizontal");
             var zMovement = Input.GetAxisRaw("Vertical");
@@ -78,11 +91,9 @@ namespace Examples.Basic.Character
         
         private void CollectCoin(Collider coll)
         {
-            if (coll == null) return;
-            
-            _coinSpawner.DestroyCoin(coll.gameObject);
+            gameObject.RoomContainer().GetSingleton<CoinSpawner>().DestroyCoin(coll.gameObject);
                 
-            _scoreManager.AddScore(ID, 1);
+            gameObject.RoomContainer().GetSingleton<ScoreManager>().AddScore(ID, 1);
         }
     }
 }
