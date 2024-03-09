@@ -220,6 +220,8 @@ namespace REFLECTIVE.Runtime.Container
         
         private bool HasRoom(string roomName)
         {
+            if (_listenerHandlers == null) return false;
+            
             return _listenerHandlers.ContainsKey(roomName);
         }
     }
