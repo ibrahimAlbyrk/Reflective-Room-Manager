@@ -1,4 +1,6 @@
 ﻿using Mirror;
+using UnityEngine;
+using System.Collections;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 {
@@ -6,11 +8,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
     {
         internal static void DoSyncScene(NetworkConnection conn, uint roomID)
         {
-            var room = RoomManagerBase.Instance.GetRoomOfPlayer(conn);
+            RoomManagerBase.Instance.StartCoroutine(DoSyncScene_Cor(conn, roomID));
+        }
 
-            if (room == null) return;
+        private static IEnumerator DoSyncScene_Cor(NetworkConnection conn, uint roomID)
+        {
+            var room = RoomManagerBase.Instance.GetRoomOfID(roomID);
+
+            if (room == null) yield break;
+
+            var containerSceneName = RoomManagerBase.Instance.ClientContainerScene;
             
-            conn.Send(new SceneMessage{sceneName = room.Scene.name, sceneOperation = SceneOperation.Normal});
+            conn.Send(new SceneMessage { sceneName = containerSceneName, sceneOperation = SceneOperation.Normal });
+            
+            conn.Send(new SceneMessage{sceneName = room.Scene.name, sceneOperation = SceneOperation.LoadAdditive});
         }
     }
 }
