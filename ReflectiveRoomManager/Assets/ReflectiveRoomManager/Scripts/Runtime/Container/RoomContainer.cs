@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.Container
     using Data;
     using NETWORK.Room.Listeners;
     
-    internal static class RoomContainer
+    public static class RoomContainer
     {
         public static readonly SingletonContainer Singleton = new();
 
@@ -18,7 +18,7 @@ namespace REFLECTIVE.Runtime.Container
     /// <summary>
     /// Provides functionality for managing and storing singleton objects associated with scenes.
     /// </summary>
-    internal class SingletonContainer
+    public class SingletonContainer
     {
         private readonly Dictionary<Scene, RoomSingletonData> _data = new();
 
@@ -30,7 +30,7 @@ namespace REFLECTIVE.Runtime.Container
         /// <typeparam name="T">The type of the element to be added.</typeparam>
         /// <returns>True if the element was successfully added; false if the scene already contains an element of the same type.</returns>
         /// <exception cref="ArgumentNullException">Thrown when either the scene or the element is null.</exception>
-        internal bool Add<T>(Scene scene, T element) where T : class
+        public bool Add<T>(Scene scene, T element) where T : class
         {
             if (scene == default) throw new ArgumentNullException(nameof(scene));
             if (element == null) throw new ArgumentNullException(nameof(element));
@@ -61,7 +61,7 @@ namespace REFLECTIVE.Runtime.Container
         /// <param name="scene">The scene from which to remove the object.</param>
         /// <returns>True if the object was successfully removed, otherwise false.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the scene parameter is null.</exception>
-        internal bool Remove<T>(Scene scene) where T : class
+        public bool Remove<T>(Scene scene) where T : class
         {
             if (scene == default) throw new ArgumentNullException(nameof(scene));
 
@@ -79,7 +79,7 @@ namespace REFLECTIVE.Runtime.Container
         /// <param name="scene">The scene from which to retrieve the object.</param>
         /// <returns>An object of type T if found; otherwise, null.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the scene is null.</exception>
-        internal T Get<T>(Scene scene) where T : class
+        public T Get<T>(Scene scene) where T : class
         {
             if (scene == default) throw new ArgumentNullException(nameof(scene));
 
@@ -94,7 +94,7 @@ namespace REFLECTIVE.Runtime.Container
     /// <summary>
     /// Provides functionality to manage and invoke room listeners.
     /// </summary>
-    internal class ListenerContainer
+    public class ListenerContainer
     {
         /// <summary>
         /// Provides functionality to manage and invoke room listeners for a specific room.
@@ -158,7 +158,7 @@ namespace REFLECTIVE.Runtime.Container
         /// </summary>
         /// <param name="roomName">The name of the room.</param>
         /// <param name="scene">The new scene that has been changed to.</param>
-        internal void CallSceneChangeListeners(string roomName, Scene scene)
+        public void CallSceneChangeListeners(string roomName, Scene scene)
         {
             if (!HasRoom(roomName)) return;
 
@@ -172,7 +172,7 @@ namespace REFLECTIVE.Runtime.Container
             }
         }
         
-        internal void RemoveRoomListenerHandlers(string roomName)
+        public void RemoveRoomListenerHandlers(string roomName)
         {
             if (!HasRoom(roomName)) return;
 
@@ -185,7 +185,7 @@ namespace REFLECTIVE.Runtime.Container
         /// <param name="roomName">The name of the room to register the listener to.</param>
         /// <param name="listener">The listener to be registered.</param>
         /// <typeparam name="T">The type of the listener to be registered.</typeparam>
-        internal void RegisterListener<T>(string roomName, IRoomListener listener)
+        public void RegisterListener<T>(string roomName, IRoomListener listener)
         {
             if (!HasRoom(roomName))
             {
@@ -206,10 +206,10 @@ namespace REFLECTIVE.Runtime.Container
         /// <typeparam name="T">The type of the room listener to unregister.</typeparam>
         /// <param name="roomName">The name of the room.</param>
         /// <param name="listener">The room listener to unregister.</param>
-        internal void UnRegisterListener<T>(string roomName, IRoomListener listener)
+        public void UnRegisterListener<T>(string roomName, IRoomListener listener)
         {
             if (!HasRoom(roomName)) return;
-
+            
             _listenerHandlers[roomName].RemoveListener<T>(listener);
         }
         
