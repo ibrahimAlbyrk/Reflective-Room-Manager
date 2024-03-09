@@ -44,6 +44,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             PrepareSceneChange(room.ID, keepClientObjects);
         }
 
+        /// <summary>
+        /// Adds a scene change handler for the given room and scene name.
+        /// </summary>
+        /// <param name="room">The room to add the scene change handler to.</param>
+        /// <param name="sceneName">The name of the scene.</param>
         private void AddSceneChangeHandler(Room room, string sceneName)
         {
             var sceneChangeHandler = new SceneChangeHandler
@@ -54,11 +59,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             
             _sceneChangeHandlers.Add(room.ID, sceneChangeHandler);
         }
-        
+
+        /// <summary>
+        /// Prepares for a scene change by making necessary adjustments to hide client objects.
+        /// </summary>
+        /// <param name="roomID">The ID of the room.</param>
+        /// <param name="keepClientObjects">A boolean indicating whether to keep client objects during the scene change.</param>
         private void PrepareSceneChange(uint roomID, bool keepClientObjects)
         {
             _keepClientObjects = keepClientObjects;
-            
+
             var sceneChangeHandler = _sceneChangeHandlers[roomID];
             
             if(_keepClientObjects)
@@ -68,7 +78,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             
             LoadScene(roomID);
         }
-        
+
+        /// <summary>
+        /// Notifies all clients in the room about a scene change.
+        /// </summary>
+        /// <param name="room">The room where the scene change occurred.</param>
+        /// <param name="sceneName">The name of the new scene.</param>
         private void NotifyClientsAboutSceneChange(Room room, string sceneName)
         {
             var unloadBeforeSceneMessage = new SceneMessage
@@ -86,7 +101,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             room.Connections.ForEach(conn => conn.Send(unloadBeforeSceneMessage));
             room.Connections.ForEach(conn => conn.Send(loadSceneMessage));
         }
-        
+
+        /// <summary>
+        /// Loads the specified scene for the given room.
+        /// </summary>
+        /// <param name="roomID">The ID of the room.</param>
         private void LoadScene(uint roomID)
         {
             var sceneChangeHandler = _sceneChangeHandlers[roomID];
@@ -97,7 +116,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             NotifyClientsAboutSceneChange(room, sceneName);
             ReflectiveSceneManager.LoadScene(sceneName, scene => OnSceneChanged(room, scene));
         }
-        
+
+        /// <summary>
+        /// Handler called when a scene has changed for a specific room.
+        /// </summary>
+        /// <param name="room">The room for which the scene has changed.</param>
+        /// <param name="loadedScene">The new loaded scene.</param>
         private void OnSceneChanged(Room room, Scene loadedScene)
         {
             ReflectiveConnectionManager.roomConnections.OnServerRoomSceneChanged.Call(loadedScene);
@@ -111,7 +135,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 
             _sceneChangeHandlers.Remove(room.ID);
         }
-        
+
+        /// <summary>
+        /// Handles the loading of a scene and updates the state of the room.
+        /// </summary>
+        /// <param name="room">The room to handle scene loading and state update for.</param>
+        /// <param name="loadedScene">The loaded scene.</param>
         private void HandleSceneLoadingAndUpdateState(Room room, Scene loadedScene)
         {
             var beforeScene = room.Scene;
