@@ -130,7 +130,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
 
             var player = connectionToClient.identity.gameObject;
             
-            NetworkServer.RemovePlayerForConnection(conn, false);
+            NetworkServer.RemovePlayerForConnection(connectionToClient, false);
 
             yield return null;
             
