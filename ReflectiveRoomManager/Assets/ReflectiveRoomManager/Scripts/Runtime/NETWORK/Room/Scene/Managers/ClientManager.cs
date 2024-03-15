@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
@@ -13,7 +14,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             _networkOperation = networkOperation;
         }
 
-        public void KeepAllClients(List<NetworkIdentity> garbageObjects, SceneChangeHandler sceneChangeHandler)
+        public void KeepAllClients(List<NetworkIdentity> identities, SceneChangeHandler sceneChangeHandler)
         {
             var room = sceneChangeHandler.Room; 
 
@@ -25,9 +26,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 
                 var clientObject = conn.identity;
 
-                NetworkServer.RemoveConnection(conn.identity.connectionToClient.connectionId);
-
-                garbageObjects.Add(clientObject);
+                NetworkServer.RemoveConnection(clientObject.connectionToClient.connectionId);
             }
         }
 
@@ -52,15 +51,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             
             foreach (var identity in identities)
             {
+                if(identity == null) continue;
+                
                 _networkOperation.NetworkTransformsReset(identity.gameObject);
             }
         }
         
-        public void MoveClientsToScene(List<NetworkIdentity> garbageObjects, Scene loadedScene)
+        public void MoveClientsToScene(List<NetworkIdentity> identities, Scene loadedScene)
         {
-            for (var i = 0; i < garbageObjects.Count; i++)
+            for (var i = 0; i < identities.Count; i++)
             {
-                var identity = garbageObjects[i];
+                var identity = identities[i];
                 
                 SceneManager.MoveGameObjectToScene(identity.gameObject, loadedScene);
 

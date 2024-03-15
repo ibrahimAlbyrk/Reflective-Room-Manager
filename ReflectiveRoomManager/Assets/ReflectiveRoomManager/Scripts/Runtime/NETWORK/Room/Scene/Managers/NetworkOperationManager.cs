@@ -11,6 +11,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 
             foreach (var networkTransform in networkTransforms)
             {
+                if(networkTransform == null) continue;
+                
                 networkTransform.Reset();
             }
         }

@@ -1,5 +1,7 @@
 ﻿using Mirror;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
@@ -15,7 +17,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         private readonly IClientManager _clientManager;
         
         private readonly Dictionary<uint, SceneChangeHandler> _sceneChangeHandlers;
-        private readonly List<NetworkIdentity> _garbageObjects;
 
         private bool _keepClientObjects;
 
@@ -23,7 +24,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         {
             _clientManager = clientManager;
             
-            _garbageObjects = new List<NetworkIdentity>();
             _sceneChangeHandlers = new Dictionary<uint, SceneChangeHandler>();
             
             ReflectiveConnectionManager.roomConnections.OnClientSceneLoaded.AddListener(msg =>
@@ -38,8 +38,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             if (_sceneChangeHandlers.ContainsKey(room.ID)) return;
 
             AddSceneChangeHandler(room, sceneName);
-            
-            _garbageObjects.Clear();
             
             PrepareSceneChange(room.ID, keepClientObjects);
         }
@@ -70,9 +68,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             _keepClientObjects = keepClientObjects;
 
             var sceneChangeHandler = _sceneChangeHandlers[roomID];
+
+            var room = RoomManagerBase.Instance.GetRoomOfID(roomID);
+            
+            var identities =  room.Connections.Select(conn => conn.identity).ToList();
             
             if(_keepClientObjects)
-                _clientManager.KeepAllClients(_garbageObjects, sceneChangeHandler);
+                _clientManager.KeepAllClients(identities, sceneChangeHandler);
             else
                 _clientManager.RemoveAllClients(sceneChangeHandler);
             
@@ -126,10 +128,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         {
             ReflectiveConnectionManager.roomConnections.OnServerRoomSceneChanged.Call(loadedScene);
             
-            if(_keepClientObjects)
-                _clientManager.MoveClientsToScene(_garbageObjects, loadedScene);
+            var identities =  room.Connections.Select(conn => conn.identity).ToList();
             
-            room.Connections.ForEach(conn => conn.Send(new SceneLoadMessage{Identities = _garbageObjects}));
+            if(_keepClientObjects)
+                _clientManager.MoveClientsToScene(identities, loadedScene);
+            
+            identities.ForEach(identity => Debug.Log(identity.connectionToClient.connectionId));
+            
+            room.Connections.ForEach(conn => conn.Send(new SceneLoadMessage{Identities = identities}));
             
             HandleSceneLoadingAndUpdateState(room, loadedScene);
 

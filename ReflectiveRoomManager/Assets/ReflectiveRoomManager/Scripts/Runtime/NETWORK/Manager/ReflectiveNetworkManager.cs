@@ -94,5 +94,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
         }
 
         #endregion
+
+        public override void OnClientSceneChanged()
+        {
+            /*
+             * In the base method,
+             * if the AutoCreatePlayer variable is true for the client during scene changes,
+             * it performs the operation of adding a player. Since this operation conflicts with the scene changing process of the scene room,
+             * we override the method
+             */
+        }
     }
 }
