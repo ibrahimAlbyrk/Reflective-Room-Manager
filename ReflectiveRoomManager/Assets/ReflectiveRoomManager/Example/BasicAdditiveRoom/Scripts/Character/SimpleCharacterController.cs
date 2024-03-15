@@ -1,11 +1,11 @@
 ﻿using Mirror;
-using REFLECTIVE.Runtime.Container;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using REFLECTIVE.Runtime.Container;
 using REFLECTIVE.Runtime.Extensions;
 using REFLECTIVE.Runtime.NETWORK.Room;
-using REFLECTIVE.Runtime.NETWORK.Room.Listeners;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
+using REFLECTIVE.Runtime.NETWORK.Room.Listeners;
 
 namespace Examples.Basic.Character
 {
@@ -30,7 +30,7 @@ namespace Examples.Basic.Character
         
         public void OnRoomSceneChanged(Scene scene)  
         {
-            SetManagers();
+            SetManagers(scene);
             
             _collision3D.UpdatePhysicScene(scene.GetPhysicsScene());
         }
@@ -48,7 +48,9 @@ namespace Examples.Basic.Character
             _collision3D.SetLayer(LayerMask.GetMask("Coin"));
             _collision3D.OnCollisionEnter += CollectCoin;
 
-            SetManagers();
+            if (RoomManagerBase.Instance == null) return;
+            
+            SetManagers(gameObject.scene);
             
             var room = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
             ID = room.CurrentPlayers;
@@ -83,17 +85,17 @@ namespace Examples.Basic.Character
             transform.Translate(dir * (speed * Time.deltaTime));
         }
 
-        private void SetManagers()
+        private void SetManagers(Scene scene)
         {
-            _coinSpawner = gameObject.RoomContainer().GetSingleton<CoinSpawner>();
-            _scoreManager = gameObject.RoomContainer().GetSingleton<ScoreManager>();
+            _coinSpawner = RoomContainer.Singleton.Get<CoinSpawner>(scene);
+            _scoreManager = RoomContainer.Singleton.Get<ScoreManager>(scene);
         }
         
         private void CollectCoin(Collider coll)
         {
-            gameObject.RoomContainer().GetSingleton<CoinSpawner>().DestroyCoin(coll.gameObject);
+            _coinSpawner.DestroyCoin(coll.gameObject);
                 
-            gameObject.RoomContainer().GetSingleton<ScoreManager>().AddScore(ID, 1);
+            _scoreManager.AddScore(ID, 1);
         }
     }
 }
