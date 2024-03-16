@@ -19,13 +19,14 @@ namespace Examples.Basic.Network.Room
         private void Start()
         {
             RoomManagerBase.Instance.Events.OnServerJoinedRoom += CreateGamePlayer;
+            
+            RoomManagerBase.Instance.Events.OnServerExitedRoom += PlayerCreatorUtilities.RemovePlayer;
 
             //If the lobby option is used, create a player for the lobby when leaving the room,
             //otherwise it will only delete the player.
             if (_useLobby)
                 RoomManagerBase.Instance.Events.OnServerExitedRoom += CreateLobbyPlayer;
-            else
-                RoomManagerBase.Instance.Events.OnServerExitedRoom += PlayerCreatorUtilities.RemovePlayer;
+
         }
         
         [ServerCallback]

@@ -27,7 +27,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         public static void TryCreatePlayerOrReplace(NetworkConnection conn, GameObject prefab, Action<GameObject> onCompleted = null)
         {
             Init();
-
+            
             var enumerator = conn.identity != null
                 ? ReplacePlayer_Cor(conn, prefab, onCompleted)
                 : CreatePlayer_Cor(conn, prefab, onCompleted);
@@ -110,18 +110,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         
         private static IEnumerator ReplacePlayer_Cor(NetworkConnection conn, GameObject prefab, Action<GameObject> onCompleted)
         {
-            var oldPlayer = conn.identity.gameObject;
-            
-            var newPlayer = SpawnPlayer(conn, prefab);
+            yield return RemovePlayer_Cor(conn);
 
-            NetworkServer.ReplacePlayerForConnection(conn.identity.connectionToClient, newPlayer, true);
-
-            yield return null;
-            
-            if(oldPlayer != null)
-                NetworkServer.Destroy(oldPlayer);
-
-            onCompleted?.Invoke(newPlayer);
+            yield return CreatePlayer_Cor(conn, prefab, onCompleted);
         }
 
         private static IEnumerator RemovePlayer_Cor(NetworkConnection conn)

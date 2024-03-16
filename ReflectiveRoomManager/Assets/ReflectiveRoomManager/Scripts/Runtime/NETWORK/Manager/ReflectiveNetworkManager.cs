@@ -97,6 +97,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
         public override void OnClientSceneChanged()
         {
+            if (NetworkClient.connection.isAuthenticated && !NetworkClient.ready) NetworkClient.Ready();
+            
             /*
              * In the base method,
              * if the AutoCreatePlayer variable is true for the client during scene changes,

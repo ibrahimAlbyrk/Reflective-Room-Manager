@@ -7,13 +7,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
     internal interface IClientManager
     {
         /// <summary>
-        /// Makes necessary adjustments to hide client objects during scene switching
-        /// </summary>
-        /// <param name="identities">The list of NetworkIdentity objects that need to be cleaned up.</param>
-        /// <param name="sceneChangeHandler">The scene change handler associated with the room. </param>
-        public void KeepAllClients(List<NetworkIdentity> identities, SceneChangeHandler sceneChangeHandler);
-
-        /// <summary>
         /// Resetting the networkTransforms of each client object to solve
         /// the problem of the networkTransform shifting to different positions when the scene changes
         /// </summary>

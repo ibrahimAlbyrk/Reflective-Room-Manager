@@ -34,6 +34,8 @@ namespace Examples.Basic.Game
         [ClientCallback]
         private void UpdateText()
         {
+            if (_scoresText == null) return;
+            
             _scoresText.text = string.Empty;
             
             foreach (var (ID, coin ) in _scores)

@@ -1,7 +1,6 @@
 ﻿using Mirror;
-using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
@@ -32,11 +31,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             });
         }
         
-        
         public void ChangeScene(Room room, string sceneName, bool keepClientObjects)
         {
             if (_sceneChangeHandlers.ContainsKey(room.ID)) return;
-
+            
             AddSceneChangeHandler(room, sceneName);
             
             PrepareSceneChange(room.ID, keepClientObjects);
@@ -52,7 +50,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             var sceneChangeHandler = new SceneChangeHandler
             {
                 Room = room,
-                SceneName = sceneName
+                SceneName = sceneName,
+                Identities = room.Connections.Select(conn => conn.identity).ToList()
             };
             
             _sceneChangeHandlers.Add(room.ID, sceneChangeHandler);
@@ -68,14 +67,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             _keepClientObjects = keepClientObjects;
 
             var sceneChangeHandler = _sceneChangeHandlers[roomID];
-
-            var room = RoomManagerBase.Instance.GetRoomOfID(roomID);
             
-            var identities =  room.Connections.Select(conn => conn.identity).ToList();
-            
-            if(_keepClientObjects)
-                _clientManager.KeepAllClients(identities, sceneChangeHandler);
-            else
+            if(!_keepClientObjects)
                 _clientManager.RemoveAllClients(sceneChangeHandler);
             
             LoadScene(roomID);
@@ -88,7 +81,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         /// <param name="sceneName">The name of the new scene.</param>
         private void NotifyClientsAboutSceneChange(Room room, string sceneName)
         {
-            var unloadBeforeSceneMessage = new SceneMessage
+            var unloadPreviousSceneMessage = new SceneMessage
             {
                 sceneName = room.Scene.name,
                 sceneOperation = SceneOperation.UnloadAdditive,
@@ -100,7 +93,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
                 sceneOperation = SceneOperation.LoadAdditive,
             };
                 
-            room.Connections.ForEach(conn => conn.Send(unloadBeforeSceneMessage));
+            room.Connections.ForEach(conn => conn.Send(unloadPreviousSceneMessage));
             room.Connections.ForEach(conn => conn.Send(loadSceneMessage));
         }
 
@@ -127,15 +120,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         private void OnSceneChanged(Room room, Scene loadedScene)
         {
             ReflectiveConnectionManager.roomConnections.OnServerRoomSceneChanged.Call(loadedScene);
-            
-            var identities =  room.Connections.Select(conn => conn.identity).ToList();
+
+            var sceneChangeHandler = _sceneChangeHandlers[room.ID];
             
             if(_keepClientObjects)
-                _clientManager.MoveClientsToScene(identities, loadedScene);
+                _clientManager.MoveClientsToScene(sceneChangeHandler.Identities, loadedScene);
             
-            identities.ForEach(identity => Debug.Log(identity.connectionToClient.connectionId));
-            
-            room.Connections.ForEach(conn => conn.Send(new SceneLoadMessage{Identities = identities}));
+            room.Connections.ForEach(conn => conn.Send(new SceneLoadMessage{Identities = sceneChangeHandler.Identities}));
             
             HandleSceneLoadingAndUpdateState(room, loadedScene);
 

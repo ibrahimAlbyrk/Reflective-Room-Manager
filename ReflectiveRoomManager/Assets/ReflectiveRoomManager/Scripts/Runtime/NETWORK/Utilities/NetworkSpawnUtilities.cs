@@ -86,7 +86,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             return spawnedObj;
         }
         
-        public static IEnumerable<GameObject>  GetSpawnablePrefabs()
+        public static IEnumerable<GameObject> GetSpawnablePrefabs()
         {
             var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
 
