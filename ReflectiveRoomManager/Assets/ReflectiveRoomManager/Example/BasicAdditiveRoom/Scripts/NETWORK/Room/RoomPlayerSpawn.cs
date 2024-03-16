@@ -19,8 +19,6 @@ namespace Examples.Basic.Network.Room
         private void Start()
         {
             RoomManagerBase.Instance.Events.OnServerJoinedRoom += CreateGamePlayer;
-            
-            RoomManagerBase.Instance.Events.OnServerExitedRoom += PlayerCreatorUtilities.RemovePlayer;
 
             //If the lobby option is used, create a player for the lobby when leaving the room,
             //otherwise it will only delete the player.
@@ -33,10 +31,7 @@ namespace Examples.Basic.Network.Room
         [ServerCallback]
         private void CreateGamePlayer(NetworkConnection conn, uint roomID)
         {
-            PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _gamePlayerPrefab, player =>
-            {
-                PlayerCreatorUtilities.ReplacePlayer(conn, _gamePlayerPrefab);
-            });
+            PlayerCreatorUtilities.TryCreatePlayerOrReplace(conn, _gamePlayerPrefab);
         }
         
         [ServerCallback]
