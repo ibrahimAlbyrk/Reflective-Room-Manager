@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using Mirror;
+using UnityEngine;
 using REFLECTIVE.Runtime.NETWORK.Room;
 using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
 namespace Examples.Basic.Game
 {
-    public class RoomSceneChange : MonoBehaviour
+    public class RoomSceneChange : NetworkBehaviour
     {
         private void OnGUI()
         {
@@ -16,9 +17,16 @@ namespace Examples.Basic.Game
             
             if (GUI.Button(rect,"Reload The Scene"))
             {
-                ChangeScene();
+                if (isServer)
+                    ChangeScene();
+                else
+                    ChangeScene_CMD();
             }
         }
+
+
+        [Command(requiresAuthority = false)]
+        private void ChangeScene_CMD() => ChangeScene();
         
         private void ChangeScene()
         {
