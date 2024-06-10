@@ -43,9 +43,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             //CLIENT SIDE
             ReflectiveConnectionManager.networkConnections.OnClientStarted.AddListener(OnStartClient);
-            ReflectiveConnectionManager.networkConnections.OnClientStarted.AddListener(OnStopClient);
+            ReflectiveConnectionManager.networkConnections.OnClientStopped.AddListener(OnStopClient);
             
-            ReflectiveConnectionManager.networkConnections.OnClientConnected.AddListener(OnStopClient);
+            ReflectiveConnectionManager.networkConnections.OnClientConnected.AddListener(OnClientConnect);
             ReflectiveConnectionManager.networkConnections.OnClientDisconnected.AddListener(OnClientDisconnect);
             ReflectiveConnectionManager.networkConnections.OnClientDisconnected.AddListener(RemoveAllRoomList);
             
