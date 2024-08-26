@@ -5,7 +5,11 @@ EditorUserSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 4
   m_ConfigSettings:
+    GraphicsSettingsInspector_UserSettings:
+      value: 18134705175a055722080a3115371d4a0d55006876786860616b0471b8b07a68ffab74f9ee2a3a30300cea1a11320d0beb1a0c25f7060f494b4cdf1b18f3045e38cb5ad8
+      flags: 0
     RecentlyUsedSceneGuid-0:
+<<<<<<< Updated upstream
       value: 5a540200540150035f5a5d7012710a44431648737d7923322c281c67b4e1666b
       flags: 0
     RecentlyUsedSceneGuid-1:
@@ -15,6 +19,35 @@ EditorUserSettings:
       value: 0107560350065f5f095e0d2711205a44434e4b792d2d2433752d4c37b7e36d3c
       flags: 0
     RecentlyUsedSceneGuid-3:
+=======
+      value: 025005005d025c0854580a2347270c444e164f727e2b23322e7b1b64b7e4633b
+      flags: 0
+    RecentlyUsedSceneGuid-1:
+      value: 5a07055f04045f5d08575a7114775b15144e1a7f747a7736797d4a66e1b6646e
+      flags: 0
+    RecentlyUsedSceneGuid-2:
+      value: 505202555c03590e595d557a49265e4447151979287b20327d7d1965e6e3326b
+      flags: 0
+    RecentlyUsedSceneGuid-3:
+      value: 5a08015f010c0d0308585f751226094412161a7d7b7876662c714862b1b53769
+      flags: 0
+    RecentlyUsedSceneGuid-4:
+      value: 5450040300505b5d585f542749275c4410154e78742c7f66292a4966b0e6353e
+      flags: 0
+    RecentlyUsedSceneGuid-5:
+      value: 0102045f55015e0e5c575c771470594412161b2e297e74312e714836e1b7376a
+      flags: 0
+    RecentlyUsedSceneGuid-6:
+      value: 00530c5700050c595b5f092314770d4114151b292e7f7e607f714b67b3b6606b
+      flags: 0
+    RecentlyUsedSceneGuid-7:
+      value: 5a540200540150035f5a5d7012710a44431648737d7923322c281c67b4e1666b
+      flags: 0
+    RecentlyUsedSceneGuid-8:
+      value: 0107560350065f5f095e0d2711205a44434e4b792d2d2433752d4c37b7e36d3c
+      flags: 0
+    RecentlyUsedSceneGuid-9:
+>>>>>>> Stashed changes
       value: 5a5757560101590a5d0c0e24427b5d44434e4c7a7b7a23677f2b4565b7b5353a
       flags: 0
     vcSharedLogLevel:
@@ -34,4 +67,6 @@ EditorUserSettings:
   m_VCHierarchyOverlayIcons: 1
   m_VCOtherOverlayIcons: 1
   m_VCAllowAsyncUpdate: 1
+  m_VCScanLocalPackagesOnConnect: 1
   m_ArtifactGarbageCollection: 1
+  m_CompressAssetsOnImport: 1

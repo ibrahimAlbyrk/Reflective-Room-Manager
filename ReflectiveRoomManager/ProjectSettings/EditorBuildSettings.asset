@@ -6,9 +6,21 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+<<<<<<< Updated upstream
     path: Assets/_Project/Scenes/Lobby_Scene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
     path: Assets/_Project/Scenes/Game_Scene.unity
     guid: b6be536dd0aeace45933aebc8d1d5c9d
+=======
+    path: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/Lobby_Scene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/Game_Scene.unity
+    guid: b6be536dd0aeace45933aebc8d1d5c9d
+  - enabled: 1
+    path: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/ClientContainer_Scene.unity
+    guid: e90524c57720baa4abf41977fecf479a
+>>>>>>> Stashed changes
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
