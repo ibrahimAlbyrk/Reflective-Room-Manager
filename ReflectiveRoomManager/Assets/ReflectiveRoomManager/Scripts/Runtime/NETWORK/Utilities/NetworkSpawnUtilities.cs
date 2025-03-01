@@ -17,7 +17,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             }
 
             var instantObj = Object.Instantiate(obj, Vector3.zero, Quaternion.identity);
-            NetworkServer.Spawn(instantObj, conn);
+            
+            NetworkServer.Spawn(instantObj, conn?.identity?.connectionToClient);
 
             return instantObj;
         }
@@ -31,7 +32,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             }
 
             var instantObj = Object.Instantiate(obj, Vector3.zero, Quaternion.identity, parent);
-            NetworkServer.Spawn(instantObj, conn);
+            NetworkServer.Spawn(instantObj, conn?.identity?.connectionToClient);
 
             return instantObj;
         }
@@ -45,7 +46,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             }
 
             var instantObj = Object.Instantiate(obj, position, rotation);
-            NetworkServer.Spawn(instantObj, conn);
+            NetworkServer.Spawn(instantObj, conn?.identity?.connectionToClient);
 
             return instantObj;
         }
@@ -59,7 +60,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             }
 
             var instantObj = Object.Instantiate(obj, position, rotation, parent);
-            NetworkServer.Spawn(instantObj, conn);
+            NetworkServer.Spawn(instantObj, conn?.identity?.connectionToClient);
 
             return instantObj;
         }

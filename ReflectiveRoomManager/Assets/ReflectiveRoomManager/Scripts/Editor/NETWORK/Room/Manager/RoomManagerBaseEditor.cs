@@ -102,7 +102,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                             break;
                         case 1 when !string.IsNullOrEmpty(searchFilter):
                             if(int.TryParse(searchFilter, out var id))
-                                if(room.Connections.All(conn => conn.connectionId != id))
+                                if(room.Connections.All(conn => conn.identity.connectionToClient.connectionId != id))
                                     continue;
                             break;
                     }

@@ -10,11 +10,6 @@ namespace Mirror
     {
         public const int LocalConnectionId = 0;
 
-        /// <summary>Unique identifier for this connection that is assigned by the transport layer.</summary>
-        // assigned by transport, this id is unique for every connection on server.
-        // clients don't know their own id and they don't know other client's ids.
-        public readonly int connectionId;
-
         /// <summary>Flag that indicates the client has been authenticated.</summary>
         public bool isAuthenticated;
 
@@ -66,11 +61,6 @@ namespace Mirror
             // set lastTime to current time when creating connection to make
             // sure it isn't instantly kicked for inactivity
             lastMessageTime = Time.time;
-        }
-
-        internal NetworkConnection(int networkConnectionId) : this()
-        {
-            connectionId = networkConnectionId;
         }
 
         // TODO if we only have Reliable/Unreliable, then we could initialize
@@ -202,6 +192,16 @@ namespace Mirror
         // then later the transport events will do the clean up.
         public abstract void Disconnect();
 
-        public override string ToString() => $"connection({connectionId})";
+        // cleanup is called before the connection is removed.
+        // return any batches' pooled writers before the connection disappears.
+        // otherwise if a connection disappears before flushing, writers would
+        // never be returned to the pool.
+        public virtual void Cleanup()
+        {
+            foreach (Batcher batcher in batches.Values)
+            {
+                batcher.Clear();
+            }
+        }
     }
 }

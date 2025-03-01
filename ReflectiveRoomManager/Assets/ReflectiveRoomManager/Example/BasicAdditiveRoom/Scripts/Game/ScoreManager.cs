@@ -14,7 +14,7 @@ namespace Examples.Basic.Game
         
         private readonly SyncDictionary<int, int> _scores = new();
 
-        private void Start() => _scores.Callback += ScoresOnChanged;
+        private void Start() => _scores.OnChange += ScoresOnChanged;
 
         private void ScoresOnChanged(SyncIDictionary<int, int>.Operation op, int key, int item) => UpdateText();
 
