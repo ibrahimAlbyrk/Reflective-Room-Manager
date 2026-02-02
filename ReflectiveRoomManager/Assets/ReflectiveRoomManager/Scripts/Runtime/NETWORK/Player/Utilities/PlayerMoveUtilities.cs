@@ -18,7 +18,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         /// <param name="scene"></param>
         public static void PlayerMoveToScene(NetworkConnection conn, Scene scene)
         {
-            if (conn == null || conn.identity == null || conn.identity.gameObject == null || scene == default) return;
+            if (conn == null) { Debug.LogWarning("[PlayerMove] Connection is null"); return; }
+            if (conn.identity == null) { Debug.LogWarning("[PlayerMove] Connection has no identity"); return; }
+            if (conn.identity.gameObject == null) { Debug.LogWarning("[PlayerMove] Identity has no gameObject"); return; }
+            if (scene == default) { Debug.LogWarning("[PlayerMove] Target scene is invalid"); return; }
             
             var playerObj = conn.identity.gameObject;
             

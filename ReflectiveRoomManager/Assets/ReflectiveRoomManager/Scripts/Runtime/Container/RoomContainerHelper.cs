@@ -61,9 +61,13 @@ namespace REFLECTIVE.Runtime.Container.Helper
         public void RegisterListener<T>(IRoomListener sceneListener) where T : IRoomListener
         {
             var room = RoomManagerBase.Instance.GetRoomOfScene(Scene);
-            
-            if (room == null) return;
-            
+
+            if (room == null)
+            {
+                Debug.LogWarning($"[RoomContainer] No room found for scene {Scene.name} — listener not registered");
+                return;
+            }
+
             RoomContainer.Listener.RegisterListener<T>(room.Name, sceneListener);
         }
 
@@ -76,8 +80,12 @@ namespace REFLECTIVE.Runtime.Container.Helper
         {
             var room = RoomManagerBase.Instance.GetRoomOfScene(Scene);
 
-            if (room == null) return;
-            
+            if (room == null)
+            {
+                Debug.LogWarning($"[RoomContainer] No room found for scene {Scene.name} — listener not unregistered");
+                return;
+            }
+
             RoomContainer.Listener.UnRegisterListener<T>(room.Name, sceneListener);
         }
 
