@@ -54,6 +54,12 @@ MonoBehaviour:
   _maxRoomCount: 10
   _maxPlayerCountPerRoom: 5
   _RoomLoaderType: 2
+  _enableReconnection: 0
+  _reconnectionGracePeriod: 30
+  _playerIdentityProviderComponent: {fileID: 0}
+  _reconnectionHandlerComponent: {fileID: 0}
+  _disconnectedPlayerHandlerComponent: {fileID: 0}
+  _playerStateSerializerComponent: {fileID: 0}
 --- !u!114 &1949250419701008128
 MonoBehaviour:
   m_ObjectHideFlags: 0
