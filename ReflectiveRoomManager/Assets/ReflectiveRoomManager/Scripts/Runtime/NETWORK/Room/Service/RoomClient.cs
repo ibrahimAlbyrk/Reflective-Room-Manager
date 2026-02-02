@@ -4,8 +4,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
     using Structs;
 
-    public static class RoomClient
+    public class RoomClient : IRoomClientService
     {
+        private static readonly RoomClient _instance = new();
+
+        public static RoomClient Instance => _instance;
+
         #region Public Variables
 
         public static uint CurrentRoomID { get; internal set; }
@@ -50,6 +54,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
             return dataValue;
         }
+
+        #endregion
+
+        #region IRoomClientService
+
+        uint IRoomClientService.CurrentRoomID => CurrentRoomID;
+        void IRoomClientService.CreateRoom(RoomInfo roomInfo) => CreateRoom(roomInfo);
+        void IRoomClientService.JoinRoom(string roomName) => JoinRoom(roomName);
+        void IRoomClientService.ExitRoom() => ExitRoom();
+        void IRoomClientService.ExitRoom(bool isDisconnected) => ExitRoom(isDisconnected);
+        string IRoomClientService.GetRoomCustomData(string dataName) => GetRoomCustomData(dataName);
 
         #endregion
     }

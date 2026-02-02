@@ -7,8 +7,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
     using Structs;
     
-    public static class RoomServer
+    public class RoomServer : IRoomServerService
     {
+        private static readonly RoomServer _instance = new();
+
+        public static RoomServer Instance => _instance;
+
         #region Transaction Methods
 
         public static void CreateRoom(RoomInfo roomInfo)
@@ -185,6 +189,24 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 
             RoomManagerBase.Instance.UpdateRoomData(room, data);
         }
+
+        #endregion
+
+        #region IRoomServerService
+
+        void IRoomServerService.CreateRoom(RoomInfo roomInfo) => CreateRoom(roomInfo);
+        void IRoomServerService.CreateRoom(NetworkConnectionToClient conn, RoomInfo roomInfo) => CreateRoom(conn, roomInfo);
+        void IRoomServerService.JoinRoom(string roomName) => JoinRoom(roomName);
+        void IRoomServerService.JoinRoom(NetworkConnectionToClient conn, string roomName) => JoinRoom(conn, roomName);
+        void IRoomServerService.ExitRoom(NetworkConnectionToClient conn, bool isDisconnected) => ExitRoom(conn, isDisconnected);
+        void IRoomServerService.RemoveRoom(string roomName, bool forced) => RemoveRoom(roomName, forced);
+        void IRoomServerService.RemoveAllRoom(bool forced) => RemoveAllRoom(forced);
+        void IRoomServerService.ChangeScene(string roomName, string sceneName, bool keepClientObjects) => ChangeScene(roomName, sceneName, keepClientObjects);
+        void IRoomServerService.ChangeScene(Room room, string sceneName, bool keepClientObjects) => ChangeScene(room, sceneName, keepClientObjects);
+        void IRoomServerService.UpdateRoomData(string roomName, string key, string value) => UpdateRoomData(roomName, key, value);
+        void IRoomServerService.UpdateRoomData(string roomName, Dictionary<string, string> data) => UpdateRoomData(roomName, data);
+        void IRoomServerService.UpdateRoomData(Room room, string key, string value) => UpdateRoomData(room, key, value);
+        void IRoomServerService.UpdateRoomData(Room room, Dictionary<string, string> data) => UpdateRoomData(room, data);
 
         #endregion
     }
