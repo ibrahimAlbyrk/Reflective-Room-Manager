@@ -1,27 +1,34 @@
 ﻿using Mirror;
-using UnityEngine;
 using System.Collections;
+using REFLECTIVE.Runtime.MonoBehavior;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 {
-    internal static class RoomSceneSynchronizer
+    internal class RoomSceneSynchronizer
     {
-        internal static void DoSyncScene(NetworkConnection conn, uint roomID)
+        private readonly RoomManagerBase _roomManager;
+
+        internal RoomSceneSynchronizer(RoomManagerBase roomManager)
         {
-            RoomManagerBase.Instance.StartCoroutine(DoSyncScene_Cor(conn, roomID));
+            _roomManager = roomManager;
         }
 
-        private static IEnumerator DoSyncScene_Cor(NetworkConnection conn, uint roomID)
+        internal void DoSyncScene(NetworkConnection conn, uint roomID)
         {
-            var room = RoomManagerBase.Instance.GetRoom(roomID);
+            CoroutineRunner.Instance.StartCoroutine(DoSyncScene_Cor(conn, roomID));
+        }
+
+        private IEnumerator DoSyncScene_Cor(NetworkConnection conn, uint roomID)
+        {
+            var room = _roomManager.GetRoom(roomID);
 
             if (room == null) yield break;
 
-            var containerSceneName = RoomManagerBase.Instance.ClientContainerScene;
-            
+            var containerSceneName = _roomManager.ClientContainerScene;
+
             conn.Send(new SceneMessage { sceneName = containerSceneName, sceneOperation = SceneOperation.Normal });
-            
-            conn.Send(new SceneMessage{sceneName = room.Scene.name, sceneOperation = SceneOperation.LoadAdditive});
+
+            conn.Send(new SceneMessage { sceneName = room.Scene.name, sceneOperation = SceneOperation.LoadAdditive });
         }
     }
 }

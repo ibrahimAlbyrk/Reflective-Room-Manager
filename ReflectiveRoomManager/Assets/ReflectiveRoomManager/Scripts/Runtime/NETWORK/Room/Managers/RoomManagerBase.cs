@@ -40,7 +40,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             ReflectiveConnectionManager.roomConnections.OnServerExitRoom.AddListener(ExitRoom);
 
             if (RoomLoaderType != RoomLoaderType.NoneScene)
-                m_eventManager.OnServerJoinedRoom += RoomSceneSynchronizer.DoSyncScene;
+            {
+                _sceneSynchronizer = new RoomSceneSynchronizer(this);
+                m_eventManager.OnServerJoinedRoom += _sceneSynchronizer.DoSyncScene;
+            }
             
             m_eventManager.OnServerJoinedRoom += SendRoomIDToClient;
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
@@ -77,7 +80,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             if (m_eventManager != null)
             {
-                m_eventManager.OnServerJoinedRoom -= RoomSceneSynchronizer.DoSyncScene;
+                if (_sceneSynchronizer != null)
+                    m_eventManager.OnServerJoinedRoom -= _sceneSynchronizer.DoSyncScene;
                 m_eventManager.OnServerJoinedRoom -= SendRoomIDToClient;
                 m_eventManager.OnServerExitedRoom -= SendClientExitSceneMessage;
                 m_eventManager.OnServerExitedRoom -= SendRoomIDToClientForReset;

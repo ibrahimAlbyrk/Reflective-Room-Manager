@@ -7,6 +7,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Loader;
     using Events;
+    using Scenes;
     using Structs;
     using Identifier;
     
@@ -75,6 +76,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private readonly List<RoomInfo> _roomListInfos = new();
 
         private IRoomLoader _roomLoader;
+
+        private RoomSceneSynchronizer _sceneSynchronizer;
 
         private System.Action _onServerStoppedRemoveAllRoom;
 
