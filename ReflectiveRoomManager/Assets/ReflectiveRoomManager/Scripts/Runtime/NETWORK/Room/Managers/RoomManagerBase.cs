@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using REFLECTIVE.Runtime.MonoBehavior;
 using REFLECTIVE.Runtime.SceneManagement.Manager;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
@@ -28,7 +29,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             //SERVER SIDE
             ReflectiveConnectionManager.networkConnections.OnServerStarted.AddListener(OnStartServer);
             ReflectiveConnectionManager.networkConnections.OnServerStopped.AddListener(OnStopServer);
-            ReflectiveConnectionManager.networkConnections.OnServerStopped.AddListener(() => RemoveAllRoom(true));
+            _onServerStoppedRemoveAllRoom = () => RemoveAllRoom(true);
+            ReflectiveConnectionManager.networkConnections.OnServerStopped.AddListener(_onServerStoppedRemoveAllRoom);
             
             ReflectiveConnectionManager.networkConnections.OnServerConnected.AddListener(OnServerConnect);
             ReflectiveConnectionManager.networkConnections.OnServerDisconnected.AddListener(OnServerDisconnect);
@@ -57,6 +59,45 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             ReflectiveConnectionManager.roomConnections.OnClientRoomListRemove.AddListener(RemoveRoomList);
 
             ReflectiveConnectionManager.roomConnections.OnClientRoomIDMessage.AddListener(GetRoomIDForClient);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            // SERVER SIDE
+            ReflectiveConnectionManager.networkConnections.OnServerStarted.RemoveListener(OnStartServer);
+            ReflectiveConnectionManager.networkConnections.OnServerStopped.RemoveListener(OnStopServer);
+            ReflectiveConnectionManager.networkConnections.OnServerStopped.RemoveListener(_onServerStoppedRemoveAllRoom);
+
+            ReflectiveConnectionManager.networkConnections.OnServerConnected.RemoveListener(OnServerConnect);
+            ReflectiveConnectionManager.networkConnections.OnServerDisconnected.RemoveListener(OnServerDisconnect);
+
+            ReflectiveConnectionManager.roomConnections.OnServerCreateRoom.RemoveListener(CreateRoom);
+            ReflectiveConnectionManager.roomConnections.OnServerJoinRoom.RemoveListener(JoinRoom);
+            ReflectiveConnectionManager.roomConnections.OnServerExitRoom.RemoveListener(ExitRoom);
+
+            if (m_eventManager != null)
+            {
+                m_eventManager.OnServerJoinedRoom -= RoomSceneSynchronizer.DoSyncScene;
+                m_eventManager.OnServerJoinedRoom -= SendRoomIDToClient;
+                m_eventManager.OnServerExitedRoom -= SendClientExitSceneMessage;
+                m_eventManager.OnServerExitedRoom -= SendRoomIDToClientForReset;
+            }
+
+            // CLIENT SIDE
+            ReflectiveConnectionManager.networkConnections.OnClientStarted.RemoveListener(OnStartClient);
+            ReflectiveConnectionManager.networkConnections.OnClientStopped.RemoveListener(OnStopClient);
+
+            ReflectiveConnectionManager.networkConnections.OnClientConnected.RemoveListener(OnClientConnect);
+            ReflectiveConnectionManager.networkConnections.OnClientDisconnected.RemoveListener(OnClientDisconnect);
+            ReflectiveConnectionManager.networkConnections.OnClientDisconnected.RemoveListener(RemoveAllRoomList);
+
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListAdd.RemoveListener(AddRoomList);
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListUpdate.RemoveListener(UpdateRoomList);
+            ReflectiveConnectionManager.roomConnections.OnClientRoomListRemove.RemoveListener(RemoveRoomList);
+
+            ReflectiveConnectionManager.roomConnections.OnClientRoomIDMessage.RemoveListener(GetRoomIDForClient);
+
+            CoroutineRunner.Cleanup();
         }
     }
 }

@@ -76,6 +76,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private IRoomLoader _roomLoader;
 
+        private System.Action _onServerStoppedRemoveAllRoom;
+
         #endregion
     }
 }
