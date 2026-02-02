@@ -88,14 +88,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
         
         public static IEnumerable<GameObject> GetSpawnablePrefabs()
         {
-            var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
-
-            foreach (var prefab in spawnablePrefabs.ToArray().Where(prefab => prefab == NetworkManager.singleton.playerPrefab))
-            {
-                spawnablePrefabs.Remove(prefab); 
-            }
-
-            return spawnablePrefabs;
+            return Resources.LoadAll<GameObject>("SpawnablePrefabs")
+                .Where(p => p != NetworkManager.singleton.playerPrefab);
         }
     }
 }
