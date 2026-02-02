@@ -10,6 +10,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Scenes;
     using Structs;
     using Identifier;
+    using Connection.Manager;
     
     public abstract partial class RoomManagerBase
     {
@@ -80,6 +81,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private RoomSceneSynchronizer _sceneSynchronizer;
 
         private System.Action _onServerStoppedRemoveAllRoom;
+
+        private IConnectionManager _connectionManager;
 
         #endregion
     }

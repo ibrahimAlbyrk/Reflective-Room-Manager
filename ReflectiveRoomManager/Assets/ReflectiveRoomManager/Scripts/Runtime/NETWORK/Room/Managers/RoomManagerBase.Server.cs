@@ -2,13 +2,11 @@
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
-    using Connection.Manager;
-
     public abstract partial class RoomManagerBase
     {
         protected virtual void OnStartServer()
         {
-            ReflectiveConnectionManager.roomConnections.AddRegistersForServer();
+            _connectionManager.RoomConnections.AddRegistersForServer();
         }
 
         protected virtual void OnStopServer()
@@ -18,7 +16,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnStartClient()
         {
-            ReflectiveConnectionManager.roomConnections.AddRegistersForClient();
+            _connectionManager.RoomConnections.AddRegistersForClient();
         }
 
         protected virtual void OnStopClient()
