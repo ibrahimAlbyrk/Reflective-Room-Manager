@@ -15,13 +15,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 
         public void RemoveAllClients(SceneChangeHandler sceneChangeHandler)
         {
-            var room = sceneChangeHandler.Room; 
+            var connections = sceneChangeHandler.Room.Connections;
 
-            for (var i = 0; i < room.Connections.Count; i++)
+            for (var i = connections.Count - 1; i >= 0; i--)
             {
-                var conn = room.Connections[i];
-                
-                if (conn.identity == null) continue;
+                var conn = connections[i];
+
+                if (conn?.identity == null) continue;
 
                 NetworkServer.RemovePlayerForConnection(conn.identity.connectionToClient, true);
             }
