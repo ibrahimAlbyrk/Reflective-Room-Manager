@@ -157,7 +157,7 @@ namespace REFLECTIVE.Editor.NETWORK.Manager
                 {
                     var ni = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
                     
-                    if (ni == null) continue;
+                    if (!ni) continue;
                     
                     if (m_networkManager.playerPrefab == ni.gameObject) continue;
                     
