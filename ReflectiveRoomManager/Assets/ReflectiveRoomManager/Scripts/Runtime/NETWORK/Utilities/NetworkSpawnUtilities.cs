@@ -92,10 +92,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
 
         private static void NotifySceneReady(GameObject obj, Scene scene)
         {
-            var listeners = obj.GetComponentsInChildren<ISceneReady>();
+            var identity = obj.GetComponent<NetworkIdentity>();
 
-            foreach (var listener in listeners)
-                listener.OnSceneReady(scene);
+            if (identity == null) return;
+
+            foreach (var nb in identity.NetworkBehaviours)
+                if (nb is ISceneReady listener)
+                    listener.OnSceneReady(scene);
         }
         
         public static IEnumerable<GameObject> GetSpawnablePrefabs()
