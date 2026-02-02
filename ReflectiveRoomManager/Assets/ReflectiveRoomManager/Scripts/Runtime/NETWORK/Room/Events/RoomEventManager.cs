@@ -46,5 +46,29 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
         {
             OnServerRoomDataUpdated?.Invoke(room);
         }
+
+        /// <summary>Called on the server when a player reconnects to a room</summary>
+        public event Action<string, NetworkConnection, uint> OnPlayerReconnected;
+
+        /// <summary>Called on the server when a player disconnects with grace period started</summary>
+        public event Action<string, uint> OnPlayerDisconnecting;
+
+        /// <summary>Called on the server when a player's reconnection grace period expired</summary>
+        public event Action<string, uint> OnPlayerReconnectionExpired;
+
+        internal void Invoke_OnPlayerReconnected(string playerId, NetworkConnection conn, uint roomID)
+        {
+            OnPlayerReconnected?.Invoke(playerId, conn, roomID);
+        }
+
+        internal void Invoke_OnPlayerDisconnecting(string playerId, uint roomID)
+        {
+            OnPlayerDisconnecting?.Invoke(playerId, roomID);
+        }
+
+        internal void Invoke_OnPlayerReconnectionExpired(string playerId, uint roomID)
+        {
+            OnPlayerReconnectionExpired?.Invoke(playerId, roomID);
+        }
     }
 }
