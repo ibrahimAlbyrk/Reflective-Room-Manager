@@ -54,6 +54,36 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection.Data
         }
     }
 
+    public class ConnectionEvent<T1, T2, T3> : ConnectionEventBase
+    {
+        private Action<T1, T2, T3> _action;
+
+        public ConnectionEvent(bool isDebug = false, [CallerMemberName] string logString = "")
+            : base(isDebug, logString) { }
+
+        public void AddListener(Action<T1, T2, T3> action) => _action += action;
+        public void RemoveListener(Action<T1, T2, T3> action) => _action -= action;
+
+        internal void Call(T1 t1, T2 t2, T3 t3)
+        {
+            LogIfDebug();
+
+            if (_action == null) return;
+
+            foreach (var handler in _action.GetInvocationList())
+            {
+                try
+                {
+                    ((Action<T1, T2, T3>)handler)(t1, t2, t3);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+        }
+    }
+
     public class ConnectionEvent<T> : ConnectionEventBase
     {
         private Action<T> _action;
