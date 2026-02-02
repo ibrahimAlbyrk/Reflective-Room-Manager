@@ -39,8 +39,7 @@ namespace REFLECTIVE.Runtime.Physic.Collision.D2
 
             size.x = Mathf.Abs(size.x);
             size.y = Mathf.Max(size.y, 0);
-            
-            if (size.y < size.x * 2) size.y = size.x * 2;
+
             if (size.x  > size.y / 2) size.x  = size.y / 2;
             
             m_physicsScene.OverlapCapsule(pos, size, Dir, 0, m_garbageColliders, m_layer);

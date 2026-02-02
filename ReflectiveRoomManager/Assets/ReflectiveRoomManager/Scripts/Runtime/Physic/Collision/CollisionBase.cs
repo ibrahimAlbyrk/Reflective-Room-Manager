@@ -25,6 +25,9 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         private HashSet<TCollider> _colliders;
         private readonly List<TCollider> _exitBuffer = new();
 
+        private int _physicsSceneRetries;
+        private const int MaxPhysicsSceneRetries = 5;
+
         public void SetEditable(bool state) => Editable = state;
         public void ChangeEditable()
         {
@@ -50,8 +53,14 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         {
             if (m_physicsScene == null)
             {
+                if (_physicsSceneRetries++ >= MaxPhysicsSceneRetries)
+                {
+                    Debug.LogError("[Collision] Physics scene not found after max retries, disabling", gameObject);
+                    enabled = false;
+                    return;
+                }
+
                 GetPhysicScene();
-                Debug.LogError("Physics scene not found", gameObject);
                 return;
             }
 
@@ -66,8 +75,26 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         private void SetCollidersCapacity()
         {
+            if (GarbageColliderSize <= 0)
+            {
+                Debug.LogWarning($"[Collision] GarbageColliderSize must be > 0, defaulting to 10", gameObject);
+                GarbageColliderSize = 10;
+            }
+
             _colliders = new HashSet<TCollider>(GarbageColliderSize);
             m_garbageColliders = new TCollider[GarbageColliderSize];
+        }
+
+        private void OnDisable()
+        {
+            _colliders?.Clear();
+        }
+
+        private void OnDestroy()
+        {
+            _colliders?.Clear();
+            _colliders = null;
+            m_garbageColliders = null;
         }
 
         private void HandleColliderCleaner()
