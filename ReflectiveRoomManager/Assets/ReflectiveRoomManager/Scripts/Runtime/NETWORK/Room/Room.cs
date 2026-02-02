@@ -24,6 +24,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         
         public int MaxPlayers;
         public int CurrentPlayers;
+        public int ReservedSlots;
 
         public readonly List<NetworkConnection> Connections;
 
@@ -99,6 +100,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             _customData.Clear();
         }
+
+        #endregion
+
+        #region Reservation
+
+        internal void AddReservedSlot() => ReservedSlots++;
+        internal void RemoveReservedSlot() => ReservedSlots--;
 
         #endregion
 

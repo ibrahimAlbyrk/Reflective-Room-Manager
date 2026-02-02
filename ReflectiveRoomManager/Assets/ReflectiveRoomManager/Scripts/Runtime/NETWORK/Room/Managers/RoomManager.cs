@@ -76,7 +76,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
             
-            if (room.MaxPlayers <= room.CurrentPlayers) // Handle room is full.
+            if (room.MaxPlayers <= room.CurrentPlayers + room.ReservedSlots) // Handle room is full.
             {
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
                 return;
@@ -166,7 +166,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
-            if (exitedRoom.CurrentPlayers < 1 && !exitedRoom.IsServer)
+            if (exitedRoom.CurrentPlayers < 1 && exitedRoom.ReservedSlots < 1 && !exitedRoom.IsServer)
                 RemoveRoom(exitedRoom);
             else
                 RoomListUtility.UpdateRoomToList(m_rooms,exitedRoom);
