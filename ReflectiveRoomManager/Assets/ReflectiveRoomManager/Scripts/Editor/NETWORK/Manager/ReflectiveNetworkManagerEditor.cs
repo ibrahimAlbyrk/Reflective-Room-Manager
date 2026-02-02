@@ -188,45 +188,58 @@ namespace REFLECTIVE.Editor.NETWORK.Manager
         
         private void ScanForNetworkIdentities()
         {
+            const int batchSize = 50;
+
             var identities = new List<GameObject>();
             var cancelled = false;
-            
+
             try
             {
                 var paths = EditorHelper.IterateOverProject("t:prefab").ToArray();
                 var count = 0;
-                foreach (var path in paths)
+
+                for (var i = 0; i < paths.Length; i += batchSize)
                 {
-                    // ignore test & example prefabs.
-                    // users sometimes keep the folders in their projects.
-                    if (path.Contains("Mirror/Tests/") ||
-                        path.Contains("Mirror/Examples/"))
+                    var batchEnd = Mathf.Min(i + batchSize, paths.Length);
+
+                    for (var j = i; j < batchEnd; j++)
                     {
-                        continue;
+                        var path = paths[j];
+
+                        // ignore test & example prefabs.
+                        // users sometimes keep the folders in their projects.
+                        if (path.Contains("Mirror/Tests/") ||
+                            path.Contains("Mirror/Examples/"))
+                        {
+                            continue;
+                        }
+
+                        if (EditorUtility.DisplayCancelableProgressBar("Searching for NetworkIdentities..",
+                                $"Scanned {count}/{paths.Length} prefabs. Found {identities.Count} new ones",
+                                count / (float)paths.Length))
+                        {
+                            cancelled = true;
+                            break;
+                        }
+
+                        count++;
+
+                        var ni = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(path);
+
+                        if (!ni)
+                        {
+                            continue;
+                        }
+
+                        if (!m_networkManager.spawnPrefabs.Contains(ni.gameObject))
+                        {
+                            identities.Add(ni.gameObject);
+                        }
                     }
 
-                    if (EditorUtility.DisplayCancelableProgressBar("Searching for NetworkIdentities..",
-                            $"Scanned {count}/{paths.Length} prefabs. Found {identities.Count} new ones",
-                            count / (float)paths.Length))
-                    {
-                        cancelled = true;
-                        break;
-                    }
+                    if (cancelled) break;
 
-                    count++;
-
-                    var ni = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(path);
-                    
-                    if (!ni)
-                    {
-                        continue;
-                    }
-
-                    if (!m_networkManager.spawnPrefabs.Contains(ni.gameObject))
-                    {
-                        identities.Add(ni.gameObject);
-                    }
-
+                    Resources.UnloadUnusedAssets();
                 }
             }
             finally
