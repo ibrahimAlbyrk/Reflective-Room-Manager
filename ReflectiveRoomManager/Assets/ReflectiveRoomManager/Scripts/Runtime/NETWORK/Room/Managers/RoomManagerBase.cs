@@ -76,9 +76,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             _connectionManager.RoomConnections.OnClientRoomIDMessage.AddListener(GetRoomIDForClient);
 
+            // Room cleanup initialization
+            if (_enableAutoCleanup)
+                _cleanupService = new RoomCleanupService(_emptyRoomTimeoutSeconds, _cleanupCheckIntervalSeconds);
+
             // Reconnection initialization
             if (_enableReconnection)
                 InitializeReconnection();
+        }
+
+        protected virtual void Update()
+        {
+            _cleanupService?.Update(m_rooms, room => RemoveRoom(room, forced: true));
         }
 
         private void InitializeReconnection()

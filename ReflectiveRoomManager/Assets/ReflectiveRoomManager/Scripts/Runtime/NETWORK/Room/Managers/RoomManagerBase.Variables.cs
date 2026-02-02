@@ -49,6 +49,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] private int _maxRequestsPerWindow = 5;
         [SerializeField] private float _rateLimitWindowSeconds = 10f;
 
+        [Header("Room Cleanup")]
+        [SerializeField] private bool _enableAutoCleanup;
+        [SerializeField] private float _emptyRoomTimeoutSeconds = 60f;
+        [SerializeField] private float _cleanupCheckIntervalSeconds = 5f;
+
         [Header("Reconnection")]
         [SerializeField] private bool _enableReconnection;
         [SerializeField] private float _reconnectionGracePeriod = 30f;
@@ -135,6 +140,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private IConnectionManager _connectionManager;
 
         private RateLimiter _rateLimiter;
+
+        private RoomCleanupService _cleanupService;
 
         protected ReconnectionService _reconnectionService;
         public bool EnableReconnection => _enableReconnection;

@@ -20,6 +20,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected virtual void OnStopServer()
         {
             _rateLimiter?.Clear();
+            _cleanupService?.Clear();
             _reconnectionService?.ClearAll();
             RemoveAllRoom(forced:true);
         }
