@@ -163,5 +163,35 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             else
                 m_eventManager.Invoke_OnServerDisconnectedClient(conn);
         }
+
+        internal override void UpdateRoomData(Room room, string key, string value)
+        {
+            if (room == null)
+            {
+                Debug.LogWarning("There is no such room for data update");
+                return;
+            }
+
+            room.UpdateCustomData(key, value);
+
+            RoomListUtility.UpdateRoomToList(m_rooms, room);
+
+            m_eventManager.Invoke_OnServerRoomDataUpdated(room);
+        }
+
+        internal override void UpdateRoomData(Room room, Dictionary<string, string> data)
+        {
+            if (room == null)
+            {
+                Debug.LogWarning("There is no such room for data update");
+                return;
+            }
+
+            room.UpdateCustomData(data);
+
+            RoomListUtility.UpdateRoomToList(m_rooms, room);
+
+            m_eventManager.Invoke_OnServerRoomDataUpdated(room);
+        }
     }
 }

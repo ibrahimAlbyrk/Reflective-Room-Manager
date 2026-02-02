@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using UnityEngine;
+using System.Collections.Generic;
 using REFLECTIVE.Runtime.NETWORK.Room.Scenes;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Service
@@ -119,6 +120,70 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             }
 
             RoomSceneChanger.ChangeScene(room, sceneName, keepClientObjects);
+        }
+
+        #endregion
+
+        #region Data Methods
+
+        public static void UpdateRoomData(string roomName, string key, string value)
+        {
+            if (RoomManagerBase.Instance == null)
+            {
+                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(UpdateRoomData));
+                return;
+            }
+
+            var room = RoomManagerBase.Instance.GetRoom(roomName);
+
+            if (room == null)
+            {
+                Debug.LogWarning($"[RoomServer] Room '{roomName}' not found — cannot update data");
+                return;
+            }
+
+            RoomManagerBase.Instance.UpdateRoomData(room, key, value);
+        }
+
+        public static void UpdateRoomData(string roomName, Dictionary<string, string> data)
+        {
+            if (RoomManagerBase.Instance == null)
+            {
+                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(UpdateRoomData));
+                return;
+            }
+
+            var room = RoomManagerBase.Instance.GetRoom(roomName);
+
+            if (room == null)
+            {
+                Debug.LogWarning($"[RoomServer] Room '{roomName}' not found — cannot update data");
+                return;
+            }
+
+            RoomManagerBase.Instance.UpdateRoomData(room, data);
+        }
+
+        public static void UpdateRoomData(Room room, string key, string value)
+        {
+            if (RoomManagerBase.Instance == null)
+            {
+                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(UpdateRoomData));
+                return;
+            }
+
+            RoomManagerBase.Instance.UpdateRoomData(room, key, value);
+        }
+
+        public static void UpdateRoomData(Room room, Dictionary<string, string> data)
+        {
+            if (RoomManagerBase.Instance == null)
+            {
+                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(UpdateRoomData));
+                return;
+            }
+
+            RoomManagerBase.Instance.UpdateRoomData(room, data);
         }
 
         #endregion

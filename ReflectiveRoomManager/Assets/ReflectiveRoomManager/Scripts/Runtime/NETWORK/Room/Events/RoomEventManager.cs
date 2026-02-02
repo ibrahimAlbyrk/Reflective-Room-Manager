@@ -38,5 +38,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
         {
             OnServerDisconnectedRoom?.Invoke(conn);
         }
+
+        /// <summary>Called on the server when room custom data is updated</summary>
+        public event Action<Room> OnServerRoomDataUpdated;
+
+        internal void Invoke_OnServerRoomDataUpdated(Room room)
+        {
+            OnServerRoomDataUpdated?.Invoke(room);
+        }
     }
 }

@@ -73,8 +73,19 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         internal void AddCustomData(string key, string value)
         {
             if (_customData.TryAdd(key, value)) return;
-            
+
             Debug.LogWarning("There is data with the same name for custom data");
+        }
+
+        internal void UpdateCustomData(string key, string value)
+        {
+            _customData[key] = value;
+        }
+
+        internal void UpdateCustomData(Dictionary<string, string> data)
+        {
+            foreach (var (key, value) in data)
+                _customData[key] = value;
         }
         
         internal bool RemoveCustomDataset(string dataName)

@@ -231,6 +231,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="isDisconnected"></param>
         internal abstract void ExitRoom(NetworkConnection conn, bool isDisconnected);
 
+        internal abstract void UpdateRoomData(Room room, string key, string value);
+        internal abstract void UpdateRoomData(Room room, Dictionary<string, string> data);
+
         #endregion
     }
 }

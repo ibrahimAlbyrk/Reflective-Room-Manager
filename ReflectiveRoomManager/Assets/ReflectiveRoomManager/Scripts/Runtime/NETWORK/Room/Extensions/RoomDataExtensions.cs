@@ -62,6 +62,52 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Extensions
 
         #endregion
 
+        #region Room Extensions
+
+        public static T GetData<T>(this Room room, string key)
+        {
+            if (room == null) return default;
+
+            var customData = room.GetCustomData();
+
+            if (!customData.TryGetValue(key, out var raw))
+                return default;
+
+            try
+            {
+                return Deserialize<T>(raw);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[RoomDataExtensions] Failed to deserialize key '{key}' as {typeof(T).Name}: {e.Message}");
+                return default;
+            }
+        }
+
+        public static bool TryGetData<T>(this Room room, string key, out T value)
+        {
+            value = default;
+
+            if (room == null) return false;
+
+            var customData = room.GetCustomData();
+
+            if (!customData.TryGetValue(key, out var raw))
+                return false;
+
+            try
+            {
+                value = Deserialize<T>(raw);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
         #region Serialization
 
         private static string Serialize<T>(T value)
