@@ -41,30 +41,37 @@ namespace REFLECTIVE.Runtime.SceneManagement.Processor
             while (_scenes.Count > 0)
             {
                 m_loadingState.StartLoading();
-                
+
                 var task = _scenes.Dequeue();
-                
-                //The reason I add one is that the first scene is the menu scene and it will stay open all the time.
-                var sceneIndex = LoadedScenes.Count + (task.LoadMode == LoadSceneMode.Additive ? 1 : 0);
-                
+
                 Scene scene = default;
-                
-                //If the scene is unloading, we need to get the scene info without deleting it
-                if (task.LoadOperation == LoadOperation.UnLoad)
-                    scene = task.Scene;
-                
+
+                switch (task.LoadOperation)
+                {
+                    case LoadOperation.UnLoad:
+                        scene = task.Scene;
+                        break;
+                    case LoadOperation.Load:
+                        SceneManager.sceneLoaded += OnSceneLoaded;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 yield return task.LoadOperation switch
                 {
                     LoadOperation.Load => StartAsyncSceneLoad(task),
                     LoadOperation.UnLoad => StartAsyncSceneUnLoad(task),
                     _ => throw new ArgumentOutOfRangeException($"SceneLoader", "Load Operation is undefined")
                 };
-                
-                //If the scene is loading, the scene information comes after loaded
+
                 if (task.LoadOperation == LoadOperation.Load)
-                    scene = SceneManager.GetSceneAt(sceneIndex);
+                    SceneManager.sceneLoaded -= OnSceneLoaded;
 
                 task.OnTaskCompletedAction?.Invoke(scene);
+                continue;
+
+                void OnSceneLoaded(Scene s, LoadSceneMode _) => scene = s;
             }
 
             m_loadingState.FinishLoading();
