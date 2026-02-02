@@ -1,18 +1,18 @@
-﻿using UnityEditor;
+using UnityEditor;
+using UnityEngine.UIElements;
+using REFLECTIVE.Editor.Utilities;
 using REFLECTIVE.Runtime.Singleton;
 
 namespace REFLECTIVE.Editor.NETWORK.Room
 {
-    using Utilities;
-    
     [CustomEditor(typeof(RoomSingleton<>), true)]
-    public class RoomSingletonEditor : UnityEditor.Editor
+    public class RoomSingletonEditor : ReflectiveEditorBase
     {
-        public override void OnInspectorGUI()
+        protected override string GetTitle() => "ROOM SINGLETON";
+
+        protected override void BuildInspectorUI(VisualElement root)
         {
-            CustomEditorUtilities.DrawReflectionTitle("ROOM SINGLETON");
-            
-            CustomEditorUtilities.DrawDefaultInspector(serializedObject);
+            AddDefaultProperties(root);
         }
     }
 }

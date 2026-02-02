@@ -1,191 +1,272 @@
-﻿using Mirror;
+using Mirror;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 using System.Collections.Generic;
 
 namespace REFLECTIVE.Editor.NETWORK.Manager
 {
     using Utilities;
-    
     using Runtime.NETWORK.Manager;
-    
+
     [CustomEditor(typeof(ReflectiveNetworkManager), true)]
-    public class ReflectiveNetworkManagerEditor : UnityEditor.Editor
+    public class ReflectiveNetworkManagerEditor : ReflectiveEditorBase
     {
-        private SerializedProperty _spawnListProperty;
-        private ReorderableList _spawnList;
-        
-        protected NetworkManager m_networkManager;
-        protected ReflectiveNetworkManager m_reflectiveNetworkManager;
+        private NetworkManager _networkManager;
+        private ReflectiveNetworkManager _reflectiveNetworkManager;
 
         private DefaultAsset _spawnablePrefabsFolderAsset;
 
-        private void OnEnable()
-        {
-            Init();
+        private ListView _spawnListView;
+        private SerializedProperty _spawnListProperty;
 
-            if (!string.IsNullOrEmpty(m_reflectiveNetworkManager.SpawnablePrefabsPath))
+        protected override string GetTitle() => "REFLECTIVE NETWORK MANAGER";
+
+        protected override void BuildInspectorUI(VisualElement root)
+        {
+            _networkManager = target as NetworkManager;
+            _reflectiveNetworkManager = _networkManager as ReflectiveNetworkManager;
+
+            if (!string.IsNullOrEmpty(_reflectiveNetworkManager.SpawnablePrefabsPath))
             {
                 _spawnablePrefabsFolderAsset =
-                    AssetDatabase.LoadAssetAtPath<DefaultAsset>(m_reflectiveNetworkManager.SpawnablePrefabsPath);
-                
-                if (m_reflectiveNetworkManager.IsFolderSearch)
-                {
-                    LoadFindedPrefabsFromFolder();   
-                }
+                    AssetDatabase.LoadAssetAtPath<DefaultAsset>(_reflectiveNetworkManager.SpawnablePrefabsPath);
             }
-        }
-        
-        protected void Init()
-        {
-            m_networkManager = target as NetworkManager;
-            m_reflectiveNetworkManager = m_networkManager as ReflectiveNetworkManager;
-            
-            CreateSpawnList();
-        }
 
-        private void CreateSpawnList()
-        {
+            AddDefaultProperties(root);
+
+            root.Add(CreateSectionHeader("SPAWNABLE PREFABS"));
+
+            var spawnBody = CreateSectionBody();
+
             _spawnListProperty = serializedObject.FindProperty("spawnPrefabs");
-                
-            _spawnList = new ReorderableList(serializedObject, _spawnListProperty)
+
+            var autoSearchProp = serializedObject.FindProperty("IsAutoPrefabSearcher");
+            var autoSearchField = new PropertyField(autoSearchProp);
+            autoSearchField.Bind(serializedObject);
+            spawnBody.Add(autoSearchField);
+
+            var manualSection = new VisualElement();
+
+            var folderSearchProp = serializedObject.FindProperty("IsFolderSearch");
+            var folderSearchField = new PropertyField(folderSearchProp);
+            folderSearchField.Bind(serializedObject);
+            manualSection.Add(folderSearchField);
+
+            var folderSection = new VisualElement();
+            folderSection.AddToClassList("folder-section");
+
+            var folderField = new ObjectField("Folder")
             {
-                drawHeaderCallback = DrawHeader,
-                drawElementCallback = DrawChild,
-                onReorderCallback = Changed,
-                onRemoveCallback = RemoveButton,
-                onChangedCallback = Changed,
-                onAddCallback = AddButton,
-                // this uses a 16x16 icon. other sizes make it stretch.
-                elementHeight = 16 
+                objectType = typeof(DefaultAsset),
+                value = _spawnablePrefabsFolderAsset
             };
-        }
 
-        public override void OnInspectorGUI()
-        {
-            CustomEditorUtilities.DrawReflectionTitle("REFLECTIVE NETWORK MANAGER");
-            
-            CustomEditorUtilities.DrawDefaultInspector(serializedObject);
-            
-            EditorGUILayout.Space(10);
-
-            EditorGUILayout.LabelField("Spawnable Prefabs Settings",new GUIStyle(EditorStyles.boldLabel));
-
-            EditorGUI.BeginChangeCheck();
-            
-            serializedObject.Update();
-
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("IsAutoPrefabSearcher"));
-
-            if (!m_reflectiveNetworkManager.IsAutoPrefabSearcher)
+            folderField.RegisterValueChangedCallback(evt =>
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("IsFolderSearch"));
+                var asset = evt.newValue as DefaultAsset;
 
-                if (m_reflectiveNetworkManager.IsFolderSearch)
+                if (asset != null)
                 {
-                    FindPrefabsFromFolder();
-                }
-
-                _spawnList.DoLayoutList();
-
-                if(m_reflectiveNetworkManager.IsFolderSearch)
-                {
-                    if (GUILayout.Button("Refresh List"))
-                    {
-                        LoadFindedPrefabsFromFolder();
-                        EditorUtility.SetDirty(target);
-                    }
-                }
-                else
-                {
-                    if (GUILayout.Button("Populate Spawnable Prefabs"))
-                    {
-                        ScanForNetworkIdentities();
-                    }
-                }   
-            }
-            
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(target);
-                serializedObject.ApplyModifiedProperties();
-            }
-        }
-
-        private void FindPrefabsFromFolder()
-        {
-            EditorGUI.BeginChangeCheck();
-            
-            _spawnablePrefabsFolderAsset = (DefaultAsset)EditorGUILayout.ObjectField("Folder: ", _spawnablePrefabsFolderAsset, typeof(DefaultAsset), true);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (_spawnablePrefabsFolderAsset != null)
-                {
-                    var assetPath = AssetDatabase.GetAssetPath(_spawnablePrefabsFolderAsset);
+                    var assetPath = AssetDatabase.GetAssetPath(asset);
 
                     if (AssetDatabase.IsValidFolder(assetPath))
                     {
-                        m_reflectiveNetworkManager.SpawnablePrefabsPath = assetPath;
-                        
-                        LoadFindedPrefabsFromFolder();
+                        _spawnablePrefabsFolderAsset = asset;
+                        _reflectiveNetworkManager.SpawnablePrefabsPath = assetPath;
+                        LoadPrefabsFromFolder();
+                        RefreshSpawnList();
                     }
                     else
                     {
                         Debug.LogWarning("This is not folder. You can only select folder!");
-                        _spawnablePrefabsFolderAsset = null;
+                        folderField.SetValueWithoutNotify(_spawnablePrefabsFolderAsset);
                     }
                 }
-                
+
                 serializedObject.ApplyModifiedProperties();
+            });
+
+            folderSection.Add(folderField);
+            manualSection.Add(folderSection);
+
+            BuildSpawnListView();
+            manualSection.Add(_spawnListView);
+
+            var refreshBtn = CreateButton("Refresh List", () =>
+            {
+                LoadPrefabsFromFolder();
+                RefreshSpawnList();
+                EditorUtility.SetDirty(target);
+            });
+
+            var populateBtn = CreateButton("Populate Spawnable Prefabs", () =>
+            {
+                ScanForNetworkIdentities();
+                RefreshSpawnList();
+            });
+
+            manualSection.Add(refreshBtn);
+            manualSection.Add(populateBtn);
+
+            spawnBody.Add(manualSection);
+            root.Add(spawnBody);
+
+            UpdateVisibility(manualSection, folderSection, refreshBtn, populateBtn);
+
+            autoSearchField.RegisterValueChangeCallback(_ =>
+            {
+                serializedObject.ApplyModifiedProperties();
+                UpdateVisibility(manualSection, folderSection, refreshBtn, populateBtn);
+            });
+
+            folderSearchField.RegisterValueChangeCallback(_ =>
+            {
+                serializedObject.ApplyModifiedProperties();
+                UpdateVisibility(manualSection, folderSection, refreshBtn, populateBtn);
+            });
+
+            if (_reflectiveNetworkManager.IsFolderSearch &&
+                !string.IsNullOrEmpty(_reflectiveNetworkManager.SpawnablePrefabsPath))
+            {
+                LoadPrefabsFromFolder();
             }
         }
 
-        private void LoadFindedPrefabsFromFolder()
+        private void UpdateVisibility(VisualElement manualSection, VisualElement folderSection,
+            Button refreshBtn, Button populateBtn)
         {
-            if (string.IsNullOrEmpty(m_reflectiveNetworkManager.SpawnablePrefabsPath)) return;
-            
+            var isAuto = _reflectiveNetworkManager.IsAutoPrefabSearcher;
+            var isFolder = _reflectiveNetworkManager.IsFolderSearch;
+
+            manualSection.style.display = isAuto ? DisplayStyle.None : DisplayStyle.Flex;
+            folderSection.style.display = isFolder ? DisplayStyle.Flex : DisplayStyle.None;
+            refreshBtn.style.display = isFolder ? DisplayStyle.Flex : DisplayStyle.None;
+            populateBtn.style.display = isFolder ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
+        private void BuildSpawnListView()
+        {
+            _spawnListView = new ListView
+            {
+                reorderable = true,
+                showAddRemoveFooter = true,
+                showBorder = true,
+                showFoldoutHeader = true,
+                headerTitle = "Registered Spawnable Prefabs",
+                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight
+            };
+
+            _spawnListView.AddToClassList("spawn-list");
+
+            _spawnListView.makeItem = () =>
+            {
+                var field = new ObjectField { objectType = typeof(GameObject) };
+                return field;
+            };
+
+            _spawnListView.bindItem = (element, index) =>
+            {
+                serializedObject.Update();
+
+                if (index >= _spawnListProperty.arraySize) return;
+
+                var field = (ObjectField)element;
+                var prop = _spawnListProperty.GetArrayElementAtIndex(index);
+                var go = (GameObject)prop.objectReferenceValue;
+
+                field.SetValueWithoutNotify(go);
+
+                field.RegisterValueChangedCallback(evt =>
+                {
+                    var newGo = evt.newValue as GameObject;
+
+                    if (newGo != null && !newGo.GetComponent<NetworkIdentity>())
+                    {
+                        Debug.LogError(
+                            $"Prefab {newGo} cannot be added as spawnable as it doesn't have a NetworkIdentity.");
+                        field.SetValueWithoutNotify(go);
+                        return;
+                    }
+
+                    serializedObject.Update();
+                    if (index < _spawnListProperty.arraySize)
+                    {
+                        _spawnListProperty.GetArrayElementAtIndex(index).objectReferenceValue = newGo;
+                        serializedObject.ApplyModifiedProperties();
+                        EditorUtility.SetDirty(target);
+                    }
+                });
+            };
+
+            _spawnListView.itemsSource = _networkManager.spawnPrefabs;
+
+            _spawnListView.itemsAdded += _ =>
+            {
+                EditorUtility.SetDirty(target);
+            };
+
+            _spawnListView.itemsRemoved += _ =>
+            {
+                EditorUtility.SetDirty(target);
+            };
+
+            _spawnListView.itemIndexChanged += (_, _) =>
+            {
+                EditorUtility.SetDirty(target);
+            };
+        }
+
+        private void RefreshSpawnList()
+        {
+            serializedObject.Update();
+
+            if (_spawnListView != null)
+            {
+                _spawnListView.itemsSource = _networkManager.spawnPrefabs;
+                _spawnListView.Rebuild();
+            }
+        }
+
+        private void LoadPrefabsFromFolder()
+        {
+            if (string.IsNullOrEmpty(_reflectiveNetworkManager.SpawnablePrefabsPath)) return;
+
             var identities = new List<GameObject>();
 
             try
             {
-                var assetPaths = IterateOverProject("t:prefab", m_reflectiveNetworkManager.SpawnablePrefabsPath).ToArray();
-                
+                var assetPaths = IterateOverProject("t:prefab", _reflectiveNetworkManager.SpawnablePrefabsPath)
+                    .ToArray();
+
                 foreach (var assetPath in assetPaths)
                 {
                     var ni = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-                    
+
                     if (!ni) continue;
-                    
-                    if (m_networkManager.playerPrefab == ni.gameObject) continue;
-                    
+
+                    if (_networkManager.playerPrefab == ni.gameObject) continue;
+
                     identities.Add(ni.gameObject);
                 }
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
-                
-                // RecordObject is needed for "*" to show up in Scene.
-                // however, this only saves List.Count without the entries.
-                Undo.RecordObject(m_networkManager, "NetworkManager: populated prefabs");
 
-                // set the entries
-                m_networkManager.spawnPrefabs = new List<GameObject>(identities);
+                Undo.RecordObject(_networkManager, "NetworkManager: populated prefabs");
 
-                // sort alphabetically for better UX
-                m_networkManager.spawnPrefabs = m_networkManager.spawnPrefabs.OrderBy(go => go.name).ToList();
+                _networkManager.spawnPrefabs = new List<GameObject>(identities);
+                _networkManager.spawnPrefabs = _networkManager.spawnPrefabs.OrderBy(go => go.name).ToList();
 
-                // SetDirty is required to save the individual entries properly.
                 EditorUtility.SetDirty(target);
-                
-                // Loading assets might use a lot of memory, so try to unload them after
+
                 Resources.UnloadUnusedAssets();
             }
         }
-        
+
         private void ScanForNetworkIdentities()
         {
             const int batchSize = 50;
@@ -206,8 +287,6 @@ namespace REFLECTIVE.Editor.NETWORK.Manager
                     {
                         var path = paths[j];
 
-                        // ignore test & example prefabs.
-                        // users sometimes keep the folders in their projects.
                         if (path.Contains("Mirror/Tests/") ||
                             path.Contains("Mirror/Examples/"))
                         {
@@ -226,12 +305,9 @@ namespace REFLECTIVE.Editor.NETWORK.Manager
 
                         var ni = AssetDatabase.LoadAssetAtPath<NetworkIdentity>(path);
 
-                        if (!ni)
-                        {
-                            continue;
-                        }
+                        if (!ni) continue;
 
-                        if (!m_networkManager.spawnPrefabs.Contains(ni.gameObject))
+                        if (!_networkManager.spawnPrefabs.Contains(ni.gameObject))
                         {
                             identities.Add(ni.gameObject);
                         }
@@ -244,93 +320,25 @@ namespace REFLECTIVE.Editor.NETWORK.Manager
             }
             finally
             {
-
                 EditorUtility.ClearProgressBar();
+
                 if (!cancelled)
                 {
-                    // RecordObject is needed for "*" to show up in Scene.
-                    // however, this only saves List.Count without the entries.
-                    Undo.RecordObject(m_networkManager, "NetworkManager: populated prefabs");
+                    Undo.RecordObject(_networkManager, "NetworkManager: populated prefabs");
 
-                    // add the entries
-                    m_networkManager.spawnPrefabs.AddRange(identities);
+                    _networkManager.spawnPrefabs.AddRange(identities);
+                    _networkManager.spawnPrefabs = _networkManager.spawnPrefabs.OrderBy(go => go.name).ToList();
 
-                    // sort alphabetically for better UX
-                    m_networkManager.spawnPrefabs = m_networkManager.spawnPrefabs.OrderBy(go => go.name).ToList();
-
-                    // SetDirty is required to save the individual entries properly.
                     EditorUtility.SetDirty(target);
                 }
-                // Loading assets might use a lot of memory, so try to unload them after
+
                 Resources.UnloadUnusedAssets();
             }
         }
 
-        private static void DrawHeader(Rect headerRect)
-        {
-            GUI.Label(headerRect, "Registered Spawnable Prefabs:");
-        }
-
-        internal void DrawChild(Rect r, int index, bool isActive, bool isFocused)
-        {
-            var prefab = _spawnListProperty.GetArrayElementAtIndex(index);
-            var go = (GameObject)prefab.objectReferenceValue;
-
-            GUIContent label;
-            
-            if (go == null)
-            {
-                label = new GUIContent("Empty", "Drag a prefab with a NetworkIdentity here");
-            }
-            else
-            {
-                var identity = go.GetComponent<NetworkIdentity>();
-                label = new GUIContent(go.name, identity != null ? $"AssetId: [{identity.assetId}]" : "No Network Identity");
-            }
-
-            var newGameObject = (GameObject)EditorGUI.ObjectField(r, label, go, typeof(GameObject), false);
-
-            if (newGameObject != go)
-            {
-                if (newGameObject != null && !newGameObject.GetComponent<NetworkIdentity>())
-                {
-                    Debug.LogError($"Prefab {newGameObject} cannot be added as spawnable as it doesn't have a NetworkIdentity.");
-                    return;
-                }
-                prefab.objectReferenceValue = newGameObject;
-            }
-        }
-
-        internal void Changed(ReorderableList list)
-        {
-            EditorUtility.SetDirty(target);
-        }
-
-        internal void AddButton(ReorderableList list)
-        {
-            _spawnListProperty.arraySize += 1;
-            list.index = _spawnListProperty.arraySize - 1;
-
-            var obj = _spawnListProperty.GetArrayElementAtIndex(_spawnListProperty.arraySize - 1);
-            obj.objectReferenceValue = null;
-
-            _spawnList.index = _spawnList.count - 1;
-
-            Changed(list);
-        }
-
-        internal void RemoveButton(ReorderableList list)
-        {
-            _spawnListProperty.DeleteArrayElementAtIndex(_spawnList.index);
-            if (list.index >= _spawnListProperty.arraySize)
-            {
-                list.index = _spawnListProperty.arraySize - 1;
-            }
-        }
-        
         private static IEnumerable<string> IterateOverProject(string filter, string folder)
         {
-            return AssetDatabase.FindAssets(filter, new[]{folder}).Select(AssetDatabase.GUIDToAssetPath);
+            return AssetDatabase.FindAssets(filter, new[] { folder }).Select(AssetDatabase.GUIDToAssetPath);
         }
     }
 }
