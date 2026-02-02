@@ -1,5 +1,6 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using REFLECTIVE.Runtime.Physic.Collision;
 
 namespace REFLECTIVE.Editor.Physic.Collision.Utilities
@@ -10,50 +11,42 @@ namespace REFLECTIVE.Editor.Physic.Collision.Utilities
         public static readonly Color EnableColor = new(0.48f, 1f, 0.22f, .5f);
         public static readonly Color DisableColor = new(0.48f, 1f, 0.22f, .2f);
 
-        public static void DrawEditColliderButton(ref bool editable)
+        public static VisualElement CreateEditColliderRow<TCollision, PScene>(
+            CollisionBase<TCollision, PScene> collision) where TCollision : Component
         {
-            GUILayout.Space(10);
+            var row = new VisualElement();
+            row.AddToClassList("edit-collider-row");
 
-            var buttonStyle = new GUIStyle(EditorStyles.miniButtonLeft)
+            row.Add(new Label("Edit Collider:"));
+
+            var button = new Button();
+            button.AddToClassList("edit-collider-btn");
+
+            var editIcon = EditorGUIUtility.IconContent("EditCollider").image;
+            if (editIcon != null)
             {
-                alignment = TextAnchor.MiddleCenter
-            };
-
-            var editIcon = EditorGUIUtility.IconContent("EditCollider").image as Texture2D;
-            var editButtonContent = new GUIContent(editIcon);
-
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Label("Edit Collider: ");
-
-            if (GUILayout.Button(editButtonContent, buttonStyle, GUILayout.Width(30), GUILayout.Height(30)))
-            {
-                editable = !editable;
+                var icon = new Image { image = editIcon };
+                icon.style.width = 16;
+                icon.style.height = 16;
+                button.Add(icon);
             }
 
-            GUILayout.FlexibleSpace();
+            if (collision.Editable)
+                button.AddToClassList("edit-collider-btn--active");
 
-            GUILayout.EndHorizontal();
-        }
+            button.clicked += () =>
+            {
+                collision.Editable = !collision.Editable;
 
-        public static void DrawGarbageField<TCollision, PScene>(CollisionBase<TCollision, PScene> collision)
-            where TCollision : Component
-        {
-            if (EditorApplication.isPlaying)
-                GUI.enabled = false;
+                if (collision.Editable)
+                    button.AddToClassList("edit-collider-btn--active");
+                else
+                    button.RemoveFromClassList("edit-collider-btn--active");
+            };
 
-            collision.GarbageColliderSize =
-                EditorGUILayout.IntField("Garbage Collider Size: ", collision.GarbageColliderSize);
+            row.Add(button);
 
-            GUI.enabled = true;
-
-            EditorGUILayout.Space(10);
-        }
-
-        public static void DrawBaseInspector<TCollision, PScene>(CollisionBase<TCollision, PScene> collision)
-            where TCollision : Component
-        {
-            DrawEditColliderButton(ref collision.Editable);
+            return row;
         }
     }
 }

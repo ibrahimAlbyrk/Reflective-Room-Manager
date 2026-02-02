@@ -1,7 +1,8 @@
-﻿using UnityEditor;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
 using REFLECTIVE.Runtime.Physic.Collision.Utilities;
-using UnityEngine;
 
 namespace REFLECTIVE.Editor.Physic.Collision
 {
@@ -12,9 +13,9 @@ namespace REFLECTIVE.Editor.Physic.Collision
     [CustomEditor(typeof(CollisionSphere))]
     public class CollisionSphereEditor : CollisionBaseEditor<CollisionSphere>
     {
-        protected override void DrawInspector(CollisionSphere myTarget)
+        protected override void BuildCollisionInspector(VisualElement root, CollisionSphere myTarget)
         {
-            EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
+            root.Add(EditorCollisionDrawUtilities.CreateEditColliderRow(myTarget));
         }
 
         protected override void DrawCollision(CollisionSphere myTarget)
@@ -30,20 +31,20 @@ namespace REFLECTIVE.Editor.Physic.Collision
             var transform = myTarget.transform;
 
             var rotation = transform.rotation;
-            
+
             var radius = CollisionTransformUtilities.GetRadius(transform, myTarget.Radius);
-            
+
             var center = myTarget.Center;
-            
+
             var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
 
             Handles.matrix = matrix;
-            
+
             EditorDrawUtilities.DrawToShadedSphere(center, rotation, radius);
-            
+
             Handles.matrix = Matrix4x4.identity;
         }
-        
+
         protected override void DrawEditableHandles(CollisionSphere myTarget)
         {
             if (!myTarget.Editable || !myTarget.enabled) return;
@@ -61,11 +62,11 @@ namespace REFLECTIVE.Editor.Physic.Collision
             var transform = myTarget.transform;
 
             var rotation = transform.rotation;
-            
+
             var radius = CollisionTransformUtilities.GetRadius(transform, myTarget.Radius);
 
             var center = myTarget.Center;
-            
+
             var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
 
             Handles.matrix = matrix;
@@ -73,13 +74,13 @@ namespace REFLECTIVE.Editor.Physic.Collision
             var tempSize = Handles.RadiusHandle(rotation, center, radius, true);
 
             Handles.matrix = Matrix4x4.identity;
-            
+
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(myTarget, "Edited Collider");
-                
+
                 var transformRadius = CollisionTransformUtilities.GetTransformRadius(transform);
-                
+
                 myTarget.Radius = tempSize / transformRadius;
             }
         }

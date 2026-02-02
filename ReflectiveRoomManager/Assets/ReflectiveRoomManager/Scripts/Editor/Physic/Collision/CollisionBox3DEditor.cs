@@ -1,20 +1,21 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using REFLECTIVE.Runtime.Physic.Collision.D3;
 
 namespace REFLECTIVE.Editor.Physic.Collision
 {
     using Utilities;
-    
+
     [CanEditMultipleObjects]
     [CustomEditor(typeof(CollisionBox3D))]
     public class CollisionBox3DEditor : CollisionBaseEditor<CollisionBox3D>
     {
-        protected override void DrawInspector(CollisionBox3D myTarget)
+        protected override void BuildCollisionInspector(VisualElement root, CollisionBox3D myTarget)
         {
-            EditorCollisionDrawUtilities.DrawBaseInspector(myTarget);
+            root.Add(EditorCollisionDrawUtilities.CreateEditColliderRow(myTarget));
         }
-        
+
         protected override void DrawCollision(CollisionBox3D myTarget)
         {
             if (myTarget.enabled)
@@ -24,22 +25,22 @@ namespace REFLECTIVE.Editor.Physic.Collision
                     : EditorCollisionDrawUtilities.EnableColor;
             }
             else Handles.color = EditorCollisionDrawUtilities.DisableColor;
-            
+
             var center = myTarget.transform.TransformPoint(myTarget.Center);
 
             var size = Vector3.Scale(myTarget.transform.localScale, myTarget.Size);
 
             Handles.matrix = Matrix4x4.TRS(center, myTarget.transform.rotation, size);
-            
+
             Handles.DrawWireCube(Vector3.zero, Vector3.one);
-            
+
             Handles.matrix = Matrix4x4.identity;
         }
 
         protected override void DrawEditableHandles(CollisionBox3D myTarget)
         {
             if (!myTarget.Editable || !myTarget.enabled) return;
-            
+
             if (myTarget.enabled)
             {
                 Handles.color = myTarget.Editable
@@ -47,10 +48,10 @@ namespace REFLECTIVE.Editor.Physic.Collision
                     : EditorCollisionDrawUtilities.EnableColor;
             }
             else Handles.color = EditorCollisionDrawUtilities.DisableColor;
-            
+
             EditorGUI.BeginChangeCheck();
-            
-            var boxDirections = new []
+
+            var boxDirections = new[]
             {
                 Vector3.up,
                 -Vector3.up,
@@ -61,20 +62,20 @@ namespace REFLECTIVE.Editor.Physic.Collision
             };
 
             var transform = myTarget.transform;
-            
+
             var boxCenter = myTarget.Center;
             var tempSize = Vector3.Scale(transform.localScale * .5f, myTarget.Size);
 
             var matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
 
             Handles.matrix = matrix;
-            
+
             for (var i = 0; i < boxDirections.Length; i++)
             {
                 var handleDirection = boxDirections[i];
-                
+
                 var handlePosition = boxCenter + Vector3.Scale(handleDirection, tempSize);
-                
+
                 var newHandlePosition = Handles.FreeMoveHandle(handlePosition,
                     0.03f * HandleUtility.GetHandleSize(handlePosition), Vector3.zero, Handles.DotHandleCap);
 
@@ -96,7 +97,7 @@ namespace REFLECTIVE.Editor.Physic.Collision
                         break;
                 }
             }
-            
+
             Handles.matrix = Matrix4x4.identity;
 
             if (EditorGUI.EndChangeCheck())

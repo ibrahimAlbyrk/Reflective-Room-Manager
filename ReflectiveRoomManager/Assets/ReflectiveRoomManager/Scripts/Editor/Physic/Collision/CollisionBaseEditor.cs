@@ -1,29 +1,29 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using REFLECTIVE.Editor.Utilities;
+using REFLECTIVE.Runtime.Physic.Collision;
+using UnityEditor.UIElements;
 
 namespace REFLECTIVE.Editor.Physic.Collision
 {
-    using Editor.Utilities;
-    
-    using Runtime.Physic.Collision;
-    
     [CanEditMultipleObjects]
-    public abstract class CollisionBaseEditor<TargetType> : UnityEditor.Editor where TargetType : Object
+    public abstract class CollisionBaseEditor<TargetType> : ReflectiveEditorBase where TargetType : Object
     {
-        public override void OnInspectorGUI()
+        protected override string GetTitle() => null;
+
+        protected override void BuildInspectorUI(VisualElement root)
         {
-            var _target = (TargetType)target;
-            
-            DrawInspector(_target);
-            
-            CustomEditorUtilities.DrawDefaultInspector(serializedObject);
-            
-            if (GUI.changed)
+            var typedTarget = (TargetType)target;
+
+            BuildCollisionInspector(root, typedTarget);
+
+            AddDefaultProperties(root);
+
+            root.TrackSerializedObjectValue(serializedObject, _ =>
             {
-                Undo.RecordObject(_target, "Changed Collider");
-            
-                EditorUtility.SetDirty(target);   
-            }
+                EditorUtility.SetDirty(target);
+            });
         }
 
         protected virtual void OnSceneGUI()
@@ -34,25 +34,24 @@ namespace REFLECTIVE.Editor.Physic.Collision
             DrawEditableHandles(myTarget);
         }
 
-        protected virtual void DrawInspector(TargetType myTarget)
+        protected virtual void BuildCollisionInspector(VisualElement root, TargetType myTarget)
         {
-            
         }
 
         protected virtual void DrawCollision(TargetType myTarget)
         {
         }
-        
+
         protected virtual void DrawEditableHandles(TargetType myTarget)
         {
         }
-        
+
         private void OnEnable()
         {
-            var _target = (TargetType)target;
+            var typedTarget = (TargetType)target;
 
-            if (_target is not IEditableForEditor editable) return;
-            
+            if (typedTarget is not IEditableForEditor editable) return;
+
             editable.SetEditable(false);
         }
     }
