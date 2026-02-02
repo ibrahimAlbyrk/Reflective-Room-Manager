@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using REFLECTIVE.Runtime.NETWORK.Room;
 using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
 namespace Examples.SpaceShooter.Network.Managers.Rooms
@@ -22,7 +23,11 @@ namespace Examples.SpaceShooter.Network.Managers.Rooms
             
             const string sceneName = "OpenWorld_Scene";
             
-            RoomClient.CreateRoom(roomName, sceneName, maxPlayers);
+            var roomInfo = new RoomBuilder(roomName, sceneName)
+                .WithMaxPlayers(maxPlayers)
+                .Build();
+
+            RoomClient.CreateRoom(roomInfo);
         }
 
         private void ButtonEnableHandler()

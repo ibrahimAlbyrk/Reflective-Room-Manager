@@ -81,7 +81,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 if(_isServer)
                     RoomServer.CreateRoom(roomInfo);
                 else
-                    RoomClient.CreateRoom(roomInfo.RoomName, roomInfo.SceneName, roomInfo.MaxPlayers);
+                    RoomClient.CreateRoom(roomInfo);
             }
 
             if (!_isServer)

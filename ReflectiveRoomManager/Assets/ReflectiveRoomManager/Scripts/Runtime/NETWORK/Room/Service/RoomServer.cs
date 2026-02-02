@@ -1,5 +1,4 @@
 ﻿using Mirror;
-using System.Collections.Generic;
 using UnityEngine;
 using REFLECTIVE.Runtime.NETWORK.Room.Scenes;
 
@@ -30,65 +29,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
                 return;
             }
 
-            RoomManagerBase.Instance.CreateRoom(roomInfo, conn);
-        }
-
-        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
-        {
-            CreateRoom(null, roomName, sceneName, maxPlayers, customData);
-        }
-
-        public static void CreateRoom(string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = null)
-        {
-            customData ??= new Dictionary<string, string>();
-
-            CreateRoom(null, roomName, sceneName, maxPlayers, customData);
-        }
-
-        public static void CreateRoom(NetworkConnectionToClient conn, string roomName, string sceneName, int maxPlayers, params (string, string)[] customData)
-        {
-            if (RoomManagerBase.Instance == null)
-            {
-                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(CreateRoom));
-                return;
-            }
-            
-            var data = new Dictionary<string, string>();
-
-            foreach (var (key, value) in customData)
-            {
-                data.Add(key, value);
-            }
-            
-            var roomInfo = new RoomInfo
-            {
-                RoomName = roomName,
-                SceneName = sceneName,
-                MaxPlayers = maxPlayers,
-                CustomData = data
-            };
-            
-            RoomManagerBase.Instance.CreateRoom(roomInfo, conn);
-        }
-
-        public static void CreateRoom(NetworkConnectionToClient conn, string roomName, string sceneName, int maxPlayers, Dictionary<string, string> customData = null)
-        {
-            if (RoomManagerBase.Instance == null)
-            {
-                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(CreateRoom));
-                return;
-            }
-            
-            customData ??= new Dictionary<string, string>();
-            
-            var roomInfo = new RoomInfo
-            {
-                RoomName = roomName,
-                SceneName = sceneName,
-                MaxPlayers = maxPlayers,
-                CustomData = customData
-            };
-            
             RoomManagerBase.Instance.CreateRoom(roomInfo, conn);
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using Mirror;
 using REFLECTIVE.Runtime.NETWORK.Room;
+using REFLECTIVE.Runtime.NETWORK.Room.Structs;
 using REFLECTIVE.Runtime.NETWORK.Manager;
 using REFLECTIVE.Runtime.NETWORK.Room.Service;
 
@@ -39,7 +40,11 @@ namespace Examples.SpaceShooter.Network.Managers
         {
             var sceneName = RoomManagerBase.Instance.RoomScene;
 
-            RoomServer.CreateRoom("OpenWorld", sceneName, 100);
+            var roomInfo = new RoomBuilder("OpenWorld", sceneName)
+                .WithMaxPlayers(100)
+                .Build();
+
+            RoomServer.CreateRoom(roomInfo);
         }
     }
 }
