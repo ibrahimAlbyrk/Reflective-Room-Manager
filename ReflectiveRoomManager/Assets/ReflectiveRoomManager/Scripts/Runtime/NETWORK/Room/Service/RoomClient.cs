@@ -101,10 +101,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         {
             var room = RoomManagerBase.Instance.GetRoomOfClient();
 
-            if (!room.CustomData.TryGetValue(dataName, out var dataValue))
+            if (room.CustomData == null || !room.CustomData.TryGetValue(dataName, out var dataValue))
             {
-                Debug.LogWarning("No such data was found");
-                
+                Debug.LogWarning("Room or custom data not found");
                 return default;
             }
 
