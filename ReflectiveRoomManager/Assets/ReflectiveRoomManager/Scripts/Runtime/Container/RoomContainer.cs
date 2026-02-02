@@ -40,17 +40,17 @@ namespace REFLECTIVE.Runtime.Container
             {
                 var containerData = new RoomSingletonData
                 (
-                    new HashSet<object> { element }
+                    new Dictionary<Type, object> { { typeof(T), element } }
                 );
 
                 _data[scene] = containerData;
-                
+
                 return true;
             }
-            
+
             if (container.HasSameTypeObject<T>()) return false;
-            
-            container.Objects.Add(element);
+
+            container.Add(element);
 
             return true;
         }
@@ -68,9 +68,7 @@ namespace REFLECTIVE.Runtime.Container
 
             if (!_data.TryGetValue(scene, out var container)) return false;
 
-            var obj = container.GetObjectOfSameType<T>();
-
-            return container.Objects.Remove(obj);
+            return container.Remove<T>();
         }
 
         /// <summary>
