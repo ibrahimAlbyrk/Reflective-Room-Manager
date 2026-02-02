@@ -782,7 +782,7 @@ includeSubdirectories - whether child directories should be watched as well
                 $"\r\n\r\nDepending on version you'll find it via: " +
                 $"\r\n1) Edit -> Preferences -> General -> Script Changes While Playing -> Recompile After Finished Playing." +
                 $"\r\n2) Edit -> Preferences -> Asset Pipeline -> Auto Refresh -> Enabled Outside Playmode",
-                "Ok, disable asset auto refresh (I'll refresh manually when needed)",
+                "Disable auto refresh (I'll refresh manually)",
                 "No, don't change (stop showing this message)",
                 "No, don't change"
             );
@@ -854,7 +854,7 @@ In the meantime, you can exclude any file from Hot-Reload by
         protected static void AutoDetectAndSetShaderMode()
         {
             var usedShaderMode = FastScriptReloadPreference.ShadersMode.Surface;
-            var renderPipelineAsset = GraphicsSettings.renderPipelineAsset;
+            var renderPipelineAsset = GraphicsSettings.defaultRenderPipeline;
             if (renderPipelineAsset == null)
             {
                 usedShaderMode = FastScriptReloadPreference.ShadersMode.Surface;

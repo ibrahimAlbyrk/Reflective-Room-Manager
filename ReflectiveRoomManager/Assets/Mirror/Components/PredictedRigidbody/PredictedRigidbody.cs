@@ -362,7 +362,7 @@ namespace Mirror
 
         // movement detection is virtual, in case projects want to use other methods.
         protected virtual bool IsMoving() =>
-            predictedRigidbody.velocity.magnitude >= motionSmoothingVelocityThreshold ||
+            predictedRigidbody.linearVelocity.magnitude >= motionSmoothingVelocityThreshold ||
             predictedRigidbody.angularVelocity.magnitude >= motionSmoothingAngularVelocityThreshold;
 
         void UpdateGhosting()
@@ -475,7 +475,7 @@ namespace Mirror
             // grab current position/rotation/velocity only once.
             // this is performance critical, avoid calling .transform multiple times.
             tf.GetPositionAndRotation(out Vector3 currentPosition, out Quaternion currentRotation); // faster than accessing .position + .rotation manually
-            Vector3 currentVelocity = predictedRigidbody.velocity;
+            Vector3 currentVelocity = predictedRigidbody.linearVelocity;
             Vector3 currentAngularVelocity = predictedRigidbody.angularVelocity;
 
             // calculate delta to previous state (if any)
@@ -529,7 +529,7 @@ namespace Mirror
             // hard snap to the position below a threshold velocity.
             // this is fine because the visual object still smoothly interpolates to it.
             // => consider both velocity and angular velocity (in case of Rigidbodies only rotating with joints etc.)
-            if (predictedRigidbody.velocity.magnitude <= snapThreshold &&
+            if (predictedRigidbody.linearVelocity.magnitude <= snapThreshold &&
                 predictedRigidbody.angularVelocity.magnitude <= snapThreshold)
             {
                 // Debug.Log($"Prediction: snapped {name} into place because velocity {predictedRigidbody.velocity.magnitude:F3} <= {snapThreshold:F3}");
@@ -543,7 +543,7 @@ namespace Mirror
                 // projects may keep Rigidbodies as kinematic sometimes. in that case, setting velocity would log an error
                 if (!predictedRigidbody.isKinematic)
                 {
-                    predictedRigidbody.velocity = velocity;
+                    predictedRigidbody.linearVelocity = velocity;
                     predictedRigidbody.angularVelocity = angularVelocity;
                 }
 
@@ -589,7 +589,7 @@ namespace Mirror
             // (projects may keep Rigidbodies as kinematic sometimes. in that case, setting velocity would log an error)
             if (!predictedRigidbody.isKinematic)
             {
-                predictedRigidbody.velocity = velocity;
+                predictedRigidbody.linearVelocity = velocity;
                 predictedRigidbody.angularVelocity = angularVelocity;
             }
         }
@@ -753,7 +753,7 @@ namespace Mirror
             writer.WriteFloat(Time.deltaTime);
             writer.WriteVector3(position);
             writer.WriteQuaternion(rotation);
-            writer.WriteVector3(predictedRigidbody.velocity);
+            writer.WriteVector3(predictedRigidbody.linearVelocity);
             writer.WriteVector3(predictedRigidbody.angularVelocity);
         }
 
