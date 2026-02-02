@@ -60,7 +60,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <param name="sceneListener">The listener object that implements the IRoomListener interface.</param>
         public void RegisterListener<T>(IRoomListener sceneListener) where T : IRoomListener
         {
-            var room = RoomManagerBase.Instance.GetRoomOfScene(Scene);
+            var room = RoomManagerBase.Instance.GetRoomByScene(Scene);
 
             if (room == null)
             {
@@ -78,7 +78,7 @@ namespace REFLECTIVE.Runtime.Container.Helper
         /// <param name="sceneListener">The listener to unregister.</param>
         public void UnRegisterListener<T>(IRoomListener sceneListener) where T : IRoomListener
         {
-            var room = RoomManagerBase.Instance.GetRoomOfScene(Scene);
+            var room = RoomManagerBase.Instance.GetRoomByScene(Scene);
 
             if (room == null)
             {

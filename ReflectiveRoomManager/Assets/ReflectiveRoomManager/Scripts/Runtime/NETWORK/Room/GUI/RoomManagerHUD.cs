@@ -37,7 +37,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
             if (!_isServer)
             {
-                var currentRoom = roomManager.GetRoomOfClient();
+                var currentRoom = roomManager.GetCurrentRoomInfo();
                 
                 if (!string.IsNullOrEmpty(currentRoom.RoomName))
                 {

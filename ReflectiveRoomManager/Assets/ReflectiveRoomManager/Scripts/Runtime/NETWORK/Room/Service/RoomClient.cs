@@ -44,7 +44,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         
         public static string GetRoomCustomData(string dataName)
         {
-            var room = RoomManagerBase.Instance.GetRoomOfClient();
+            var room = RoomManagerBase.Instance.GetCurrentRoomInfo();
 
             if (room.CustomData == null || !room.CustomData.TryGetValue(dataName, out var dataValue))
             {

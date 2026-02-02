@@ -13,7 +13,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 
         private static IEnumerator DoSyncScene_Cor(NetworkConnection conn, uint roomID)
         {
-            var room = RoomManagerBase.Instance.GetRoomOfID(roomID);
+            var room = RoomManagerBase.Instance.GetRoom(roomID);
 
             if (room == null) yield break;
 

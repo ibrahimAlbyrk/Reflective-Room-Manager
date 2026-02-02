@@ -72,7 +72,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         /// <returns></returns>
         private static GameObject SpawnPlayer(NetworkConnection conn, GameObject prefab)
         {
-            var room = RoomManagerBase.Instance.GetRoomOfPlayer(conn);
+            var room = RoomManagerBase.Instance.GetRoomByConnection(conn);
 
             //If there is no room, then it is in the lobby, and since it is in the lobby in this script,
             //I take the scene of its own object.

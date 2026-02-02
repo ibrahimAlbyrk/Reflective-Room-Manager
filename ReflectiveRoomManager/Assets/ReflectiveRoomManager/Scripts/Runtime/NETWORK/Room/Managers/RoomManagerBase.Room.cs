@@ -35,19 +35,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         /// <summary>
-        /// Retrieve a room info based on the given room name.
-        /// </summary>
-        /// <param name="roomName">The name of the room to retrieve information for.</param>
-        /// <remarks>Only works on client</remarks>
-        /// <returns>The RoomInfo object containing information about the room. Returns null if the room does not exist.</returns>
-        public RoomInfo GetRoomInfo(string roomName)
-        {
-            var roomInfo = _roomListInfos.FirstOrDefault(roomInfo => roomInfo.RoomName == roomName && !roomInfo.IsPrivate);
-
-            return roomInfo;
-        }
-        
-        /// <summary>
         /// Returns a list of all room infos
         /// </summary>
         /// <remarks>Only works on client</remarks>
@@ -60,7 +47,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <remarks>Only works on server</remarks>
         /// <param name="conn"></param>
         /// <returns>Information about the room where the "connection" is located.</returns>
-        public Room GetRoomOfPlayer(NetworkConnection conn)
+        public Room GetRoomByConnection(NetworkConnection conn)
         {
             return m_rooms.FirstOrDefault(room => room.Connections.Any(connection => connection == conn));
         }
@@ -69,22 +56,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// The function returns information about the room to which id belongs
         /// </summary>
         /// <remarks>Only works on server</remarks>
-        /// <param name="ID"></param>
+        /// <param name="id"></param>
         /// <returns>Information about the room where the "connection" is located.</returns>
-        public Room GetRoomOfID(uint ID)
+        public Room GetRoom(uint id)
         {
-            return m_rooms.FirstOrDefault(room => room.ID == ID);
-        }
-        
-        /// <summary>
-        /// The function returns information about the room info to which id belongs
-        /// </summary>
-        /// <remarks>Only works on client</remarks>
-        /// <param name="ID"></param>
-        /// <returns>Information about the room info where the "connection" is located.</returns>
-        public RoomInfo GetRoomInfoOfID(uint ID)
-        {
-            return _roomListInfos.FirstOrDefault(room => room.ID == ID);
+            return m_rooms.FirstOrDefault(room => room.ID == id);
         }
 
         /// <summary>
@@ -92,7 +68,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         /// <remarks>Only works on client</remarks>
         /// <returns>Information about the room where the "connection ID" is located.</returns>
-        public RoomInfo GetRoomOfClient()
+        public RoomInfo GetCurrentRoomInfo()
         {
             return _roomListInfos.FirstOrDefault(room => room.ID == RoomClient.CurrentRoomID);
         }
@@ -103,7 +79,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <remarks>Only works on server</remarks>
         /// <param name="scene"></param>
         /// <returns>Information about the room where the scene* is located</returns>
-        public Room GetRoomOfScene(Scene scene)
+        public Room GetRoomByScene(Scene scene)
         {
             return m_rooms.FirstOrDefault(room => room.Scene == scene);
         }
