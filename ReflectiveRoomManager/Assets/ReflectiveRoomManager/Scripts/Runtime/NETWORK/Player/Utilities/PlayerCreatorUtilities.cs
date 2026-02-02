@@ -12,8 +12,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
     
     public static class PlayerCreatorUtilities
     {
-        private static MonoBehaviourHook _monoBehaviourHook;
-
         /// <summary>
         /// Checks whether the client is a player object.
         /// If there is a player object, it replaces it with ReplacePlayer()
@@ -26,13 +24,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         /// <param name="onCompleted"></param>
         public static void TryCreatePlayerOrReplace(NetworkConnection conn, GameObject prefab, Action<GameObject> onCompleted = null)
         {
-            Init();
-            
             var enumerator = conn.identity != null
                 ? ReplacePlayer_Cor(conn, prefab, onCompleted)
                 : CreatePlayer_Cor(conn, prefab, onCompleted);
 
-            _monoBehaviourHook.StartCoroutine(enumerator);
+            CoroutineRunner.Instance.StartCoroutine(enumerator);
         }
 
         /// <summary>
@@ -43,9 +39,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         /// <param name="onCompleted"></param>
         public static void CreatePlayer(NetworkConnection conn, GameObject prefab, Action<GameObject> onCompleted = null)
         {
-            Init();
-            
-            _monoBehaviourHook.StartCoroutine(CreatePlayer_Cor(conn, prefab, onCompleted));
+            CoroutineRunner.Instance.StartCoroutine(CreatePlayer_Cor(conn, prefab, onCompleted));
         }
 
         /// <summary>
@@ -56,9 +50,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         /// <param name="onCompleted"></param>
         public static void ReplacePlayer(NetworkConnection conn, GameObject prefab, Action<GameObject> onCompleted = null)
         {
-            Init();
-            
-            _monoBehaviourHook.StartCoroutine(ReplacePlayer_Cor(conn, prefab, onCompleted));
+            CoroutineRunner.Instance.StartCoroutine(ReplacePlayer_Cor(conn, prefab, onCompleted));
         }
 
         /// <summary>
@@ -68,9 +60,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         /// <param name="conn"></param>
         public static void RemovePlayer(NetworkConnection conn)
         {
-            Init();
-
-            _monoBehaviourHook.StartCoroutine(RemovePlayer_Cor(conn));
+            CoroutineRunner.Instance.StartCoroutine(RemovePlayer_Cor(conn));
         }
 
         /// <summary>
@@ -129,15 +119,5 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
                 NetworkServer.Destroy(player);
         }
         
-        private static void Init()
-        {
-            if (_monoBehaviourHook != null) return;
-
-            var gameObject = new GameObject("PlayerCreator Handler");
-            
-            UnityEngine.Object.DontDestroyOnLoad(gameObject);
-            
-            _monoBehaviourHook = gameObject.AddComponent<MonoBehaviourHook>();
-        }
     }
 }
