@@ -20,7 +20,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             m_eventManager = new RoomEventManager();
 
-            m_uniqueIdentifier = new UniqueIdentifier(8);
+            m_uniqueIdentifier = new UniqueIdentifier();
 
             //SERVER SIDE
             ReflectiveConnectionManager.networkConnections.OnServerStarted.AddListener(OnStartServer);
