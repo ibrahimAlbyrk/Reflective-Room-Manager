@@ -1,8 +1,11 @@
 ﻿using Mirror;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
+    using Structs;
     using Reconnection.Messages;
 
     public abstract partial class RoomManagerBase
@@ -19,6 +22,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnStopServer()
         {
+            if (_shutdownCoroutine != null)
+            {
+                StopCoroutine(_shutdownCoroutine);
+                _shutdownCoroutine = null;
+            }
+
+            _isShuttingDown = false;
+
             _rateLimiter?.Clear();
             _cleanupService?.Clear();
             _reconnectionService?.ClearAll();
@@ -36,6 +47,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnServerConnect(NetworkConnection conn)
         {
+            if (_isShuttingDown)
+            {
+                conn.Disconnect();
+                return;
+            }
+
             SendUpdateRoomListForClient(conn);
         }
 
@@ -69,6 +86,36 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnClientDisconnect()
         {
+        }
+
+        public void GracefulShutdown(float warningSeconds = 10f)
+        {
+            if (_isShuttingDown) return;
+
+            _isShuttingDown = true;
+
+            var warningMsg = new ServerShutdownWarningMessage(warningSeconds);
+
+            foreach (var room in m_rooms)
+            {
+                foreach (var conn in room.Connections)
+                    conn.Send(warningMsg);
+            }
+
+            m_eventManager.Invoke_OnServerShutdownStarted(warningSeconds);
+
+            _shutdownCoroutine = StartCoroutine(ShutdownAfterDelay(warningSeconds));
+        }
+
+        private IEnumerator ShutdownAfterDelay(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+
+            RemoveAllRoom(forced: true);
+            NetworkServer.Shutdown();
+
+            _isShuttingDown = false;
+            _shutdownCoroutine = null;
         }
     }
 }

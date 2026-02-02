@@ -146,6 +146,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected ReconnectionService _reconnectionService;
         public bool EnableReconnection => _enableReconnection;
 
+        protected bool _isShuttingDown;
+        private Coroutine _shutdownCoroutine;
+
+        public bool IsShuttingDown => _isShuttingDown;
+
         #endregion
     }
 }

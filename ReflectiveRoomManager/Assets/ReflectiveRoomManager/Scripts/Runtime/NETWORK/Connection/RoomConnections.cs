@@ -43,6 +43,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         
         public readonly ConnectionEvent<SceneLoadMessage> OnClientSceneLoaded = new(false);
 
+        public readonly ConnectionEvent<float> OnClientShutdownWarning = new(false);
+
         internal void AddRegistersForServer()
         {
             NetworkServer.RegisterHandler<ServerRoomMessage>(OnReceivedRoomMessageViaServer);
@@ -54,6 +56,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
             NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
             NetworkClient.RegisterHandler<ClientRoomIDMessage>(OnReceivedRoomIDViaClient);
             NetworkClient.RegisterHandler<SceneLoadMessage>(OnReceivedSceneLoadMessage);
+            NetworkClient.RegisterHandler<ServerShutdownWarningMessage>(OnReceivedShutdownWarning);
         }
 
         private void OnRoomListChangeForClient(RoomListChangeMessage msg)
@@ -116,6 +119,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
                 default:
                     throw new ArgumentException("Invalid ServerRoomState", nameof(msg.ServerRoomState));
             }
+        }
+
+        private void OnReceivedShutdownWarning(ServerShutdownWarningMessage msg)
+        {
+            OnClientShutdownWarning.Call(msg.SecondsRemaining);
         }
 
         /// <summary>

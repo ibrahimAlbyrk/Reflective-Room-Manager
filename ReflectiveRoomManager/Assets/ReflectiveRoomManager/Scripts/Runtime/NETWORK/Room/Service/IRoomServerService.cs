@@ -21,5 +21,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         void UpdateRoomData(string roomName, Dictionary<string, string> data);
         void UpdateRoomData(Room room, string key, string value);
         void UpdateRoomData(Room room, Dictionary<string, string> data);
+        void GracefulShutdown(float warningSeconds = 10f);
     }
 }

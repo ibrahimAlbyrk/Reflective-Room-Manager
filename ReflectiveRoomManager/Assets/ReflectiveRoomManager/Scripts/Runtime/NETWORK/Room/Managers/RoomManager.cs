@@ -15,13 +15,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     {
         internal override void CreateRoom(RoomInfo roomInfo, NetworkConnection conn = default)
         {
+            if (_isShuttingDown)
+            {
+                if (conn != null)
+                    RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
+
             var roomName = roomInfo.RoomName;
             var maxPlayers = Mathf.Min(roomInfo.MaxPlayers, MaxPlayerCountPerRoom);
 
             if (m_rooms.Count >= MaxRoomCount)
             {
                 Debug.LogWarning("No more rooms can be created as there is a maximum number of rooms");
-                
+
                 return;
             }
 
@@ -77,6 +84,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private void JoinRoomInternal(NetworkConnection conn, Room room, string accessToken)
         {
+            if (_isShuttingDown)
+            {
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
+
             if (room == null)
             {
                 Debug.LogWarning($"There is no such room for join");

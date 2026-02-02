@@ -103,6 +103,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.Instance.RemoveAllRoom(forced);
         }
 
+        public static void GracefulShutdown(float warningSeconds = 10f)
+        {
+            if (RoomManagerBase.Instance == null)
+            {
+                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(GracefulShutdown));
+                return;
+            }
+
+            RoomManagerBase.Instance.GracefulShutdown(warningSeconds);
+        }
+
         #endregion
 
         #region Scene Methods
@@ -219,6 +230,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         void IRoomServerService.UpdateRoomData(string roomName, Dictionary<string, string> data) => UpdateRoomData(roomName, data);
         void IRoomServerService.UpdateRoomData(Room room, string key, string value) => UpdateRoomData(room, key, value);
         void IRoomServerService.UpdateRoomData(Room room, Dictionary<string, string> data) => UpdateRoomData(room, data);
+        void IRoomServerService.GracefulShutdown(float warningSeconds) => GracefulShutdown(warningSeconds);
 
         #endregion
     }

@@ -47,6 +47,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
             OnServerRoomDataUpdated?.Invoke(room);
         }
 
+        /// <summary>Called on the server when graceful shutdown has been initiated</summary>
+        public event Action<float> OnServerShutdownStarted;
+
+        internal void Invoke_OnServerShutdownStarted(float secondsRemaining)
+        {
+            OnServerShutdownStarted?.Invoke(secondsRemaining);
+        }
+
         /// <summary>Called on the server when a player reconnects to a room</summary>
         public event Action<string, NetworkConnection, uint> OnPlayerReconnected;
 
