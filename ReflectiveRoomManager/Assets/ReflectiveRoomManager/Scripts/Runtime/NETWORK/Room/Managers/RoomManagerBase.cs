@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using REFLECTIVE.Runtime.SceneManagement.Manager;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
@@ -17,6 +18,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (!InitializeSingleton()) return;
 
             InitializeRoomLoader();
+
+            ReflectiveSceneManager.Init(RoomLoaderType);
 
             m_eventManager = new RoomEventManager();
 

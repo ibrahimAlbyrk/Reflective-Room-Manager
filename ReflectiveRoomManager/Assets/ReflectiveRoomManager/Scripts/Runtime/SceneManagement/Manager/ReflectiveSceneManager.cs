@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 namespace REFLECTIVE.Runtime.SceneManagement.Manager
 {
     using Processor;
-    using NETWORK.Room;
     using NETWORK.Room.Loader;
     using Processor.Factory;
     
@@ -34,14 +33,8 @@ namespace REFLECTIVE.Runtime.SceneManagement.Manager
             });
         }
 
-        [RuntimeInitializeOnLoadMethod]
-        private static void Init()
+        internal static void Init(RoomLoaderType roomLoaderType)
         {
-            var roomLoaderType = RoomLoaderType.AdditiveScene;
-
-            if (RoomManagerBase.Instance != null)
-                roomLoaderType = RoomManagerBase.Instance.RoomLoaderType;
-            
             Processor = SceneProcessorFactory.Create(roomLoaderType);
         }
     }
