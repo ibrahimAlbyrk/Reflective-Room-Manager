@@ -25,7 +25,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             if (RoomManagerBase.Instance == null) return;
 
             if (RoomManagerBase.Instance.RoomLoaderType == RoomLoaderType.NoneScene) return;
-            
+
+            if (_sceneChangeManager == null)
+            {
+                Debug.LogError("SceneChangeManager not initialized");
+                return;
+            }
+
             _sceneChangeManager.ChangeScene(room, sceneName, keepClientObjects);
         }
     }
