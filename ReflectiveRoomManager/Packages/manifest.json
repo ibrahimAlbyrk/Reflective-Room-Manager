@@ -2,7 +2,7 @@
   "dependencies": {
     "com.unity.collab-proxy": "2.11.2",
     "com.unity.feature.development": "1.0.2",
-    "com.unity.ide.rider": "3.0.38",
+    "com.unity.ide.rider": "3.0.39",
     "com.unity.multiplayer.center": "1.0.1",
     "com.unity.nuget.newtonsoft-json": "3.2.2",
     "com.unity.postprocessing": "3.5.1",
