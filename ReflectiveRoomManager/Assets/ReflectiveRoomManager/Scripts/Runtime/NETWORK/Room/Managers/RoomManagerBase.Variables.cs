@@ -10,6 +10,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Scenes;
     using Structs;
     using Identifier;
+    using Validation;
     using Connection.Manager;
     
     public abstract partial class RoomManagerBase
@@ -62,7 +63,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;
         public string ClientContainerScene => _clientContainerScene;
-        
+
+        public IRoomValidator RoomValidator
+        {
+            get => _roomValidator;
+            set => _roomValidator = value ?? new DefaultRoomValidator();
+        }
+
         #endregion
 
         #region Private Variables
@@ -81,6 +88,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private RoomSceneSynchronizer _sceneSynchronizer;
 
         private System.Action _onServerStoppedRemoveAllRoom;
+
+        private IRoomValidator _roomValidator = new DefaultRoomValidator();
 
         private IConnectionManager _connectionManager;
 

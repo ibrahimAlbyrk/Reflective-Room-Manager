@@ -32,6 +32,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
+            if (conn != null && !RoomValidator.CanCreateRoom(conn, roomInfo, out var createReason))
+            {
+                Debug.LogWarning($"Room creation denied: {createReason}");
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
+
             var isServer = conn is null;
 
             var room = new Room(roomName, maxPlayers, isServer)
@@ -71,6 +78,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             if (room.MaxPlayers <= room.CurrentPlayers) // Handle room is full.
             {
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
+
+            if (!RoomValidator.CanJoinRoom(conn, room, out var joinReason))
+            {
+                Debug.LogWarning($"Room join denied: {joinReason}");
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
                 return;
             }
