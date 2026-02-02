@@ -11,6 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         void CreateRoom(NetworkConnectionToClient conn, RoomInfo roomInfo);
         void JoinRoom(string roomName);
         void JoinRoom(NetworkConnectionToClient conn, string roomName);
+        void JoinRoom(NetworkConnectionToClient conn, string roomName, string accessToken);
         void ExitRoom(NetworkConnectionToClient conn, bool isDisconnected);
         void RemoveRoom(string roomName, bool forced = false);
         void RemoveAllRoom(bool forced = false);

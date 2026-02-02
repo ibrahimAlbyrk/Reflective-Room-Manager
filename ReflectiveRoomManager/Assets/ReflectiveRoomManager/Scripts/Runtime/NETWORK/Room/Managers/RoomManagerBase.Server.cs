@@ -19,6 +19,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnStopServer()
         {
+            _rateLimiter?.Clear();
             _reconnectionService?.ClearAll();
             RemoveAllRoom(forced:true);
         }
@@ -39,6 +40,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)
         {
+            _rateLimiter?.RemoveConnection(conn);
+
             if (_reconnectionService != null && _reconnectionService.isActiveAndEnabled)
             {
                 var room = GetRoomByConnection(conn);

@@ -1,5 +1,6 @@
 ﻿using System;
 using Mirror;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace REFLECTIVE.Runtime.NETWORK.Connection
@@ -8,12 +9,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
     using Room.Enums;
     using Room.Scenes;
     using Room.Structs;
-    
+    using Room.Utilities;
+
     public class RoomConnections
     {
+        private RateLimiter _rateLimiter;
+
+        internal void SetRateLimiter(RateLimiter rateLimiter)
+        {
+            _rateLimiter = rateLimiter;
+        }
+
         //SERVER SIDE
         public readonly ConnectionEvent<RoomInfo, NetworkConnectionToClient> OnServerCreateRoom = new(false);
-        public readonly ConnectionEvent<NetworkConnectionToClient, string> OnServerJoinRoom = new(false);
+        public readonly ConnectionEvent<NetworkConnectionToClient, string, string> OnServerJoinRoom = new(false);
         public readonly ConnectionEvent<NetworkConnectionToClient, bool> OnServerExitRoom = new(false);
 
         public readonly ConnectionEvent<Scene> OnServerRoomSceneLoaded = new(false);
@@ -86,13 +95,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         /// <param name="msg"></param>
         private void OnReceivedRoomMessageViaServer(NetworkConnectionToClient conn, ServerRoomMessage msg)
         {
+            if (_rateLimiter != null && !_rateLimiter.IsAllowed(conn))
+            {
+                Debug.LogWarning($"[RateLimiter] Connection {conn.connectionId} exceeded rate limit");
+                conn.Send(new ClientRoomMessage(ClientRoomState.Fail));
+                return;
+            }
+
             switch (msg.ServerRoomState)
             {
                 case ServerRoomState.Create:
                     OnServerCreateRoom.Call(msg.RoomInfo, conn);
                     break;
                 case ServerRoomState.Join:
-                    OnServerJoinRoom.Call(conn, msg.RoomInfo.RoomName);
+                    OnServerJoinRoom.Call(conn, msg.RoomInfo.RoomName, msg.AccessToken ?? string.Empty);
                     break;
                 case ServerRoomState.Exit:
                     OnServerExitRoom.Call(conn, msg.IsDisconnected);

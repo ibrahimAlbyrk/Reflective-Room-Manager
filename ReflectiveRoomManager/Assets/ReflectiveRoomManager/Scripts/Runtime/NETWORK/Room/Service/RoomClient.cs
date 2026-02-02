@@ -28,6 +28,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.RequestJoinRoom(roomName);
         }
 
+        public static void JoinRoom(string roomName, string accessToken)
+        {
+            RoomManagerBase.RequestJoinRoom(roomName, accessToken);
+        }
+
         public static void ExitRoom()
         {
             RoomManagerBase.RequestExitRoom();
@@ -62,6 +67,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         uint IRoomClientService.CurrentRoomID => CurrentRoomID;
         void IRoomClientService.CreateRoom(RoomInfo roomInfo) => CreateRoom(roomInfo);
         void IRoomClientService.JoinRoom(string roomName) => JoinRoom(roomName);
+        void IRoomClientService.JoinRoom(string roomName, string accessToken) => JoinRoom(roomName, accessToken);
         void IRoomClientService.ExitRoom() => ExitRoom();
         void IRoomClientService.ExitRoom(bool isDisconnected) => ExitRoom(isDisconnected);
         string IRoomClientService.GetRoomCustomData(string dataName) => GetRoomCustomData(dataName);

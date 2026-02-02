@@ -123,6 +123,26 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         /// <summary>
+        /// Sends a request to join the specified room with an access token
+        /// </summary>
+        /// <remarks>Only works on client</remarks>
+        /// <param name="roomName"></param>
+        /// <param name="accessToken"></param>
+        internal static void RequestJoinRoom(string roomName, string accessToken)
+        {
+            if (NetworkClient.connection == null) return;
+
+            var roomInfo = new RoomInfo
+            {
+                RoomName = roomName
+            };
+
+            var serverRoomMessage = new ServerRoomMessage(ServerRoomState.Join, roomInfo, accessToken);
+
+            NetworkClient.Send(serverRoomMessage);
+        }
+
+        /// <summary>
         /// Sends a request to the server to exit the client's room
         /// </summary>
         /// <remarks>Only works on client</remarks>
@@ -197,6 +217,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// <param name="conn"></param>
         /// <param name="roomName"></param>
         internal abstract void JoinRoom(NetworkConnection conn, string roomName);
+
+        /// <summary>
+        /// Joins the client into the room with the specified room' name and access token
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="roomName"></param>
+        /// <param name="accessToken"></param>
+        internal abstract void JoinRoom(NetworkConnection conn, string roomName, string accessToken);
 
         /// <summary>
         /// Joins the client into the room with the specified room' ID

@@ -59,6 +59,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
             RoomManagerBase.Instance.JoinRoom(conn, roomName);
         }
 
+        public static void JoinRoom(NetworkConnectionToClient conn, string roomName, string accessToken)
+        {
+            if (RoomManagerBase.Instance == null)
+            {
+                Debug.LogWarning("[RoomServer] RoomManagerBase.Instance is null — cannot execute " + nameof(JoinRoom));
+                return;
+            }
+
+            RoomManagerBase.Instance.JoinRoom(conn, roomName, accessToken);
+        }
+
         public static void ExitRoom(NetworkConnectionToClient conn, bool isDisconnected)
         {
             if (RoomManagerBase.Instance == null)
@@ -198,6 +209,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         void IRoomServerService.CreateRoom(NetworkConnectionToClient conn, RoomInfo roomInfo) => CreateRoom(conn, roomInfo);
         void IRoomServerService.JoinRoom(string roomName) => JoinRoom(roomName);
         void IRoomServerService.JoinRoom(NetworkConnectionToClient conn, string roomName) => JoinRoom(conn, roomName);
+        void IRoomServerService.JoinRoom(NetworkConnectionToClient conn, string roomName, string accessToken) => JoinRoom(conn, roomName, accessToken);
         void IRoomServerService.ExitRoom(NetworkConnectionToClient conn, bool isDisconnected) => ExitRoom(conn, isDisconnected);
         void IRoomServerService.RemoveRoom(string roomName, bool forced) => RemoveRoom(roomName, forced);
         void IRoomServerService.RemoveAllRoom(bool forced) => RemoveAllRoom(forced);

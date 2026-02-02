@@ -10,6 +10,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Scenes;
     using Structs;
     using Identifier;
+    using Utilities;
     using Validation;
     using Reconnection;
     using Connection.Manager;
@@ -36,6 +37,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         [Tooltip("determines what type of loading the room will have")]
         [SerializeField] private RoomLoaderType _RoomLoaderType = RoomLoaderType.AdditiveScene;
+
+        [Header("Validation")]
+        [Tooltip("Optional custom room validator (must implement IRoomValidator)")]
+        [SerializeField] private MonoBehaviour _roomValidatorComponent;
+        [Tooltip("Optional custom room access validator (must implement IRoomAccessValidator)")]
+        [SerializeField] private MonoBehaviour _roomAccessValidatorComponent;
+
+        [Header("Rate Limiting")]
+        [SerializeField] private bool _enableRateLimiting;
+        [SerializeField] private int _maxRequestsPerWindow = 5;
+        [SerializeField] private float _rateLimitWindowSeconds = 10f;
 
         [Header("Reconnection")]
         [SerializeField] private bool _enableReconnection;
@@ -75,8 +87,24 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         public IRoomValidator RoomValidator
         {
-            get => _roomValidator;
+            get
+            {
+                if (_roomValidatorComponent is IRoomValidator component)
+                    return component;
+                return _roomValidator;
+            }
             set => _roomValidator = value ?? new DefaultRoomValidator();
+        }
+
+        public IRoomAccessValidator RoomAccessValidator
+        {
+            get
+            {
+                if (_roomAccessValidatorComponent is IRoomAccessValidator component)
+                    return component;
+                return _roomAccessValidator;
+            }
+            set => _roomAccessValidator = value ?? new DefaultRoomAccessValidator();
         }
 
         #endregion
@@ -98,9 +126,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         private System.Action _onServerStoppedRemoveAllRoom;
 
+        private System.Action<Mirror.NetworkConnectionToClient, string, string> _onServerJoinRoomHandler;
+
         private IRoomValidator _roomValidator = new DefaultRoomValidator();
 
+        private IRoomAccessValidator _roomAccessValidator = new DefaultRoomAccessValidator();
+
         private IConnectionManager _connectionManager;
+
+        private RateLimiter _rateLimiter;
 
         protected ReconnectionService _reconnectionService;
         public bool EnableReconnection => _enableReconnection;

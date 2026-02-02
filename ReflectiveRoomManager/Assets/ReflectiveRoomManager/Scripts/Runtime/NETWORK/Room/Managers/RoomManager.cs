@@ -67,17 +67,34 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         internal override void JoinRoom(NetworkConnection conn, Room room)
         {
+            JoinRoomInternal(conn, room, string.Empty);
+        }
+
+        internal void JoinRoom(NetworkConnection conn, Room room, string accessToken)
+        {
+            JoinRoomInternal(conn, room, accessToken);
+        }
+
+        private void JoinRoomInternal(NetworkConnection conn, Room room, string accessToken)
+        {
             if (room == null)
             {
                 Debug.LogWarning($"There is no such room for join");
-                
+
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
-                
+
                 return;
             }
-            
+
             if (room.MaxPlayers <= room.CurrentPlayers + room.ReservedSlots) // Handle room is full.
             {
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
+
+            if (!RoomAccessValidator.ValidateAccess(conn, room, accessToken, out var accessReason))
+            {
+                Debug.LogWarning($"Room access denied: {accessReason}");
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
                 return;
             }
@@ -90,20 +107,27 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
 
             room.AddConnection(conn);
-            
+
             RoomMessageUtility.SendRoomUpdateMessage(
                 RoomListUtility.ConvertToRoomList(room), RoomMessageState.Update);
-            
+
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
 
             m_eventManager.Invoke_OnServerJoinedClient(conn, room.ID);
         }
-        
+
         internal override void JoinRoom(NetworkConnection conn, string roomName)
         {
             var room = m_rooms.FirstOrDefault(r => r.Name == roomName && !r.IsPrivate);
 
            JoinRoom(conn, room);
+        }
+
+        internal override void JoinRoom(NetworkConnection conn, string roomName, string accessToken)
+        {
+            var room = m_rooms.FirstOrDefault(r => r.Name == roomName && !r.IsPrivate);
+
+            JoinRoom(conn, room, accessToken);
         }
 
         internal override void JoinRoom(NetworkConnection conn, uint roomID)

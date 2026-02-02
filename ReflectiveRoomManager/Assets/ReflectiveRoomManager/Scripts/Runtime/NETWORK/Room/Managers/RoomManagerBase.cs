@@ -9,6 +9,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Events;
     using Loader;
     using Identifier;
+    using Utilities;
     using Reconnection;
     using Reconnection.Messages;
     using Connection.Manager;
@@ -22,6 +23,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (!InitializeSingleton()) return;
 
             _connectionManager = ReflectiveConnectionManager.Instance;
+
+            if (_enableRateLimiting)
+            {
+                _rateLimiter = new RateLimiter(_maxRequestsPerWindow, _rateLimitWindowSeconds);
+                _connectionManager.RoomConnections.SetRateLimiter(_rateLimiter);
+            }
 
             InitializeRoomLoader();
 
@@ -41,7 +48,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.NetworkConnections.OnServerDisconnected.AddListener(OnServerDisconnect);
 
             _connectionManager.RoomConnections.OnServerCreateRoom.AddListener(CreateRoom);
-            _connectionManager.RoomConnections.OnServerJoinRoom.AddListener(JoinRoom);
+            _onServerJoinRoomHandler = (conn, roomName, accessToken) => JoinRoom(conn, roomName, accessToken);
+            _connectionManager.RoomConnections.OnServerJoinRoom.AddListener(_onServerJoinRoomHandler);
             _connectionManager.RoomConnections.OnServerExitRoom.AddListener(ExitRoom);
 
             if (RoomLoaderType != RoomLoaderType.NoneScene)
@@ -138,7 +146,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.NetworkConnections.OnServerDisconnected.RemoveListener(OnServerDisconnect);
 
             _connectionManager.RoomConnections.OnServerCreateRoom.RemoveListener(CreateRoom);
-            _connectionManager.RoomConnections.OnServerJoinRoom.RemoveListener(JoinRoom);
+            _connectionManager.RoomConnections.OnServerJoinRoom.RemoveListener(_onServerJoinRoomHandler);
             _connectionManager.RoomConnections.OnServerExitRoom.RemoveListener(ExitRoom);
 
             if (m_eventManager != null)
