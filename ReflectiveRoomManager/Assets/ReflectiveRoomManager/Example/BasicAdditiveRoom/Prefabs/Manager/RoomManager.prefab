@@ -54,6 +54,11 @@ MonoBehaviour:
   _maxRoomCount: 10
   _maxPlayerCountPerRoom: 5
   _RoomLoaderType: 2
+  _roomValidatorComponent: {fileID: 0}
+  _roomAccessValidatorComponent: {fileID: 0}
+  _enableRateLimiting: 1
+  _maxRequestsPerWindow: 5
+  _rateLimitWindowSeconds: 10
   _enableReconnection: 0
   _reconnectionGracePeriod: 30
   _playerIdentityProviderComponent: {fileID: 0}
