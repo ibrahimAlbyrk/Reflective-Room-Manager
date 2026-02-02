@@ -13,7 +13,7 @@ namespace REFLECTIVE.Runtime.SceneManagement.Manager
         public static event Action<Scene> OnSceneLoaded;
         public static event Action<Scene> OnSceneUnloaded;
         
-        public static SceneProcessor Processor;
+        public static SceneProcessor Processor { get; internal set; }
 
         public static void LoadScene(string sceneName, Action<Scene> onCompleted = null)
         {

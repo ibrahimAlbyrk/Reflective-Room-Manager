@@ -8,11 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
     {
         #region Public Variables
 
-        /// <summary>
-        /// ID of the room where the client is joined.
-        /// <remarks>Returns -1 if the client is not in the room</remarks>
-        /// </summary>
-        public static uint CurrentRoomID;
+        public static uint CurrentRoomID { get; internal set; }
 
         #endregion
 
