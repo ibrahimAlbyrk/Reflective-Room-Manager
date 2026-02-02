@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using UnityEngine;
+
 namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
 {
     using Enums;
@@ -23,7 +25,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
         public static void UpdateRoomToList(List<Room> rooms, Room room)
         {
             var index = rooms.FindIndex(info => info.Name == room.Name);
-            
+
+            if (index == -1)
+            {
+                Debug.LogError($"Room '{room.Name}' not found in list");
+                return;
+            }
+
             rooms[index] = room;
             
             var roomList = ConvertToRoomList(room);
