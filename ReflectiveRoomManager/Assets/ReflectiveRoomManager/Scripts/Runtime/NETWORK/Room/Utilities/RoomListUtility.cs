@@ -36,7 +36,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             
             var roomList = ConvertToRoomList(room);
             
-            RoomMessageUtility.SenRoomUpdateMessage(roomList, RoomMessageState.Update);
+            RoomMessageUtility.SendRoomUpdateMessage(roomList, RoomMessageState.Update);
         }
         
         public static void AddRoomToList(List<Room> rooms, Room room)
@@ -45,7 +45,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
             
             var roomList = ConvertToRoomList(room);
 
-            RoomMessageUtility.SenRoomUpdateMessage(roomList, RoomMessageState.Add);
+            RoomMessageUtility.SendRoomUpdateMessage(roomList, RoomMessageState.Add);
         }
         
         public static void RemoveRoomToList(List<Room> rooms, Room room)
@@ -54,7 +54,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
 
             var roomList = ConvertToRoomList(room);
 
-            RoomMessageUtility.SenRoomUpdateMessage(roomList, RoomMessageState.Remove);
+            RoomMessageUtility.SendRoomUpdateMessage(roomList, RoomMessageState.Remove);
         }
     }
 }

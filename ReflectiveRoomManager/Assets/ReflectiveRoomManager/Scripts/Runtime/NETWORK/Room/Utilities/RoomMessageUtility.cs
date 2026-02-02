@@ -7,7 +7,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Utilities
     
     public static class RoomMessageUtility
     {
-        public static void SenRoomUpdateMessage(RoomInfo roomInfo, RoomMessageState state)
+        public static void SendRoomUpdateMessage(RoomInfo roomInfo, RoomMessageState state)
         {
             var roomListChangeMessage = new RoomListChangeMessage(roomInfo, state);
             

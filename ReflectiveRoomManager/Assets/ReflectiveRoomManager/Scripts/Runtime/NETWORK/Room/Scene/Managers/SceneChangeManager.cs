@@ -144,7 +144,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             
             room.Scene = loadedScene;
             
-            RoomMessageUtility.SenRoomUpdateMessage(RoomListUtility.ConvertToRoomList(room), RoomMessageState.Update);
+            RoomMessageUtility.SendRoomUpdateMessage(RoomListUtility.ConvertToRoomList(room), RoomMessageState.Update);
                 
             ReflectiveSceneManager.UnLoadScene(beforeScene);
                 

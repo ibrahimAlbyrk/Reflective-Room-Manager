@@ -76,7 +76,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             room.AddConnection(conn);
             
-            RoomMessageUtility.SenRoomUpdateMessage(
+            RoomMessageUtility.SendRoomUpdateMessage(
                 RoomListUtility.ConvertToRoomList(room), RoomMessageState.Update);
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
