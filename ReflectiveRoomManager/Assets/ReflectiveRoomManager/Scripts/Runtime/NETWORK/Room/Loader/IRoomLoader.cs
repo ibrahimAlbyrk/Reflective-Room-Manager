@@ -6,7 +6,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Loader
 
     public interface IRoomLoader
     {
-        public void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded);
-        public void UnLoadRoom(Room room);
+        event Action<float> OnLoadProgress;
+        void LoadRoom(Room room, RoomInfo roomInfo, Action onLoaded);
+        void UnLoadRoom(Room room);
     }
 }
