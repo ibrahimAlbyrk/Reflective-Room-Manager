@@ -69,21 +69,33 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             var spawnedObj = SpawnObject(obj, conn);
 
             if (spawnedObj == null) return null;
-            
+
             SceneManager.MoveGameObjectToScene(spawnedObj, scene);
+
+            NotifySceneReady(spawnedObj, scene);
 
             return spawnedObj;
         }
-        
+
         public static GameObject SpawnObjectForScene(Scene scene, GameObject obj, Vector3 position, Quaternion rotation, NetworkConnection conn = null)
         {
             var spawnedObj = SpawnObject(obj, position, rotation, conn);
 
             if (spawnedObj == null) return null;
-            
+
             SceneManager.MoveGameObjectToScene(spawnedObj, scene);
 
+            NotifySceneReady(spawnedObj, scene);
+
             return spawnedObj;
+        }
+
+        private static void NotifySceneReady(GameObject obj, Scene scene)
+        {
+            var listeners = obj.GetComponentsInChildren<ISceneReady>();
+
+            foreach (var listener in listeners)
+                listener.OnSceneReady(scene);
         }
         
         public static IEnumerable<GameObject> GetSpawnablePrefabs()
