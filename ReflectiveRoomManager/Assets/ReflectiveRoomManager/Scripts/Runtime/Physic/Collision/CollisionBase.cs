@@ -22,7 +22,8 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         protected TCollider[] m_garbageColliders;
         
-        private List<TCollider> _colliders;
+        private HashSet<TCollider> _colliders;
+        private readonly List<TCollider> _exitBuffer = new();
 
         public void SetEditable(bool state) => Editable = state;
         public void ChangeEditable()
@@ -65,19 +66,14 @@ namespace REFLECTIVE.Runtime.Physic.Collision
 
         private void SetCollidersCapacity()
         {
-            _colliders = new List<TCollider>(GarbageColliderSize);
+            _colliders = new HashSet<TCollider>(GarbageColliderSize);
             m_garbageColliders = new TCollider[GarbageColliderSize];
         }
 
         private void HandleColliderCleaner()
         {
             //COLLIDER
-            for (var i = _colliders.Count - 1; i >= 0; i--)
-            {
-                if(_colliders[i] != null) continue;
-                
-                _colliders.RemoveAt(i);
-            }
+            _colliders.RemoveWhere(c => c == null);
             
             //GARBAGE
             for (var i = 0; i < m_garbageColliders.Length; i++)
@@ -129,17 +125,22 @@ namespace REFLECTIVE.Runtime.Physic.Collision
         /// <param name="colliders"></param>
         private void HandleCollisionsExit(TCollider[] colliders)
         {
-            for (var i = _colliders.Count - 1; i >= 0; i--)
+            foreach (var coll in _colliders)
             {
-                var coll = _colliders[i];
-                
                 if (coll == null) continue;
-                
+
                 if (colliders.Contains(coll)) continue;
 
-                _colliders.RemoveAt(i);
+                _exitBuffer.Add(coll);
+            }
+
+            foreach (var coll in _exitBuffer)
+            {
+                _colliders.Remove(coll);
                 HandleCollisionExit(coll);
             }
+
+            _exitBuffer.Clear();
         }
 
         private void HandleCollisionEnter(TCollider coll) => OnCollisionEnter?.Invoke(coll);
