@@ -4,35 +4,14 @@ using System.Runtime.CompilerServices;
 
 namespace REFLECTIVE.Runtime.NETWORK.Connection.Data
 {
-    public class ConnectionEvent<T1, T2>
+    public abstract class ConnectionEventBase
     {
-        protected Action<T1, T2> _action;
-        
         private readonly string _logString;
-        
         private readonly bool _isDebug;
 
-        public void AddListener(Action<T1, T2> action)
-        {
-            _action += action;
-        }
-
-        public void RemoveListener(Action<T1, T2> action)
-        {
-            _action -= action;
-        }
-
-        internal void Call(T1 t1, T2 t2)
-        {
-            LogIfDebug();
-            
-            _action?.Invoke(t1, t2);
-        }
-
-        public ConnectionEvent(bool isDebug = false, [CallerMemberName] string logString = "")
+        protected ConnectionEventBase(bool isDebug, string logString)
         {
             _isDebug = isDebug;
-            
             _logString = logString;
         }
 
@@ -44,56 +23,94 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection.Data
             #endif
         }
     }
-    
-    public class ConnectionEvent<T> : ConnectionEvent<T, object>
+
+    public class ConnectionEvent<T1, T2> : ConnectionEventBase
     {
-        protected new Action<T> _action;
-        
+        private Action<T1, T2> _action;
+
         public ConnectionEvent(bool isDebug = false, [CallerMemberName] string logString = "")
-            : base(isDebug, logString)
-        {
-        }
-        
-        internal void Call(T t)
+            : base(isDebug, logString) { }
+
+        public void AddListener(Action<T1, T2> action) => _action += action;
+        public void RemoveListener(Action<T1, T2> action) => _action -= action;
+
+        internal void Call(T1 t1, T2 t2)
         {
             LogIfDebug();
-            _action?.Invoke(t);
-        }
-        
-        public void AddListener(Action<T> action)
-        {
-            _action += action;
-        }
 
-        public void RemoveListener(Action<T> action)
-        {
-            _action -= action;
+            if (_action == null) return;
+
+            foreach (var handler in _action.GetInvocationList())
+            {
+                try
+                {
+                    ((Action<T1, T2>)handler)(t1, t2);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
         }
     }
 
-    public class ConnectionEvent : ConnectionEvent<object, object>
+    public class ConnectionEvent<T> : ConnectionEventBase
     {
-        protected new Action _action;
-        
+        private Action<T> _action;
+
         public ConnectionEvent(bool isDebug = false, [CallerMemberName] string logString = "")
-            : base(isDebug, logString)
+            : base(isDebug, logString) { }
+
+        public void AddListener(Action<T> action) => _action += action;
+        public void RemoveListener(Action<T> action) => _action -= action;
+
+        internal void Call(T t)
         {
+            LogIfDebug();
+
+            if (_action == null) return;
+
+            foreach (var handler in _action.GetInvocationList())
+            {
+                try
+                {
+                    ((Action<T>)handler)(t);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
         }
-        
+    }
+
+    public class ConnectionEvent : ConnectionEventBase
+    {
+        private Action _action;
+
+        public ConnectionEvent(bool isDebug = false, [CallerMemberName] string logString = "")
+            : base(isDebug, logString) { }
+
+        public void AddListener(Action action) => _action += action;
+        public void RemoveListener(Action action) => _action -= action;
+
         internal void Call()
         {
             LogIfDebug();
-            _action?.Invoke();
-        }
-        
-        public void AddListener(Action action)
-        {
-            _action += action;
-        }
 
-        public void RemoveListener(Action action)
-        {
-            _action -= action;
+            if (_action == null) return;
+
+            foreach (var handler in _action.GetInvocationList())
+            {
+                try
+                {
+                    ((Action)handler)();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
         }
     }
 }
