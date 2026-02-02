@@ -32,7 +32,7 @@ namespace Examples.Basic.Game
         {
             var scene = gameObject.scene;
             
-            var room = RoomManagerBase.Instance.GetRoomOfScene(scene);
+            var room = RoomManagerBase.Instance.GetRoomByScene(scene);
             
             RoomServer.ChangeScene(room, RoomManagerBase.Instance.RoomScene, true);
         }

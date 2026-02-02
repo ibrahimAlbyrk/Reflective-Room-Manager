@@ -24,7 +24,7 @@ namespace Examples.SpaceShooter.Game
         [ServerCallback]
         private void Start()
         {
-            var room = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
+            var room = RoomManagerBase.Instance.GetRoomByScene(gameObject.scene);
 
             _modType = room.IsServer ? ModType.OpenWorld : ModType.ShrinkingArea;
             

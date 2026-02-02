@@ -50,7 +50,7 @@ namespace Examples.SpaceShooter.Game.Mod
 
         private IEnumerable<SpaceshipController> CalculateLivingShips()
         {
-            var room = RoomManagerBase.Instance.GetRoomOfScene(_manager.gameObject.scene);
+            var room = RoomManagerBase.Instance.GetRoomByScene(_manager.gameObject.scene);
             var connections = room.Connections;
 
             return from conn in connections

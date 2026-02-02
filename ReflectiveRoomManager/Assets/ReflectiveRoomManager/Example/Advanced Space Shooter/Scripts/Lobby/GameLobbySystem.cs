@@ -35,7 +35,7 @@ namespace Examples.SpaceShooter.Lobby
         [Command(requiresAuthority = false)]
         private void CMD_ListPlayers()
         {
-            _currentRoom = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
+            _currentRoom = RoomManagerBase.Instance.GetRoomByScene(gameObject.scene);
             
             RPC_ListPlayers(_currentRoom?.Connections?.Select(conn => conn?.identity?.GetComponent<SpaceshipController>()?.Username).ToArray());
         }
@@ -60,7 +60,7 @@ namespace Examples.SpaceShooter.Lobby
         [ServerCallback]
         private void Start()
         {
-            _currentRoom = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
+            _currentRoom = RoomManagerBase.Instance.GetRoomByScene(gameObject.scene);
             
             RoomManagerBase.Instance.Events.OnServerJoinedRoom += OnJoinedClient;
             RoomManagerBase.Instance.Events.OnServerExitedRoom += OnExitedClient;

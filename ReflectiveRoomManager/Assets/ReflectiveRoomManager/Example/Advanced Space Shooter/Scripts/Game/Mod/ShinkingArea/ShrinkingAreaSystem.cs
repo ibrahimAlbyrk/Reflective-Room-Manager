@@ -56,7 +56,7 @@ namespace Examples.SpaceShooter.Game.Mod.ShrinkingArea
         [ServerCallback]
         private void Start()
         {
-            _currentRoom = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
+            _currentRoom = RoomManagerBase.Instance.GetRoomByScene(gameObject.scene);
             
             var gameManager = gameObject.RoomContainer().GetSingleton<GameManager>();
             

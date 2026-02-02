@@ -52,7 +52,7 @@ namespace Examples.Basic.Character
             
             SetManagers(gameObject.scene);
             
-            var room = RoomManagerBase.Instance.GetRoomOfScene(gameObject.scene);
+            var room = RoomManagerBase.Instance.GetRoomByScene(gameObject.scene);
             ID = room.CurrentPlayers;
 
             _roomName = room.Name;
