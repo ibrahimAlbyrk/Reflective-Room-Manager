@@ -1,0 +1,412 @@
+/* ========================================
+   Reflective Room Manager — Monochrome Theme
+   White-dominant, clean, grouped sections
+   ======================================== */
+
+/* ── Root ── */
+.reflective-root {
+    background-color: rgb(56, 56, 56);
+    padding: 0;
+    margin: -2px -4px 0 -4px;
+}
+
+/* ── Title bar ── */
+.reflective-title {
+    background-color: rgb(245, 245, 245);
+    color: rgb(20, 20, 20);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    font-size: 11px;
+    padding: 7px 0;
+    margin: 0;
+    letter-spacing: 3px;
+}
+
+/* ── Section header (for explicit CreateSectionHeader calls) ── */
+.section-header {
+    background-color: rgb(62, 62, 62);
+    color: rgb(210, 210, 210);
+    -unity-font-style: bold;
+    font-size: 10px;
+    padding: 5px 10px;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+/* ── Property group: [Header] groups ── */
+.property-group {
+    background-color: rgb(50, 50, 50);
+    margin: 3px 6px;
+    padding: 0;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+    overflow: hidden;
+}
+
+.property-group-header {
+    background-color: rgb(66, 66, 66);
+    color: rgb(220, 220, 220);
+    -unity-font-style: bold;
+    font-size: 10px;
+    padding: 4px 10px;
+    margin: 0;
+    letter-spacing: 1px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(55, 55, 55);
+}
+
+.property-group-body {
+    padding: 6px 8px;
+}
+
+.property-group-body > PropertyField {
+    margin: 1px 0;
+}
+
+/* Hide Unity's built-in [Header] label inside grouped properties */
+.property-group-body .unity-header-drawer__label {
+    display: none;
+}
+
+/* ── Ungrouped properties (before first header) ── */
+.properties-container {
+    background-color: rgb(50, 50, 50);
+    padding: 6px 8px;
+    margin: 3px 6px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+}
+
+.properties-container > PropertyField {
+    margin: 1px 0;
+}
+
+/* ── Section body ── */
+.section-body {
+    padding: 6px 6px;
+}
+
+/* ── Separator ── */
+.separator {
+    height: 1px;
+    background-color: rgb(65, 65, 65);
+    margin: 0;
+}
+
+.separator--thin {
+    height: 1px;
+    background-color: rgb(58, 58, 58);
+    margin: 0;
+}
+
+/* ── Labels in property fields ── */
+.reflective-root .unity-base-field > .unity-label {
+    color: rgb(200, 200, 200);
+    font-size: 11px;
+}
+
+/* ── Input fields ── */
+.reflective-root .unity-base-text-field__input {
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(55, 55, 55);
+    border-width: 1px;
+    border-radius: 2px;
+    color: rgb(220, 220, 220);
+}
+
+.reflective-root .unity-base-text-field__input:focus {
+    border-color: rgb(170, 170, 170);
+}
+
+/* ── Popup / Enum ── */
+.reflective-root .unity-base-popup-field__input {
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(55, 55, 55);
+    border-width: 1px;
+    border-radius: 2px;
+    color: rgb(220, 220, 220);
+}
+
+.reflective-root .unity-base-popup-field__input:hover {
+    border-color: rgb(90, 90, 90);
+}
+
+/* ── Object field ── */
+.reflective-root .unity-object-field__input {
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(55, 55, 55);
+    border-width: 1px;
+    border-radius: 2px;
+}
+
+.reflective-root .unity-object-field__input:hover {
+    border-color: rgb(90, 90, 90);
+}
+
+/* ── Toggle ── */
+.reflective-root .unity-toggle__checkmark {
+    background-color: rgb(40, 40, 40);
+    border-color: rgb(70, 70, 70);
+    border-width: 1px;
+    border-radius: 2px;
+}
+
+.reflective-root .unity-toggle__input:checked > .unity-toggle__checkmark {
+    background-color: rgb(210, 210, 210);
+    border-color: rgb(210, 210, 210);
+}
+
+/* ── Base field input ── */
+.reflective-root .unity-base-field__input {
+    border-radius: 2px;
+}
+
+/* ── Foldout ── */
+.reflective-root .unity-foldout > .unity-foldout__toggle {
+    background-color: rgb(58, 58, 58);
+    padding: 4px 8px;
+    margin: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(50, 50, 50);
+}
+
+.reflective-root .unity-foldout > .unity-foldout__toggle > .unity-label {
+    color: rgb(210, 210, 210);
+    -unity-font-style: bold;
+    font-size: 11px;
+}
+
+.reflective-root .unity-foldout > .unity-foldout__toggle > .unity-toggle__input > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(180, 180, 180);
+}
+
+.reflective-root .unity-foldout > .unity-foldout__content {
+    padding: 0;
+    margin-left: 0;
+}
+
+/* ── Reflective Foldout (room list) ── */
+.reflective-foldout {
+    margin: 3px 6px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+    overflow: hidden;
+}
+
+.reflective-foldout > .unity-foldout__toggle {
+    background-color: rgb(66, 66, 66);
+    padding: 5px 10px;
+}
+
+.reflective-foldout > .unity-foldout__toggle > .unity-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgb(220, 220, 220);
+    -unity-font-style: bold;
+}
+
+.reflective-foldout > .unity-foldout__content {
+    background-color: rgb(50, 50, 50);
+}
+
+/* ── HelpBox ── */
+.reflective-helpbox {
+    background-color: rgb(52, 52, 52);
+    border-color: rgb(65, 65, 65);
+    border-width: 1px;
+    color: rgb(200, 200, 200);
+    padding: 8px 10px;
+    margin: 3px 6px;
+    font-size: 10px;
+    border-radius: 3px;
+    white-space: normal;
+}
+
+.reflective-helpbox--warning {
+    border-left-width: 3px;
+    border-left-color: rgb(230, 230, 230);
+}
+
+.reflective-helpbox--info {
+    border-left-width: 3px;
+    border-left-color: rgb(130, 130, 130);
+}
+
+/* ── Buttons ── */
+.reflective-button {
+    background-color: rgb(66, 66, 66);
+    color: rgb(220, 220, 220);
+    border-color: rgb(80, 80, 80);
+    border-width: 1px;
+    border-radius: 3px;
+    -unity-font-style: bold;
+    font-size: 11px;
+    padding: 5px 14px;
+    margin: 4px 6px;
+}
+
+.reflective-button:hover {
+    background-color: rgb(78, 78, 78);
+    border-color: rgb(120, 120, 120);
+    color: white;
+}
+
+.reflective-button:active {
+    background-color: rgb(90, 90, 90);
+}
+
+.reflective-button--danger {
+    border-color: rgb(140, 140, 140);
+}
+
+.reflective-button--danger:hover {
+    background-color: rgb(80, 80, 80);
+    border-color: rgb(210, 210, 210);
+    color: white;
+}
+
+.reflective-button--small {
+    font-size: 10px;
+    padding: 3px 10px;
+    margin: 0;
+    -unity-font-style: normal;
+    border-radius: 2px;
+}
+
+/* ── Search toolbar ── */
+.search-toolbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 8px;
+    background-color: rgb(46, 46, 46);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(55, 55, 55);
+    margin: 0;
+}
+
+.search-toolbar > Label {
+    font-size: 10px;
+    color: rgb(150, 150, 150);
+    margin-right: 4px;
+    min-width: auto;
+}
+
+.search-toolbar > TextField {
+    flex-grow: 1;
+    margin: 0 8px 0 0;
+}
+
+.search-toolbar > PopupField {
+    width: 90px;
+}
+
+/* ── Room card ── */
+.room-card {
+    background-color: rgb(50, 50, 50);
+    border-width: 0 0 1px 0;
+    border-color: rgb(44, 44, 44);
+    padding: 2px 4px;
+    margin: 0;
+}
+
+.room-card:hover {
+    background-color: rgb(55, 55, 55);
+}
+
+.room-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-player-count {
+    -unity-text-align: middle-right;
+    flex-grow: 1;
+    margin-right: 8px;
+    color: rgb(150, 150, 150);
+    font-size: 10px;
+}
+
+.room-detail-label {
+    color: rgb(160, 160, 160);
+    font-size: 10px;
+    padding-left: 18px;
+    margin: 1px 0;
+}
+
+/* ── Room scroll ── */
+.room-scroll {
+    max-height: 300px;
+}
+
+/* ── Collision editor ── */
+.edit-collider-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 10px;
+    background-color: rgb(50, 50, 50);
+    margin: 3px 6px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+}
+
+.edit-collider-row > Label {
+    margin-right: 8px;
+    color: rgb(200, 200, 200);
+    font-size: 11px;
+}
+
+.edit-collider-btn {
+    width: 28px;
+    height: 28px;
+    padding: 2px;
+    border-width: 1px;
+    border-color: rgb(70, 70, 70);
+    border-radius: 2px;
+    background-color: rgb(55, 55, 55);
+}
+
+.edit-collider-btn:hover {
+    background-color: rgb(70, 70, 70);
+    border-color: rgb(110, 110, 110);
+}
+
+.edit-collider-btn--active {
+    background-color: rgb(210, 210, 210);
+    border-color: rgb(210, 210, 210);
+}
+
+/* ── Spawn list ── */
+.spawn-list {
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+    min-height: 60px;
+    margin: 4px 0;
+    background-color: rgb(44, 44, 44);
+    border-radius: 2px;
+}
+
+/* ── Folder section ── */
+.folder-section {
+    padding: 4px 0;
+}
+
+/* ── Generic row ── */
+.row {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* ── Disabled ── */
+.disabled-container {
+    opacity: 0.4;
+}
+
+/* ── Footer ── */
+.footer-spacer {
+    height: 6px;
+}
