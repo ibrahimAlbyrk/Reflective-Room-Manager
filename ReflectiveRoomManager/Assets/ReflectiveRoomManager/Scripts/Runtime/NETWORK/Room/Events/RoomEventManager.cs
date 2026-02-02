@@ -21,29 +21,21 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
         
         internal void Invoke_OnServerCreatedRoom(RoomInfo roomInfo)
         {
-            // Debug.Log("OnServerCreatedRoom");
-            
             OnServerCreatedRoom?.Invoke(roomInfo);
         }
 
         internal void Invoke_OnServerJoinedClient(NetworkConnection conn, uint roomID)
         {
-            // Debug.Log("OnServerJoinedRoom");
-            
             OnServerJoinedRoom?.Invoke(conn, roomID);
         }
 
         internal void Invoke_OnServerExitedClient(NetworkConnection conn)
         {
-            // Debug.Log("OnServerExitedRoom");
-            
             OnServerExitedRoom?.Invoke(conn);
         }
 
         internal void Invoke_OnServerDisconnectedClient(NetworkConnection conn)
         {
-            // Debug.Log("OnServerDisconnectedClient");
-            
             OnServerDisconnectedRoom?.Invoke(conn);
         }
     }
