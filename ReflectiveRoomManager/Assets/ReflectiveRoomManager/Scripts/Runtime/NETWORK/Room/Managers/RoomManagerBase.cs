@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mirror;
+using UnityEngine;
 using REFLECTIVE.Runtime.MonoBehavior;
 using REFLECTIVE.Runtime.SceneManagement.Manager;
 
@@ -8,6 +9,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Events;
     using Loader;
     using Identifier;
+    using Reconnection;
+    using Reconnection.Messages;
     using Connection.Manager;
 
     [DisallowMultipleComponent]
@@ -64,6 +67,64 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.RoomConnections.OnClientRoomListRemove.AddListener(RemoveRoomList);
 
             _connectionManager.RoomConnections.OnClientRoomIDMessage.AddListener(GetRoomIDForClient);
+
+            // Reconnection initialization
+            if (_enableReconnection)
+                InitializeReconnection();
+        }
+
+        private void InitializeReconnection()
+        {
+            var identityProvider = _playerIdentityProviderComponent != null
+                ? _playerIdentityProviderComponent as IPlayerIdentityProvider
+                : gameObject.AddComponent<GuidPlayerIdentityProvider>();
+
+            IReconnectionHandler reconnectionHandler;
+            if (_reconnectionHandlerComponent != null)
+            {
+                reconnectionHandler = _reconnectionHandlerComponent as IReconnectionHandler;
+            }
+            else
+            {
+                var defaultHandler = gameObject.AddComponent<DefaultReconnectionHandler>();
+                defaultHandler.SetGracePeriod(_reconnectionGracePeriod);
+                reconnectionHandler = defaultHandler;
+            }
+
+            var playerHandler = _disconnectedPlayerHandlerComponent != null
+                ? _disconnectedPlayerHandlerComponent as IDisconnectedPlayerHandler
+                : gameObject.AddComponent<DefaultDisconnectedPlayerHandler>();
+
+            var stateSerializer = _playerStateSerializerComponent != null
+                ? _playerStateSerializerComponent as IPlayerStateSerializer
+                : null;
+
+            _reconnectionService = gameObject.AddComponent<ReconnectionService>();
+            _reconnectionService.Initialize(reconnectionHandler, stateSerializer, playerHandler, identityProvider, m_eventManager);
+        }
+
+        private void OnPlayerIdentityMessageReceived(NetworkConnectionToClient conn, PlayerIdentityMessage msg)
+        {
+            if (_reconnectionService == null) return;
+
+            var identityProvider = _playerIdentityProviderComponent != null
+                ? _playerIdentityProviderComponent as IPlayerIdentityProvider
+                : GetComponent<GuidPlayerIdentityProvider>() as IPlayerIdentityProvider;
+
+            if (identityProvider == null) return;
+
+            // Check if this is a reconnection attempt
+            if (!string.IsNullOrEmpty(msg.PlayerId) && _reconnectionService.HasPendingReconnection(msg.PlayerId))
+            {
+                var playerId = identityProvider.GetOrAssignPlayerId(conn, msg.PlayerId);
+
+                if (_reconnectionService.TryReconnect(playerId, conn))
+                    return;
+            }
+
+            // Normal flow: assign new or existing ID
+            var assignedId = identityProvider.GetOrAssignPlayerId(conn, msg.PlayerId);
+            conn.Send(new PlayerIdentityResponseMessage { PlayerId = assignedId });
         }
 
         protected virtual void OnDestroy()

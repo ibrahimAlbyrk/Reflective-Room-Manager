@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Manager
 {
+    using Room;
     using Utilities;
     using Connection.Manager;
     
@@ -77,7 +78,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
         public override void OnServerDisconnect(NetworkConnectionToClient conn)
         {
             ReflectiveConnectionManager.networkConnections.OnServerDisconnected.Call(conn);
-            
+
+            if (RoomManagerBase.Instance != null && RoomManagerBase.Instance.ShouldSkipBaseDisconnect(conn))
+                return;
+
             base.OnServerDisconnect(conn);
         }
 

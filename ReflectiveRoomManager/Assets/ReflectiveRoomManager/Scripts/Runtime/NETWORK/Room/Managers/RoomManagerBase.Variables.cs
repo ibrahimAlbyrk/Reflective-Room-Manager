@@ -11,6 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Structs;
     using Identifier;
     using Validation;
+    using Reconnection;
     using Connection.Manager;
     
     public abstract partial class RoomManagerBase
@@ -35,6 +36,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         [Tooltip("determines what type of loading the room will have")]
         [SerializeField] private RoomLoaderType _RoomLoaderType = RoomLoaderType.AdditiveScene;
+
+        [Header("Reconnection")]
+        [SerializeField] private bool _enableReconnection;
+        [SerializeField] private float _reconnectionGracePeriod = 30f;
+        [SerializeField] private MonoBehaviour _playerIdentityProviderComponent;
+        [SerializeField] private MonoBehaviour _reconnectionHandlerComponent;
+        [SerializeField] private MonoBehaviour _disconnectedPlayerHandlerComponent;
+        [SerializeField] private MonoBehaviour _playerStateSerializerComponent;
 
         #endregion
 
@@ -92,6 +101,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private IRoomValidator _roomValidator = new DefaultRoomValidator();
 
         private IConnectionManager _connectionManager;
+
+        protected ReconnectionService _reconnectionService;
+        public bool EnableReconnection => _enableReconnection;
 
         #endregion
     }
