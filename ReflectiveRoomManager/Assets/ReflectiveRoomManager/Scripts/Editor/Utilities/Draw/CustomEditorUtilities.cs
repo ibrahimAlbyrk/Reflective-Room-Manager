@@ -5,15 +5,19 @@ namespace REFLECTIVE.Editor.Utilities
 {
     public static class CustomEditorUtilities
     {
-        
+        private static Texture2D _titleBackground;
+
         public static void DrawReflectionTitle(string title = "Reflection")
         {
+            if (_titleBackground == null)
+                _titleBackground = MakeTex(1, 1, Color.white);
+
             var titleStyle = new GUIStyle(EditorStyles.miniLabel)
             {
                 normal =
                 {
                     textColor = Color.black,
-                    background = MakeTex(1, 1, Color.white)
+                    background = _titleBackground
                 },
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 12
@@ -61,7 +65,8 @@ namespace REFLECTIVE.Editor.Utilities
             }
         
             var result = new Texture2D(width, height);
-            
+            result.hideFlags = HideFlags.HideAndDontSave;
+
             result.SetPixels(pix);
             result.Apply();
 
