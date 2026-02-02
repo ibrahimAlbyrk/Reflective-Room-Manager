@@ -2,11 +2,10 @@
 {
     public static class ReflectiveConnectionManager
     {
-        public static RoomConnections roomConnections => _roomConnections ??= new RoomConnections();
+        private static readonly RoomConnections _roomConnections = new();
+        private static readonly NetworkConnections _networkConnections = new();
 
-        public static NetworkConnections networkConnections => _networkConnections ??= new NetworkConnections();
-
-        private static RoomConnections _roomConnections;
-        private static NetworkConnections _networkConnections;
+        public static RoomConnections roomConnections => _roomConnections;
+        public static NetworkConnections networkConnections => _networkConnections;
     }
 }
