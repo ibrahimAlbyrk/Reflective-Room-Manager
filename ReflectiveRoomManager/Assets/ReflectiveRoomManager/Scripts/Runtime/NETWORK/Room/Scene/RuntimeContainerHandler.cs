@@ -12,7 +12,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         private const string RUNTIME_CONTAINER_NAME = "__RuntimeContainer__";
 
         private Scene _currentContainer;
-        private uint _pendingRoomID;
 
         internal void RegisterClientHandlers()
         {
@@ -34,19 +33,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
                 return;
             }
 
-            _pendingRoomID = msg.RoomID;
-
             if (msg.UseRuntimeContainer)
             {
-                CreateRuntimeContainer(msg.PhysicsMode);
+                CreateRuntimeContainer(msg.RoomID, msg.PhysicsMode);
             }
             else
             {
-                LoadCustomContainer(msg.CustomContainerScene);
+                LoadCustomContainer(msg.RoomID, msg.CustomContainerScene);
             }
         }
 
-        private void CreateRuntimeContainer(LocalPhysicsMode physicsMode)
+        private void CreateRuntimeContainer(uint roomId, LocalPhysicsMode physicsMode)
         {
             CleanupExistingContainer();
 
@@ -60,50 +57,71 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
                 if (!_currentContainer.IsValid())
                 {
                     Debug.LogError("[RuntimeContainerHandler] Failed to create runtime container");
-                    SendReadyAcknowledgment(_pendingRoomID, false);
+                    SendReadyAcknowledgment(roomId, false);
                     return;
                 }
 
                 SceneManager.SetActiveScene(_currentContainer);
-                SendReadyAcknowledgment(_pendingRoomID, true);
+                SendReadyAcknowledgment(roomId, true);
             }
             catch (Exception e)
             {
                 Debug.LogError($"[RuntimeContainerHandler] Exception: {e.Message}");
-                SendReadyAcknowledgment(_pendingRoomID, false);
+                SendReadyAcknowledgment(roomId, false);
             }
         }
 
-        private void LoadCustomContainer(string scenePath)
+        private void LoadCustomContainer(uint roomId, string scenePath)
         {
             CleanupExistingContainer();
 
-            var op = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
-            if (op == null)
+            AsyncOperation op;
+            try
             {
-                Debug.LogError($"[RuntimeContainerHandler] Failed to load container: {scenePath}");
-                SendReadyAcknowledgment(_pendingRoomID, false);
+                op = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[RuntimeContainerHandler] Failed to start scene load: {e.Message}");
+                SendReadyAcknowledgment(roomId, false);
                 return;
             }
 
+            if (op == null)
+            {
+                Debug.LogError($"[RuntimeContainerHandler] Failed to load container: {scenePath}");
+                SendReadyAcknowledgment(roomId, false);
+                return;
+            }
+
+            // Capture roomId in closure to avoid race condition
+            var capturedRoomId = roomId;
+            var capturedScenePath = scenePath;
+
             op.completed += _ =>
             {
-                // Scene path may contain folder structure, get just the name
-                var sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+                var sceneName = System.IO.Path.GetFileNameWithoutExtension(capturedScenePath);
                 _currentContainer = SceneManager.GetSceneByName(sceneName);
 
-                // Fallback: if not found by name, get the active scene
                 if (!_currentContainer.IsValid())
                 {
                     _currentContainer = SceneManager.GetActiveScene();
                 }
 
-                SendReadyAcknowledgment(_pendingRoomID, true);
+                if (!_currentContainer.IsValid())
+                {
+                    Debug.LogError($"[RuntimeContainerHandler] Scene loaded but not found: {sceneName}");
+                    SendReadyAcknowledgment(capturedRoomId, false);
+                    return;
+                }
+
+                SendReadyAcknowledgment(capturedRoomId, true);
             };
         }
 
         private void SendReadyAcknowledgment(uint roomId, bool success)
         {
+            if (!NetworkClient.active) return;
             NetworkClient.Send(new ContainerReadyMessage(roomId, success));
         }
 

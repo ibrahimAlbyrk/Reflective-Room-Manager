@@ -32,7 +32,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         internal void DoSyncScene(NetworkConnection conn, uint roomID)
         {
             var room = _roomManager.GetRoom(roomID);
-            if (room == null) return;
+            if (room == null)
+            {
+                Debug.LogWarning($"[RoomSceneSynchronizer] Room {roomID} not found for sync");
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
 
             _pendingStates.Add(conn, roomID);
 
@@ -73,7 +78,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         private void SendRoomScene(NetworkConnection conn, uint roomID)
         {
             var room = _roomManager.GetRoom(roomID);
-            if (room == null) return;
+            if (room == null)
+            {
+                Debug.LogWarning($"[RoomSceneSynchronizer] Room {roomID} no longer exists");
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
 
             conn.Send(new SceneMessage
             {
@@ -85,6 +95,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         internal void RemovePendingState(NetworkConnection conn)
         {
             _pendingStates.Remove(conn);
+        }
+
+        internal void RemovePendingStatesForRoom(uint roomId)
+        {
+            _pendingStates.RemoveByRoomId(roomId);
         }
     }
 }
