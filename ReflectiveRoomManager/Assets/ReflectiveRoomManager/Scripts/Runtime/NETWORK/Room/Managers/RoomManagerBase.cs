@@ -58,6 +58,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 _sceneSynchronizer = new RoomSceneSynchronizer(this);
                 _sceneSynchronizer.RegisterServerHandlers();
                 m_eventManager.OnServerJoinedRoom += _sceneSynchronizer.DoSyncScene;
+                m_eventManager.OnServerRoomRemoving += _sceneSynchronizer.RemovePendingStatesForRoom;
             }
             
             m_eventManager.OnServerJoinedRoom += SendRoomIDToClient;
@@ -149,6 +150,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnDestroy()
         {
+            if (_connectionManager == null)
+            {
+                Debug.LogWarning("[RoomManagerBase] OnDestroy called but Awake was never executed");
+                return;
+            }
+
             // SERVER SIDE
             _connectionManager.NetworkConnections.OnServerStarted.RemoveListener(OnStartServer);
             _connectionManager.NetworkConnections.OnServerStopped.RemoveListener(OnStopServer);
@@ -167,6 +174,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 if (_sceneSynchronizer != null)
                 {
                     m_eventManager.OnServerJoinedRoom -= _sceneSynchronizer.DoSyncScene;
+                    m_eventManager.OnServerRoomRemoving -= _sceneSynchronizer.RemovePendingStatesForRoom;
                     _sceneSynchronizer.UnregisterServerHandlers();
                 }
                 m_eventManager.OnServerJoinedRoom -= SendRoomIDToClient;
