@@ -89,6 +89,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public string LobbyScene => _lobbyScene;
         public string RoomScene => _roomScene;
         public string ClientContainerScene => _clientContainerScene;
+        public bool UseRuntimeContainer => string.IsNullOrEmpty(_clientContainerScene);
 
         public IRoomValidator RoomValidator
         {

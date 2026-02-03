@@ -38,7 +38,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void OnStartClient()
         {
-            _connectionManager.RoomConnections.AddRegistersForClient();
+            var useSceneManagement = RoomLoaderType != Loader.RoomLoaderType.NoneScene;
+            _connectionManager.RoomConnections.AddRegistersForClient(useSceneManagement);
         }
 
         protected virtual void OnStopClient()

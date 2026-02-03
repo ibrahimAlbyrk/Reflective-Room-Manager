@@ -46,6 +46,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             _connectionManager.NetworkConnections.OnServerConnected.AddListener(OnServerConnect);
             _connectionManager.NetworkConnections.OnServerDisconnected.AddListener(OnServerDisconnect);
+            _connectionManager.NetworkConnections.OnServerDisconnected.AddListener(OnServerDisconnectCleanupPendingState);
 
             _connectionManager.RoomConnections.OnServerCreateRoom.AddListener(CreateRoom);
             _onServerJoinRoomHandler = (conn, roomName, accessToken) => JoinRoom(conn, roomName, accessToken);
@@ -55,6 +56,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (RoomLoaderType != RoomLoaderType.NoneScene)
             {
                 _sceneSynchronizer = new RoomSceneSynchronizer(this);
+                _sceneSynchronizer.RegisterServerHandlers();
                 m_eventManager.OnServerJoinedRoom += _sceneSynchronizer.DoSyncScene;
             }
             
@@ -69,6 +71,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.NetworkConnections.OnClientConnected.AddListener(OnClientConnect);
             _connectionManager.NetworkConnections.OnClientDisconnected.AddListener(OnClientDisconnect);
             _connectionManager.NetworkConnections.OnClientDisconnected.AddListener(RemoveAllRoomList);
+            _connectionManager.NetworkConnections.OnClientStopped.AddListener(_connectionManager.RoomConnections.CleanupClientHandlers);
             
             _connectionManager.RoomConnections.OnClientRoomListAdd.AddListener(AddRoomList);
             _connectionManager.RoomConnections.OnClientRoomListUpdate.AddListener(UpdateRoomList);
@@ -153,6 +156,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             _connectionManager.NetworkConnections.OnServerConnected.RemoveListener(OnServerConnect);
             _connectionManager.NetworkConnections.OnServerDisconnected.RemoveListener(OnServerDisconnect);
+            _connectionManager.NetworkConnections.OnServerDisconnected.RemoveListener(OnServerDisconnectCleanupPendingState);
 
             _connectionManager.RoomConnections.OnServerCreateRoom.RemoveListener(CreateRoom);
             _connectionManager.RoomConnections.OnServerJoinRoom.RemoveListener(_onServerJoinRoomHandler);
@@ -161,7 +165,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (m_eventManager != null)
             {
                 if (_sceneSynchronizer != null)
+                {
                     m_eventManager.OnServerJoinedRoom -= _sceneSynchronizer.DoSyncScene;
+                    _sceneSynchronizer.UnregisterServerHandlers();
+                }
                 m_eventManager.OnServerJoinedRoom -= SendRoomIDToClient;
                 m_eventManager.OnServerExitedRoom -= SendClientExitSceneMessage;
                 m_eventManager.OnServerExitedRoom -= SendRoomIDToClientForReset;
@@ -174,6 +181,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.NetworkConnections.OnClientConnected.RemoveListener(OnClientConnect);
             _connectionManager.NetworkConnections.OnClientDisconnected.RemoveListener(OnClientDisconnect);
             _connectionManager.NetworkConnections.OnClientDisconnected.RemoveListener(RemoveAllRoomList);
+            _connectionManager.NetworkConnections.OnClientStopped.RemoveListener(_connectionManager.RoomConnections.CleanupClientHandlers);
 
             _connectionManager.RoomConnections.OnClientRoomListAdd.RemoveListener(AddRoomList);
             _connectionManager.RoomConnections.OnClientRoomListUpdate.RemoveListener(UpdateRoomList);
