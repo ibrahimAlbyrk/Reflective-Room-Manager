@@ -163,13 +163,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (room == null)
             {
                 Debug.LogWarning($"There is no such room for remove");
-                
+
                 return;
             }
 
             var removedConnections = room.RemoveAllConnections();
 
             if (room.IsServer && !forced) return;
+
+            m_eventManager.Invoke_OnServerRoomRemoving(room.ID);
 
             UnLoadRoom(room);
 

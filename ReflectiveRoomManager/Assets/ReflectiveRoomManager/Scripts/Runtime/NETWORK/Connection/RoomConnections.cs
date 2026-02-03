@@ -14,6 +14,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
     public class RoomConnections
     {
         private RateLimiter _rateLimiter;
+        private RuntimeContainerHandler _runtimeContainerHandler;
 
         internal void SetRateLimiter(RateLimiter rateLimiter)
         {
@@ -50,13 +51,25 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
             NetworkServer.RegisterHandler<ServerRoomMessage>(OnReceivedRoomMessageViaServer);
         }
         
-        internal void AddRegistersForClient()
+        internal void AddRegistersForClient(bool initializeContainerHandler = true)
         {
             NetworkClient.RegisterHandler<ClientRoomMessage>(OnReceivedRoomMessageViaClient);
             NetworkClient.RegisterHandler<RoomListChangeMessage>(OnRoomListChangeForClient);
             NetworkClient.RegisterHandler<ClientRoomIDMessage>(OnReceivedRoomIDViaClient);
             NetworkClient.RegisterHandler<SceneLoadMessage>(OnReceivedSceneLoadMessage);
             NetworkClient.RegisterHandler<ServerShutdownWarningMessage>(OnReceivedShutdownWarning);
+
+            if (initializeContainerHandler)
+            {
+                _runtimeContainerHandler = new RuntimeContainerHandler();
+                _runtimeContainerHandler.RegisterClientHandlers();
+            }
+        }
+
+        internal void CleanupClientHandlers()
+        {
+            _runtimeContainerHandler?.UnregisterClientHandlers();
+            _runtimeContainerHandler = null;
         }
 
         private void OnRoomListChangeForClient(RoomListChangeMessage msg)

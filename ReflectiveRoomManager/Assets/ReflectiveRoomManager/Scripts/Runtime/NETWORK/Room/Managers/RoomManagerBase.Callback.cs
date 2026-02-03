@@ -44,6 +44,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             conn.Send(new SceneMessage{sceneName = _lobbyScene, sceneOperation = SceneOperation.Normal});
         }
 
+        private void OnServerDisconnectCleanupPendingState(NetworkConnectionToClient conn)
+        {
+            _sceneSynchronizer?.RemovePendingState(conn);
+        }
+
         private void AddRoomList(RoomInfo roomInfo)
         {
             _roomListInfos.Add(roomInfo);

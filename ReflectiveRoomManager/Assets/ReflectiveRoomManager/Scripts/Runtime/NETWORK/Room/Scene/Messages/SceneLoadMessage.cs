@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Mirror;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes

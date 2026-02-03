@@ -47,6 +47,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Events
             OnServerRoomDataUpdated?.Invoke(room);
         }
 
+        /// <summary>Called on the server when a room is about to be removed</summary>
+        public event Action<uint> OnServerRoomRemoving;
+
+        internal void Invoke_OnServerRoomRemoving(uint roomId)
+        {
+            OnServerRoomRemoving?.Invoke(roomId);
+        }
+
         /// <summary>Called on the server when graceful shutdown has been initiated</summary>
         public event Action<float> OnServerShutdownStarted;
 
