@@ -43,7 +43,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
             CoroutineRunner.Instance.StartCoroutine(RemovePlayer_Cor(conn));
         }
 
-        private static GameObject SpawnPlayer(NetworkConnection conn, GameObject prefab)
+        private static GameObject SpawnPlayer(NetworkConnectionToClient conn, GameObject prefab)
         {
             var room = RoomManagerBase.Instance.GetRoomByConnection(conn);
             var scene = room?.Scene ?? SceneManager.GetActiveScene();
@@ -56,7 +56,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         {
             if (conn is not NetworkConnectionToClient connectionToClient) yield break;
 
-            var player = SpawnPlayer(conn, prefab);
+            var player = SpawnPlayer(connectionToClient, prefab);
 
             NetworkServer.AddPlayerForConnection(connectionToClient, player);
 

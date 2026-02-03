@@ -8,7 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
 {
     public static class NetworkSpawnUtilities
     {
-        public static GameObject SpawnObject(GameObject obj, NetworkConnection conn = null)
+        public static GameObject SpawnObject(GameObject obj, NetworkConnectionToClient conn = null)
         {
             if (NetworkManager.singleton == null)
             {
@@ -22,7 +22,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             return instantObj;
         }
         
-        public static GameObject SpawnObject(GameObject obj, Transform parent, NetworkConnection conn = null)
+        public static GameObject SpawnObject(GameObject obj, Transform parent, NetworkConnectionToClient conn = null)
         {
             if (NetworkManager.singleton == null)
             {
@@ -36,7 +36,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             return instantObj;
         }
 
-        public static GameObject SpawnObject(GameObject obj, Vector3 position, Quaternion rotation, NetworkConnection conn = null)
+        public static GameObject SpawnObject(GameObject obj, Vector3 position, Quaternion rotation, NetworkConnectionToClient conn = null)
         {
             if (NetworkManager.singleton == null)
             {
@@ -50,7 +50,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             return instantObj;
         }
         
-        public static GameObject SpawnObject(GameObject obj, Vector3 position, Quaternion rotation, Transform parent, NetworkConnection conn = null)
+        public static GameObject SpawnObject(GameObject obj, Vector3 position, Quaternion rotation, Transform parent, NetworkConnectionToClient conn = null)
         {
             if (NetworkManager.singleton == null)
             {
@@ -64,7 +64,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             return instantObj;
         }
 
-        public static GameObject SpawnObjectForScene(Scene scene, GameObject obj, NetworkConnection conn = null)
+        public static GameObject SpawnObjectForScene(Scene scene, GameObject obj, NetworkConnectionToClient conn = null)
         {
             var spawnedObj = SpawnObject(obj, conn);
 
@@ -77,7 +77,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
             return spawnedObj;
         }
 
-        public static GameObject SpawnObjectForScene(Scene scene, GameObject obj, Vector3 position, Quaternion rotation, NetworkConnection conn = null)
+        public static GameObject SpawnObjectForScene(Scene scene, GameObject obj, Vector3 position, Quaternion rotation, NetworkConnectionToClient conn = null)
         {
             var spawnedObj = SpawnObject(obj, position, rotation, conn);
 

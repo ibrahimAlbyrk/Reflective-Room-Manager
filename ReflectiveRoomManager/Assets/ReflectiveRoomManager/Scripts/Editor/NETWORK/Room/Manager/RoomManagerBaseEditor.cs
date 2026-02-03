@@ -115,7 +115,7 @@ namespace REFLECTIVE.Editor.NETWORK.Room.Manager
                     else
                     {
                         if (int.TryParse(filter, out var id))
-                            if (room.Connections.All(conn => conn.connectionId != id))
+                            if (room.Connections.OfType<NetworkConnectionToClient>().All(conn => conn.connectionId != id))
                                 continue;
                     }
                 }

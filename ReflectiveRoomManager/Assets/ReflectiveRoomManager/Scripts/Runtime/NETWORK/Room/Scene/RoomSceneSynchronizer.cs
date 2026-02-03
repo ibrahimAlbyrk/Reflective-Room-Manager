@@ -29,7 +29,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             _pendingStates.Clear();
         }
 
-        internal void DoSyncScene(NetworkConnection conn, uint roomID)
+        internal void DoSyncScene(NetworkConnectionToClient conn, uint roomID)
         {
             var room = _roomManager.GetRoom(roomID);
             if (room == null)
@@ -75,7 +75,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             SendRoomScene(conn, msg.RoomID);
         }
 
-        private void SendRoomScene(NetworkConnection conn, uint roomID)
+        private void SendRoomScene(NetworkConnectionToClient conn, uint roomID)
         {
             var room = _roomManager.GetRoom(roomID);
             if (room == null)
@@ -92,7 +92,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
             });
         }
 
-        internal void RemovePendingState(NetworkConnection conn)
+        internal void RemovePendingState(NetworkConnectionToClient conn)
         {
             _pendingStates.Remove(conn);
         }

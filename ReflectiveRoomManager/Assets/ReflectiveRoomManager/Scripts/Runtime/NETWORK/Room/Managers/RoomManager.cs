@@ -126,7 +126,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
 
-            m_eventManager.Invoke_OnServerJoinedClient(conn, room.ID);
+            if (conn is NetworkConnectionToClient connToClient)
+                m_eventManager.Invoke_OnServerJoinedClient(connToClient, room.ID);
         }
 
         internal override void JoinRoom(NetworkConnection conn, string roomName)
@@ -212,10 +213,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
             
-            if(!isDisconnected)
-                m_eventManager.Invoke_OnServerExitedClient(conn);
-            else
-                m_eventManager.Invoke_OnServerDisconnectedClient(conn);
+            if (conn is NetworkConnectionToClient connToClient)
+            {
+                if(!isDisconnected)
+                    m_eventManager.Invoke_OnServerExitedClient(connToClient);
+                else
+                    m_eventManager.Invoke_OnServerDisconnectedClient(connToClient);
+            }
         }
 
         internal override void UpdateRoomData(Room room, string key, string value)
