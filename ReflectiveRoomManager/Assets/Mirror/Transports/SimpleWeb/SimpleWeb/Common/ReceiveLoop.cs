@@ -62,7 +62,7 @@ namespace Mirror.SimpleWeb
                     while (client.Connected)
                         ReadOneMessage(config, readBuffer);
 
-                    Log.Verbose($"[SWT-ReceiveLoop]: {conn} Not Connected");
+                    Log.Verbose("[SWT-ReceiveLoop]: {0} Not Connected", conn);
                 }
                 catch (Exception)
                 {
@@ -71,39 +71,35 @@ namespace Mirror.SimpleWeb
                     throw;
                 }
             }
-            catch (ThreadInterruptedException e) { Log.InfoException(e); }
-            catch (ThreadAbortException e) { Log.InfoException(e); }
-            catch (ObjectDisposedException e) { Log.InfoException(e); }
-            catch (ReadHelperException e)
-            {
-                Log.InfoException(e);
-            }
+            catch (ThreadInterruptedException e) { Log.InfoException("[SWT-ReceiveLoop]", e); }
+            catch (ThreadAbortException) { Log.Error("[SWT-ReceiveLoop]: Thread Abort Exception"); }
+            catch (ObjectDisposedException e) { Log.InfoException("[SWT-ReceiveLoop]", e); }
+            catch (ReadHelperException e) { Log.InfoException("[SWT-ReceiveLoop]", e); }
             catch (SocketException e)
             {
                 // this could happen if wss client closes stream
-                Log.Warn($"[SWT-ReceiveLoop]: ReceiveLoop SocketException\n{e.Message}");
+                Log.Warn("[SWT-ReceiveLoop]: ReceiveLoop SocketException\n{0}", e.Message);
                 queue.Enqueue(new Message(conn.connId, e));
             }
             catch (IOException e)
             {
                 // this could happen if client disconnects
-                Log.Warn($"[SWT-ReceiveLoop]: ReceiveLoop IOException\n{e.Message}");
+                Log.Warn("[SWT-ReceiveLoop]: ReceiveLoop IOException\n{0}", e.Message);
                 queue.Enqueue(new Message(conn.connId, e));
             }
             catch (InvalidDataException e)
             {
-                Log.Error($"[SWT-ReceiveLoop]: Invalid data from {conn}\n{e.Message}\n{e.StackTrace}\n\n");
+                Log.Error("[SWT-ReceiveLoop]: Invalid data from {0}\n{1}\n{2}", conn, e.Message, e.StackTrace);
                 queue.Enqueue(new Message(conn.connId, e));
             }
             catch (Exception e)
             {
-                Log.Exception(e);
+                Log.Exception("[SWT-ReceiveLoop]", e);
                 queue.Enqueue(new Message(conn.connId, e));
             }
             finally
             {
                 Profiler.EndThreadProfiling();
-                conn.Dispose();
             }
         }
 
@@ -161,7 +157,7 @@ namespace Mirror.SimpleWeb
                 }
 
                 // dump after mask off
-                Log.DumpBuffer($"[SWT-ReceiveLoop]: Message", msg);
+                Log.DumpBuffer("[SWT-ReceiveLoop]: Message", msg);
 
                 queue.Enqueue(new Message(conn.connId, msg));
             }
@@ -176,14 +172,14 @@ namespace Mirror.SimpleWeb
             // read 2
             header.offset = ReadHelper.Read(stream, buffer, header.offset, Constants.HeaderMinSize);
             // log after first blocking call
-            Log.Flood($"[SWT-ReceiveLoop]: Message From {conn}");
+            Log.Flood("[SWT-ReceiveLoop]: Message From {0}", conn);
 
             if (MessageProcessor.NeedToReadShortLength(buffer))
                 header.offset = ReadHelper.Read(stream, buffer, header.offset, Constants.ShortLength);
             if (MessageProcessor.NeedToReadLongLength(buffer))
                 header.offset = ReadHelper.Read(stream, buffer, header.offset, Constants.LongLength);
 
-            Log.DumpBuffer($"[SWT-ReceiveLoop]: Raw Header", buffer, 0, header.offset);
+            Log.DumpBuffer("[SWT-ReceiveLoop]: Raw Header", buffer, 0, header.offset);
 
             MessageProcessor.ValidateHeader(buffer, maxMessageSize, expectMask, opCodeContinuation);
 
@@ -194,7 +190,7 @@ namespace Mirror.SimpleWeb
             header.payloadLength = MessageProcessor.GetPayloadLength(buffer);
             header.finished = MessageProcessor.Finished(buffer);
 
-            Log.Flood($"[SWT-ReceiveLoop]: Header ln:{header.payloadLength} op:{header.opcode} mask:{expectMask}");
+            Log.Flood("[SWT-ReceiveLoop]: Header ln:{0} op:{1} mask:{2}", header.payloadLength, header.opcode, expectMask);
 
             return header;
         }
@@ -206,7 +202,7 @@ namespace Mirror.SimpleWeb
             ArrayBuffer arrayBuffer = CopyMessageToBuffer(bufferPool, expectMask, buffer, msgOffset, payloadLength);
 
             // dump after mask off
-            Log.DumpBuffer($"[SWT-ReceiveLoop]: Message", arrayBuffer);
+            Log.DumpBuffer("[SWT-ReceiveLoop]: Message", arrayBuffer);
 
             queue.Enqueue(new Message(conn.connId, arrayBuffer));
         }
@@ -238,10 +234,8 @@ namespace Mirror.SimpleWeb
             }
 
             // dump after mask off
-            Log.DumpBuffer($"[SWT-ReceiveLoop]: Message", buffer, msgOffset, payloadLength);
-            Log.Verbose($"[SWT-ReceiveLoop]: Close: {GetCloseCode(buffer, msgOffset)} message:{GetCloseMessage(buffer, msgOffset, payloadLength)}");
-
-            conn.Dispose();
+            Log.DumpBuffer("[SWT-ReceiveLoop]: Message", buffer, msgOffset, payloadLength);
+            Log.Verbose("[SWT-ReceiveLoop]: Close: {0} message:{1}", GetCloseCode(buffer, msgOffset), GetCloseMessage(buffer, msgOffset, payloadLength));
         }
 
         static string GetCloseMessage(byte[] buffer, int msgOffset, int payloadLength)

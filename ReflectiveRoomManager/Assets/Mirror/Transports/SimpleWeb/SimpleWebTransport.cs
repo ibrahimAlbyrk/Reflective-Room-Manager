@@ -8,6 +8,9 @@ namespace Mirror.SimpleWeb
 {
     [DisallowMultipleComponent]
     [HelpURL("https://mirror-networking.gitbook.io/docs/manual/transports/websockets-transport")]
+#if !UNITY_2022_3_OR_NEWER
+    [Obsolete("SimpleWebTransport is not supported for this version of Unity.\nPlease upgrade to Unity 2022.3 LTS or newer for WebGL projects.", true)]
+#endif
     public class SimpleWebTransport : Transport, PortTransport
     {
         public const string NormalScheme = "ws";
@@ -18,7 +21,7 @@ namespace Mirror.SimpleWeb
 
         [FormerlySerializedAs("handshakeMaxSize")]
         [Tooltip("Max size for http header send as handshake for websockets")]
-        public int maxHandshakeSize = 3000;
+        public int maxHandshakeSize = 16 * 1024;
 
         [FormerlySerializedAs("serverMaxMessagesPerTick")]
         [Tooltip("Caps the number of messages the server will process per tick. Allows LateUpdate to finish to let the reset of unity continue in case more messages arrive before they are processed")]
@@ -51,7 +54,7 @@ namespace Mirror.SimpleWeb
         [Header("Server settings")]
 
         [Tooltip("Port to use for server")]
-        public ushort port = 7778;
+        public ushort port = 27777;
         public ushort Port
         {
             get
@@ -90,7 +93,7 @@ namespace Mirror.SimpleWeb
 
         [Tooltip("Sets connect scheme to wss. Useful when client needs to connect using wss when TLS is outside of transport.\nNOTE: if sslEnabled is true clientUseWss is also true")]
         public bool clientUseWss;
-        public ClientWebsocketSettings clientWebsocketSettings;
+        public ClientWebsocketSettings clientWebsocketSettings = new ClientWebsocketSettings { ClientPortOption = WebsocketPortOption.DefaultSameAsServer, CustomClientPort = 7777 };
 
         [Header("Logging")]
 
@@ -121,7 +124,7 @@ namespace Mirror.SimpleWeb
             Log.minLogLevel = minimumLogLevel;
         }
 
-        public override string ToString() => $"SWT [{port}]";
+        public override string ToString() => $"SWT [{Port}]";
 
         void OnValidate()
         {
@@ -234,8 +237,9 @@ namespace Mirror.SimpleWeb
 
         public override void ClientDisconnect()
         {
-            // don't set client null here of messages wont be processed
-            client?.Disconnect();
+            // don't set client null here or messages wont be processed
+            if (client != null && client.ConnectionState != ClientState.NotConnected)
+                client.Disconnect();
         }
 
         public override void ClientSend(ArraySegment<byte> segment, int channelId)
@@ -276,16 +280,7 @@ namespace Mirror.SimpleWeb
 
         string GetServerScheme() => sslEnabled ? SecureScheme : NormalScheme;
 
-        public override Uri ServerUri()
-        {
-            UriBuilder builder = new UriBuilder
-            {
-                Scheme = GetServerScheme(),
-                Host = Dns.GetHostName(),
-                Port = port
-            };
-            return builder.Uri;
-        }
+        public override Uri ServerUri() => TryBuildValidUri(GetServerScheme(), Dns.GetHostName(), port);
 
         public override bool ServerActive()
         {
@@ -300,7 +295,7 @@ namespace Mirror.SimpleWeb
             SslConfig config = SslConfigLoader.Load(sslEnabled, sslCertJson, sslProtocols);
             server = new SimpleWebServer(serverMaxMsgsPerTick, TcpConfig, maxMessageSize, maxHandshakeSize, config);
 
-            server.onConnect += OnServerConnected.Invoke;
+            server.onConnect += OnServerConnectedWithAddress.Invoke;
             server.onDisconnect += OnServerDisconnected.Invoke;
             server.onData += (int connId, ArraySegment<byte> data) => OnServerDataReceived.Invoke(connId, data, Channels.Reliable);
 

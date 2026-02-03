@@ -13,6 +13,7 @@ namespace Mirror.Examples.NetworkRoom
         [Header("Spawner Setup")]
         [Tooltip("Reward Prefab for the Spawner")]
         public GameObject rewardPrefab;
+        public byte poolSize = 10;
 
         public static new NetworkRoomManagerExt singleton => NetworkManager.singleton as NetworkRoomManagerExt;
 
@@ -24,7 +25,24 @@ namespace Mirror.Examples.NetworkRoom
         {
             // spawn the initial batch of Rewards
             if (sceneName == GameplayScene)
+            {
+                Spawner.InitializePool(rewardPrefab, poolSize);
                 Spawner.InitialSpawn();
+            }
+            else
+                Spawner.ClearPool();
+        }
+
+        public override void OnRoomClientSceneChanged()
+        {
+            // Don't initialize the pool for host client because it's
+            // already initialized in OnRoomServerSceneChanged
+            if (NetworkServer.active) return;
+
+            if (networkSceneName == GameplayScene)
+                Spawner.InitializePool(rewardPrefab, poolSize);
+            else
+                Spawner.ClearPool();
         }
 
         /// <summary>
@@ -61,21 +79,22 @@ namespace Mirror.Examples.NetworkRoom
             is set as DontDestroyOnLoad = true.
         */
 
+#if !UNITY_SERVER || UNITY_EDITOR
         bool showStartButton;
+#endif
 
         public override void OnRoomServerPlayersReady()
         {
             // calling the base method calls ServerChangeScene as soon as all players are in Ready state.
             if (Utils.IsHeadless())
-            {
                 base.OnRoomServerPlayersReady();
-            }
+#if !UNITY_SERVER || UNITY_EDITOR
             else
-            {
                 showStartButton = true;
-            }
+#endif
         }
 
+#if !UNITY_SERVER || UNITY_EDITOR
         public override void OnGUI()
         {
             base.OnGUI();
@@ -88,5 +107,6 @@ namespace Mirror.Examples.NetworkRoom
                 ServerChangeScene(GameplayScene);
             }
         }
+#endif
     }
 }

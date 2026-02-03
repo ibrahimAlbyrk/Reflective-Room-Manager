@@ -1,12 +1,14 @@
 // extremely fast spatial hashing interest management based on uMMORPG GridChecker.
 // => 30x faster in initial tests
 // => scales way higher
+// checks on two dimensions only(!), for example: XZ for 3D games or XY for 2D games.
+// this is faster than XYZ checking but doesn't check vertical distance.
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirror
 {
-    [AddComponentMenu("Network/ Interest Management/ Spatial Hash/Spatial Hashing Interest Management")]
+    [AddComponentMenu("Network/ Interest Management/ Spatial Hash/Grid Spatial Hash (2D)")]
     public class SpatialHashingInterestManagement : InterestManagement
     {
         [Tooltip("The maximum range that objects will be visible at.")]
@@ -36,7 +38,7 @@ namespace Mirror
         [Tooltip("Spatial Hashing supports 3D (XZ) and 2D (XY) games.")]
         public CheckMethod checkMethod = CheckMethod.XZ_FOR_3D;
 
-        // debugging
+        [Header("Debug Settings")]
         public bool showSlider;
 
         // the grid
@@ -128,8 +130,8 @@ namespace Mirror
             }
         }
 
-// OnGUI allocates even if it does nothing. avoid in release.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || (!UNITY_SERVER && DEBUG)
+        // OnGUI allocates even if it does nothing. avoid in release.
         // slider from dotsnet. it's nice to play around with in the benchmark
         // demo.
         void OnGUI()

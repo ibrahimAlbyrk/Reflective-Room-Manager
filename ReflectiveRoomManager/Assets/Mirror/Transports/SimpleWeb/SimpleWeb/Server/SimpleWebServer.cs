@@ -6,7 +6,7 @@ namespace Mirror.SimpleWeb
 {
     public class SimpleWebServer
     {
-        public event Action<int> onConnect;
+        public event Action<int, string> onConnect;
         public event Action<int> onDisconnect;
         public event Action<int, ArraySegment<byte>> onData;
         public event Action<int, Exception> onError;
@@ -56,7 +56,7 @@ namespace Mirror.SimpleWeb
             server.Send(connectionId, buffer);
         }
 
-        public bool KickClient(int connectionId) => server.CloseConnection(connectionId);
+        public void KickClient(int connectionId) => server.CloseConnection(connectionId);
 
         public string GetClientAddress(int connectionId) => server.GetClientAddress(connectionId);
 
@@ -79,19 +79,14 @@ namespace Mirror.SimpleWeb
             int processedCount = 0;
             bool skipEnabled = behaviour == null;
             // check enabled every time in case behaviour was disabled after data
-            while (
-                (skipEnabled || behaviour.enabled) &&
-                processedCount < maxMessagesPerTick &&
-                // Dequeue last
-                server.receiveQueue.TryDequeue(out Message next)
-                )
+            while ((skipEnabled || behaviour.enabled) && processedCount < maxMessagesPerTick && server.receiveQueue.TryDequeue(out Message next))
             {
                 processedCount++;
 
                 switch (next.type)
                 {
                     case EventType.Connected:
-                        onConnect?.Invoke(next.connId);
+                        onConnect?.Invoke(next.connId, GetClientAddress(next.connId));
                         break;
                     case EventType.Data:
                         onData?.Invoke(next.connId, next.data.ToSegment());
@@ -107,9 +102,8 @@ namespace Mirror.SimpleWeb
             }
 
             if (server.receiveQueue.Count > 0)
-            {
-                Log.Warn($"[SWT-SimpleWebServer]: ProcessMessageQueue has {server.receiveQueue.Count} remaining.");
-            }
+                Log.Verbose("[SWT-SimpleWebServer]: ProcessMessageQueue has {0} remaining. skipEnabled {1} behaviour.enabled {2} processedCount {3}\nThis is usually fine for ConcurrentQueue if Transport slips one in on another thread",
+                    server.receiveQueue.Count, skipEnabled, (behaviour == null ? false : behaviour.enabled), processedCount);
         }
     }
 }

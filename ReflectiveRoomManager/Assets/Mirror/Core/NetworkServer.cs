@@ -6,6 +6,28 @@ using UnityEngine;
 
 namespace Mirror
 {
+    public enum ReplacePlayerOptions
+    {
+        /// <summary>Player Object remains active on server and clients. Ownership is not removed</summary>
+        KeepAuthority,
+        /// <summary>Player Object remains active on server and clients. Only ownership is removed</summary>
+        KeepActive,
+        /// <summary>Player Object is unspawned on clients but remains on server</summary>
+        Unspawn,
+        /// <summary>Player Object is destroyed on server and clients</summary>
+        Destroy
+    }
+
+    public enum RemovePlayerOptions
+    {
+        /// <summary>Player Object remains active on server and clients. Only ownership is removed</summary>
+        KeepActive,
+        /// <summary>Player Object is unspawned on clients but remains on server</summary>
+        Unspawn,
+        /// <summary>Player Object is destroyed on server and clients</summary>
+        Destroy
+    }
+
     /// <summary>NetworkServer handles remote connections and has a local connection for a local client.</summary>
     public static partial class NetworkServer
     {
@@ -32,6 +54,17 @@ namespace Mirror
         public static float sendInterval => sendRate < int.MaxValue ? 1f / sendRate : 0; // for 30 Hz, that's 33ms
         static double lastSendTime;
 
+        // ocassionally send a full reliable state for unreliable components to delta compress against.
+        // this only applies to Components with SyncMethod=Unreliable.
+        public static int unreliableBaselineRate = 1;
+        public static float unreliableBaselineInterval => unreliableBaselineRate < int.MaxValue ? 1f / unreliableBaselineRate : 0; // for 1 Hz, that's 1000ms
+        static double lastUnreliableBaselineTime;
+
+        // quake sends unreliable messages twice to make up for message drops.
+        // this double bandwidth, but allows for smaller buffer time / faster sync.
+        // best to turn this off unless the game is extremely fast paced.
+        public static bool unreliableRedundancy = false;
+
         /// <summary>Connection to host mode client (if any)</summary>
         public static LocalConnectionToClient localConnection { get; private set; }
 
@@ -48,9 +81,16 @@ namespace Mirror
         public static readonly Dictionary<uint, NetworkIdentity> spawned =
             new Dictionary<uint, NetworkIdentity>();
 
-        /// <summary>Single player mode can use dontListen to not accept incoming connections</summary>
-        // see also: https://github.com/vis2k/Mirror/pull/2595
-        public static bool dontListen;
+        /// <summary>Single player mode can set listen=false to not accept incoming connections.</summary>
+        public static bool listen;
+
+        // DEPRECATED 2024-10-14
+        [Obsolete("NetworkServer.dontListen was replaced with NetworkServer.listen. The new value is the opposite, and avoids double negatives like 'dontListen=false'")]
+        public static bool dontListen
+        {
+            get => !listen;
+            set => listen = !value;
+        }
 
         /// <summary>active checks if the server has been started either has standalone or as host server.</summary>
         public static bool active { get; internal set; }
@@ -89,6 +129,7 @@ namespace Mirror
         public static Action<NetworkConnectionToClient> OnConnectedEvent;
         public static Action<NetworkConnectionToClient> OnDisconnectedEvent;
         public static Action<NetworkConnectionToClient, TransportError, string> OnErrorEvent;
+        public static Action<NetworkConnectionToClient, Exception> OnTransportExceptionEvent;
 
         // keep track of actual achieved tick rate.
         // might become lower under heavy load.
@@ -111,11 +152,12 @@ namespace Mirror
         public static void Listen(int maxConns)
         {
             Initialize();
-            maxConnections = maxConns;
 
             // only start server if we want to listen
-            if (!dontListen)
+            if (listen && !Utils.IsWebGL)
             {
+                maxConnections = maxConns;
+
                 Transport.active.ServerStart();
 
                 if (Transport.active is PortTransport portTransport)
@@ -134,6 +176,8 @@ namespace Mirror
                 else
                     Debug.Log("Server started listening");
             }
+            else
+                maxConnections = 0;
 
             active = true;
             RegisterMessageHandlers();
@@ -180,10 +224,14 @@ namespace Mirror
         static void AddTransportHandlers()
         {
             // += so that other systems can also hook into it (i.e. statistics)
+#pragma warning disable CS0618 // Type or member is obsolete
             Transport.active.OnServerConnected += OnTransportConnected;
+#pragma warning restore CS0618 // Type or member is obsolete
+            Transport.active.OnServerConnectedWithAddress += OnTransportConnectedWithAddress;
             Transport.active.OnServerDataReceived += OnTransportData;
             Transport.active.OnServerDisconnected += OnTransportDisconnected;
             Transport.active.OnServerError += OnTransportError;
+            Transport.active.OnServerTransportException += OnTransportException;
         }
 
         /// <summary>Shuts down the server and disconnects all clients</summary>
@@ -214,10 +262,12 @@ namespace Mirror
             }
 
             // Reset all statics here....
-            dontListen = false;
+            listen = true;
             isLoadingScene = false;
             lastSendTime = 0;
             actualTickRate = 0;
+
+            exceptionsDisconnect = true;
 
             localConnection = null;
 
@@ -243,6 +293,7 @@ namespace Mirror
             OnConnectedEvent = null;
             OnDisconnectedEvent = null;
             OnErrorEvent = null;
+            OnTransportExceptionEvent = null;
 
             if (aoi != null) aoi.ResetState();
         }
@@ -250,7 +301,10 @@ namespace Mirror
         static void RemoveTransportHandlers()
         {
             // -= so that other systems can also hook into it (i.e. statistics)
+#pragma warning disable CS0618 // Type or member is obsolete
             Transport.active.OnServerConnected -= OnTransportConnected;
+#pragma warning restore CS0618 // Type or member is obsolete
+            Transport.active.OnServerConnectedWithAddress -= OnTransportConnectedWithAddress;
             Transport.active.OnServerDataReceived -= OnTransportData;
             Transport.active.OnServerDisconnected -= OnTransportDisconnected;
             Transport.active.OnServerError -= OnTransportError;
@@ -281,7 +335,9 @@ namespace Mirror
             RegisterHandler<NetworkPingMessage>(NetworkTime.OnServerPing, false);
             RegisterHandler<NetworkPongMessage>(NetworkTime.OnServerPong, false);
             RegisterHandler<EntityStateMessage>(OnEntityStateMessage, true);
-            RegisterHandler<TimeSnapshotMessage>(OnTimeSnapshotMessage, true);
+            RegisterHandler<EntityStateMessageUnreliableBaseline>(OnEntityStateMessageUnreliableBaseline, true);
+            RegisterHandler<EntityStateMessageUnreliableDelta>(OnEntityStateMessageUnreliableDelta, true);
+            RegisterHandler<TimeSnapshotMessage>(OnTimeSnapshotMessage, false); // unreliable may arrive before reliable authority went through
         }
 
         // remote calls ////////////////////////////////////////////////////////
@@ -312,7 +368,13 @@ namespace Mirror
                                 return;
                             }
 
-                    Debug.LogWarning("Command received while client is not ready.\nThis may be ignored if client intentionally set NotReady.");
+                    if (RemoteProcedureCalls.GetFunctionMethodName(msg.functionHash, out string method))
+                    {
+                        Debug.LogWarning($"Command {method} received from {conn} when client was not ready.\nThis may be ignored if client intentionally set NotReady.");
+                        return;
+                    }
+
+                    Debug.LogWarning($"Command received from {conn} while client is not ready.\nThis may be ignored if client intentionally set NotReady.");
                 }
                 return;
             }
@@ -369,7 +431,10 @@ namespace Mirror
                     {
                         // DeserializeServer checks permissions internally.
                         // failure to deserialize disconnects to prevent exploits.
-                        if (!identity.DeserializeServer(reader))
+                        // -> initialState=false because for Reliable messages,
+                        //    initial always comes from server and broadcast
+                        //    updates are always deltas.
+                        if (!identity.DeserializeServer(reader, false))
                         {
                             if (exceptionsDisconnect)
                             {
@@ -389,6 +454,137 @@ namespace Mirror
                     Debug.LogWarning($"EntityStateMessage from {connection} for {identity.name} without authority.");
             }
             // no warning. don't spam server logs.
+            // else Debug.LogWarning($"Did not find target for sync message for {message.netId} . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+        }
+
+        // for client's owned ClientToServer components.
+        static void OnEntityStateMessageUnreliableBaseline(NetworkConnectionToClient connection, EntityStateMessageUnreliableBaseline message, int channelId)
+        {
+            // safety check: baseline should always arrive over Reliable channel.
+            if (channelId != Channels.Reliable)
+            {
+                Debug.LogError($"Server OnEntityStateMessageUnreliableBaseline arrived on channel {channelId} instead of Reliable. This should never happen!");
+                return;
+            }
+
+            // need to validate permissions carefully.
+            // an attacker may attempt to modify a not-owned or not-ClientToServer component.
+
+            // valid netId?
+            if (spawned.TryGetValue(message.netId, out NetworkIdentity identity) && identity != null)
+            {
+                // owned by the connection?
+                if (identity.connectionToClient == connection)
+                {
+                    // set the last received reliable baseline tick number.
+                    identity.lastUnreliableBaselineReceived = message.baselineTick;
+
+                    using (NetworkReaderPooled reader = NetworkReaderPool.Get(message.payload))
+                    {
+                        // DeserializeServer checks permissions internally.
+                        // failure to deserialize disconnects to prevent exploits.
+                        //
+                        // full state updates (initial=true) arrive over reliable.
+                        if (!identity.DeserializeServer(reader, true))
+                        {
+                            if (exceptionsDisconnect)
+                            {
+                                Debug.LogError($"Server failed to deserialize client unreliable state for {identity.name} with netId={identity.netId}, Disconnecting.");
+                                connection.Disconnect();
+                            }
+                            else
+                                Debug.LogWarning($"Server failed to deserialize client unreliable state for {identity.name} with netId={identity.netId}.");
+                        }
+                    }
+                }
+                // An attacker may attempt to modify another connection's entity
+                // This could also be a race condition of message in flight when
+                // RemoveClientAuthority is called, so not malicious.
+                // Don't disconnect, just log the warning.
+                else
+                    Debug.LogWarning($"EntityStateMessage from {connection} for {identity.name} without authority.");
+            }
+            // no warning. unreliable messages often arrive before/after the reliable spawn/despawn messages.
+            // else Debug.LogWarning($"Did not find target for sync message for {message.netId} . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+        }
+
+        // for client's owned ClientToServer components.
+        static void OnEntityStateMessageUnreliableDelta(NetworkConnectionToClient connection, EntityStateMessageUnreliableDelta message, int channelId)
+        {
+            // safety check: baseline should always arrive over Reliable channel.
+            if (channelId != Channels.Unreliable)
+            {
+                Debug.LogError($"Server OnEntityStateMessageUnreliableDelta arrived on channel {channelId} instead of Unreliable. This should never happen!");
+                return;
+            }
+
+            // need to validate permissions carefully.
+            // an attacker may attempt to modify a not-owned or not-ClientToServer component.
+
+            // valid netId?
+            if (spawned.TryGetValue(message.netId, out NetworkIdentity identity) && identity != null)
+            {
+                // owned by the connection?
+                if (identity.connectionToClient == connection)
+                {
+                    // unreliable state sync messages may arrive out of order.
+                    // only ever apply state that's newer than the last received state.
+                    // note that we send one EntityStateMessage per Entity,
+                    // so there will be multiple with the same == timestamp.
+                    if (connection.remoteTimeStamp < identity.lastUnreliableStateTime)
+                    {
+                        // debug log to show that it's working.
+                        // can be tested via LatencySimulation scramble easily.
+                        Debug.Log($"Server caught out of order Unreliable state message for {identity.name}. This is fine.\nIdentity timestamp={identity.lastUnreliableStateTime:F3} batch remoteTimestamp={connection.remoteTimeStamp:F3}");
+                        return;
+                    }
+                    // UDP messages may accidentally arrive twice.
+                    // or even intentionally, if unreliableRedundancy is turned on.
+                    else if (connection.remoteTimeStamp == identity.lastUnreliableStateTime)
+                    {
+                        // only log this if unreliableRedundancy is disabled.
+                        // otherwise it's expected and will happen a lot.
+                        if (!unreliableRedundancy) Debug.Log($"Server caught duplicate Unreliable state message for {identity.name}. This is fine.\nIdentity timestamp={identity.lastUnreliableStateTime:F3} batch remoteTimestamp={connection.remoteTimeStamp:F3}");
+                        return;
+                    }
+
+                    // make sure this delta is for the correct baseline.
+                    // we don't want to apply an old delta on top of a new baseline.
+                    if (message.baselineTick != identity.lastUnreliableBaselineReceived)
+                    {
+                        Debug.Log($"Server caught Unreliable state message for old baseline for {identity} with baselineTick={identity.lastUnreliableBaselineReceived} messageBaseline={message.baselineTick}. This is fine.");
+                        return;
+                    }
+
+                    // set the new last received time for unreliable
+                    identity.lastUnreliableStateTime = connection.remoteTimeStamp;
+
+                    using (NetworkReaderPooled reader = NetworkReaderPool.Get(message.payload))
+                    {
+                        // DeserializeServer checks permissions internally.
+                        // failure to deserialize disconnects to prevent exploits.
+                        //
+                        // delta state updates (initial=false) arrive over unreliable.
+                        if (!identity.DeserializeServer(reader, false))
+                        {
+                            if (exceptionsDisconnect)
+                            {
+                                Debug.LogError($"Server failed to deserialize client unreliable state for {identity.name} with netId={identity.netId}, Disconnecting.");
+                                connection.Disconnect();
+                            }
+                            else
+                                Debug.LogWarning($"Server failed to deserialize client unreliable state for {identity.name} with netId={identity.netId}.");
+                        }
+                    }
+                }
+                // An attacker may attempt to modify another connection's entity
+                // This could also be a race condition of message in flight when
+                // RemoveClientAuthority is called, so not malicious.
+                // Don't disconnect, just log the warning.
+                else
+                    Debug.LogWarning($"EntityStateMessage from {connection} for {identity.name} without authority.");
+            }
+            // no warning. unreliable messages often arrive before/after the reliable spawn/despawn messages.
             // else Debug.LogWarning($"Did not find target for sync message for {message.netId} . Note: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
         }
 
@@ -623,25 +819,46 @@ namespace Mirror
         // transport events ////////////////////////////////////////////////////
         // called by transport
         static void OnTransportConnected(int connectionId)
+            => OnTransportConnectedWithAddress(connectionId, Transport.active.ServerGetClientAddress(connectionId));
+
+        static void OnTransportConnectedWithAddress(int connectionId, string clientAddress)
         {
-            // Debug.Log($"Server accepted client:{connectionId}");
+            if (IsConnectionAllowed(connectionId, clientAddress))
+            {
+                // create a connection
+                NetworkConnectionToClient conn = new NetworkConnectionToClient(connectionId, clientAddress);
+                OnConnected(conn);
+            }
+            else
+            {
+                // kick the client immediately
+                Transport.active.ServerDisconnect(connectionId);
+            }
+        }
+
+        static bool IsConnectionAllowed(int connectionId, string address)
+        {
+            // only accept connections while listening
+            if (!listen)
+            {
+                Debug.Log($"Server not listening, rejecting connectionId={connectionId} with address={address}");
+                return false;
+            }
 
             // connectionId needs to be != 0 because 0 is reserved for local player
             // note that some transports like kcp generate connectionId by
             // hashing which can be < 0 as well, so we need to allow < 0!
             if (connectionId == 0)
             {
-                Debug.LogError($"Server.HandleConnect: invalid connectionId: {connectionId} . Needs to be != 0, because 0 is reserved for local player.");
-                Transport.active.ServerDisconnect(connectionId);
-                return;
+                Debug.LogError($"Server.HandleConnect: invalid connectionId={connectionId}. Needs to be != 0, because 0 is reserved for local player.");
+                return false;
             }
 
             // connectionId not in use yet?
             if (connections.ContainsKey(connectionId))
             {
-                Transport.active.ServerDisconnect(connectionId);
-                // Debug.Log($"Server connectionId {connectionId} already in use...kicked client");
-                return;
+                Debug.LogError($"Server connectionId={connectionId} already in use. Client with address={address} will be kicked");
+                return false;
             }
 
             // are more connections allowed? if not, kick
@@ -649,18 +866,13 @@ namespace Mirror
             //  less code and third party transport might not do that anyway)
             // (this way we could also send a custom 'tooFull' message later,
             //  Transport can't do that)
-            if (connections.Count < maxConnections)
+            if (connections.Count >= maxConnections)
             {
-                // add connection
-                NetworkConnectionToClient conn = new NetworkConnectionToClient(connectionId);
-                OnConnected(conn);
+                Debug.LogError($"Server full, client connectionId={connectionId} with address={address} will be kicked");
+                return false;
             }
-            else
-            {
-                // kick
-                Transport.active.ServerDisconnect(connectionId);
-                // Debug.Log($"Server full, kicked client {connectionId}");
-            }
+
+            return true;
         }
 
         internal static void OnConnected(NetworkConnectionToClient conn)
@@ -821,6 +1033,7 @@ namespace Mirror
             // Debug.Log($"Server disconnect client:{connectionId}");
             if (connections.TryGetValue(connectionId, out NetworkConnectionToClient conn))
             {
+                conn.Cleanup();
                 RemoveConnection(connectionId);
                 // Debug.Log($"Server lost client:{connectionId}");
 
@@ -848,6 +1061,17 @@ namespace Mirror
             // try get connection. passes null otherwise.
             connections.TryGetValue(connectionId, out NetworkConnectionToClient conn);
             OnErrorEvent?.Invoke(conn, error, reason);
+        }
+
+        // transport errors are forwarded to high level
+        static void OnTransportException(int connectionId, Exception exception)
+        {
+            // transport errors will happen. logging a warning is enough.
+            // make sure the user does not panic.
+            Debug.LogWarning($"Server Transport Exception for connId={connectionId}: {exception}");
+            // try get connection. passes null otherwise.
+            connections.TryGetValue(connectionId, out NetworkConnectionToClient conn);
+            OnTransportExceptionEvent?.Invoke(conn, exception);
         }
 
         /// <summary>Destroys all of the connection's owned objects on the server.</summary>
@@ -1060,10 +1284,36 @@ namespace Mirror
             return true;
         }
 
-        /// <summary>Replaces connection's player object. The old object is not destroyed.</summary>
-        // This does NOT change the ready state of the connection, so it can
-        // safely be used while changing scenes.
+        // Deprecated 2024-08-09
+        [Obsolete("Use ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, uint assetId, ReplacePlayerOptions replacePlayerOptions) instead")]
+        public static bool ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, uint assetId, bool keepAuthority = false)
+        {
+            if (GetNetworkIdentity(player, out NetworkIdentity identity))
+                identity.assetId = assetId;
+
+            return ReplacePlayerForConnection(conn, player, keepAuthority ? ReplacePlayerOptions.KeepAuthority : ReplacePlayerOptions.KeepActive);
+        }
+
+        // Deprecated 2024-08-09
+        [Obsolete("Use ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, ReplacePlayerOptions replacePlayerOptions) instead")]
         public static bool ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, bool keepAuthority = false)
+        {
+            return ReplacePlayerForConnection(conn, player, keepAuthority ? ReplacePlayerOptions.KeepAuthority : ReplacePlayerOptions.KeepActive);
+        }
+
+        /// <summary>Replaces connection's player object. The old object is not destroyed.</summary>
+        // This does NOT change the ready state of the connection, so it can safely be used while changing scenes.
+        public static bool ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, uint assetId, ReplacePlayerOptions replacePlayerOptions)
+        {
+            if (GetNetworkIdentity(player, out NetworkIdentity identity))
+                identity.assetId = assetId;
+
+            return ReplacePlayerForConnection(conn, player, replacePlayerOptions);
+        }
+
+        /// <summary>Replaces connection's player object. The old object is not destroyed.</summary>
+        // This does NOT change the ready state of the connection, so it can safely be used while changing scenes.
+        public static bool ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, ReplacePlayerOptions replacePlayerOptions)
         {
             if (!player.TryGetComponent(out NetworkIdentity identity))
             {
@@ -1105,47 +1355,61 @@ namespace Mirror
 
             Respawn(identity);
 
-            if (keepAuthority)
+            switch (replacePlayerOptions)
             {
-                // This needs to be sent to clear isLocalPlayer on
-                // client while keeping hasAuthority true
-                SendChangeOwnerMessage(previousPlayer, conn);
-            }
-            else
-            {
-                // This clears both isLocalPlayer and hasAuthority on client
-                previousPlayer.RemoveClientAuthority();
+                case ReplacePlayerOptions.KeepAuthority:
+                    // This needs to be sent to clear isLocalPlayer on
+                    // client while keeping hasAuthority true
+                    SendChangeOwnerMessage(previousPlayer, conn);
+                    break;
+                case ReplacePlayerOptions.KeepActive:
+                    // This clears both isLocalPlayer and hasAuthority on client
+                    previousPlayer.RemoveClientAuthority();
+                    break;
+                case ReplacePlayerOptions.Unspawn:
+                    UnSpawn(previousPlayer.gameObject);
+                    break;
+                case ReplacePlayerOptions.Destroy:
+                    Destroy(previousPlayer.gameObject);
+                    break;
             }
 
             return true;
         }
 
-        /// <summary>Replaces connection's player object. The old object is not destroyed.</summary>
-        // This does NOT change the ready state of the connection, so it can
-        // safely be used while changing scenes.
-        public static bool ReplacePlayerForConnection(NetworkConnectionToClient conn, GameObject player, uint assetId, bool keepAuthority = false)
-        {
-            if (GetNetworkIdentity(player, out NetworkIdentity identity))
-            {
-                identity.assetId = assetId;
-            }
-            return ReplacePlayerForConnection(conn, player, keepAuthority);
-        }
-
         /// <summary>Removes the player object from the connection</summary>
         // destroyServerObject: Indicates whether the server object should be destroyed
+        // Deprecated 2024-06-06
+        [Obsolete("Use RemovePlayerForConnection(NetworkConnectionToClient conn, RemovePlayerOptions removeOptions) instead")]
         public static void RemovePlayerForConnection(NetworkConnectionToClient conn, bool destroyServerObject)
         {
-            if (conn.identity != null)
-            {
-                if (destroyServerObject)
-                    Destroy(conn.identity.gameObject);
-                else
-                    UnSpawn(conn.identity.gameObject);
+            if (destroyServerObject)
+                RemovePlayerForConnection(conn, RemovePlayerOptions.Destroy);
+            else
+                RemovePlayerForConnection(conn, RemovePlayerOptions.Unspawn);
+        }
 
-                conn.identity = null;
+        /// <summary>Removes player object for the connection. Options to keep the object in play, unspawn it, or destroy it.</summary>
+        public static void RemovePlayerForConnection(NetworkConnectionToClient conn, RemovePlayerOptions removeOptions = RemovePlayerOptions.KeepActive)
+        {
+            if (conn.identity == null) return;
+
+            switch (removeOptions)
+            {
+                case RemovePlayerOptions.KeepActive:
+                    conn.identity.connectionToClient = null;
+                    conn.owned.Remove(conn.identity);
+                    SendChangeOwnerMessage(conn.identity, conn);
+                    break;
+                case RemovePlayerOptions.Unspawn:
+                    UnSpawn(conn.identity.gameObject);
+                    break;
+                case RemovePlayerOptions.Destroy:
+                    Destroy(conn.identity.gameObject);
+                    break;
             }
-            //else Debug.Log($"Connection {conn} has no identity");
+
+            conn.identity = null;
         }
 
         // ready ///////////////////////////////////////////////////////////////
@@ -1259,13 +1523,13 @@ namespace Mirror
         }
 
         // show / hide for connection //////////////////////////////////////////
-        internal static void ShowForConnection(NetworkIdentity identity, NetworkConnection conn)
+        internal static void ShowForConnection(NetworkIdentity identity, NetworkConnectionToClient conn)
         {
             if (conn.isReady)
                 SendSpawnMessage(identity, conn);
         }
 
-        internal static void HideForConnection(NetworkIdentity identity, NetworkConnection conn)
+        internal static void HideForConnection(NetworkIdentity identity, NetworkConnectionToClient conn)
         {
             ObjectHideMessage msg = new ObjectHideMessage
             {
@@ -1275,7 +1539,7 @@ namespace Mirror
         }
 
         // spawning ////////////////////////////////////////////////////////////
-        internal static void SendSpawnMessage(NetworkIdentity identity, NetworkConnection conn)
+        internal static void SendSpawnMessage(NetworkIdentity identity, NetworkConnectionToClient conn)
         {
             if (identity.serverOnly) return;
 
@@ -1313,7 +1577,7 @@ namespace Mirror
 
             // serialize all components with initialState = true
             // (can be null if has none)
-            identity.SerializeServer(true, ownerWriter, observersWriter);
+            identity.SerializeServer_Spawn(ownerWriter, observersWriter);
 
             // convert to ArraySegment to avoid reader allocations
             // if nothing was written, .ToArraySegment returns an empty segment.
@@ -1342,7 +1606,7 @@ namespace Mirror
             {
                 netId = identity.netId,
                 isOwner = identity.connectionToClient == conn,
-                isLocalPlayer = conn.identity == identity
+                isLocalPlayer = (conn.identity == identity && identity.connectionToClient == conn)
             });
         }
 
@@ -1446,14 +1710,14 @@ namespace Mirror
         /// <summary>Spawn the given game object on all clients which are ready.</summary>
         // This will cause a new object to be instantiated from the registered
         // prefab, or from a custom spawn function.
-        public static void Spawn(GameObject obj, NetworkConnection ownerConnection = null)
+        public static void Spawn(GameObject obj, NetworkConnectionToClient ownerConnection = null)
         {
             SpawnObject(obj, ownerConnection);
         }
 
         /// <summary>Spawns an object and also assigns Client Authority to the specified client.</summary>
         // This is the same as calling NetworkIdentity.AssignClientAuthority on the spawned object.
-        public static void Spawn(GameObject obj, uint assetId, NetworkConnection ownerConnection = null)
+        public static void Spawn(GameObject obj, uint assetId, NetworkConnectionToClient ownerConnection = null)
         {
             if (GetNetworkIdentity(obj, out NetworkIdentity identity))
             {
@@ -1462,7 +1726,7 @@ namespace Mirror
             SpawnObject(obj, ownerConnection);
         }
 
-        static void SpawnObject(GameObject obj, NetworkConnection ownerConnection)
+        static void SpawnObject(GameObject obj, NetworkConnectionToClient ownerConnection)
         {
             // verify if we can spawn this
             if (Utils.IsPrefab(obj))
@@ -1548,14 +1812,12 @@ namespace Mirror
             RebuildObservers(identity, true);
         }
 
-        /// <summary>This takes an object that has been spawned and un-spawns it.</summary>
-        // The object will be removed from clients that it was spawned on, or
-        // the custom spawn handler function on the client will be called for
-        // the object.
-        // Unlike when calling NetworkServer.Destroy(), on the server the object
-        // will NOT be destroyed. This allows the server to re-use the object,
-        // even spawn it again later.
-        public static void UnSpawn(GameObject obj)
+        // internal Unspawn function which has the 'resetState' parameter.
+        // resetState calls .ResetState() on the object after unspawning.
+        // this is necessary for scene objects, but not for prefabs since we
+        // don't want to reset their isServer flags etc.
+        // fixes: https://github.com/MirrorNetworking/Mirror/issues/3832
+        static void UnSpawnInternal(GameObject obj, bool resetState)
         {
             // Debug.Log($"DestroyObject instance:{identity.netId}");
 
@@ -1610,6 +1872,9 @@ namespace Mirror
             // in host mode, call OnStopClient/OnStopLocalPlayer manually
             if (NetworkClient.active && activeHost)
             {
+                // fix: #3962 custom unspawn handler for this prefab (for prefab pools etc.)
+                NetworkClient.InvokeUnSpawnHandler(identity.assetId, identity.gameObject);
+
                 if (identity.isLocalPlayer)
                     identity.OnStopLocalPlayer();
 
@@ -1629,9 +1894,21 @@ namespace Mirror
             identity.OnStopServer();
 
             // finally reset the state and deactivate it
-            identity.ResetState();
-            identity.gameObject.SetActive(false);
+            if (resetState)
+            {
+                identity.ResetState();
+                identity.gameObject.SetActive(false);
+            }
         }
+
+        /// <summary>This takes an object that has been spawned and un-spawns it.</summary>
+        // The object will be removed from clients that it was spawned on, or
+        // the custom spawn handler function on the client will be called for
+        // the object.
+        // Unlike when calling NetworkServer.Destroy(), on the server the object
+        // will NOT be destroyed. This allows the server to re-use the object,
+        // even spawn it again later.
+        public static void UnSpawn(GameObject obj) => UnSpawnInternal(obj, resetState: true);
 
         // destroy /////////////////////////////////////////////////////////////
         /// <summary>Destroys this object and corresponding objects on all clients.</summary>
@@ -1654,17 +1931,31 @@ namespace Mirror
                 return;
             }
 
-            // first, we unspawn it on clients and server
-            UnSpawn(obj);
+            // get the NetworkIdentity component first
+            if (!GetNetworkIdentity(obj, out NetworkIdentity identity))
+            {
+                Debug.LogWarning($"NetworkServer.Destroy() called on {obj.name} which doesn't have a NetworkIdentity component.");
+                return;
+            }
 
-            // additionally, if it's a prefab then we destroy it completely.
+            // is this a scene object?
+            // then we simply unspawn & reset it so it can still be spawned again.
             // we never destroy scene objects on server or on client, since once
             // they are gone, they are gone forever and can't be instantiate again.
             // for example, server may Destroy() a scene object and once a match
             // restarts, the scene objects would be gone from the new match.
-            if (GetNetworkIdentity(obj, out NetworkIdentity identity) &&
-                identity.sceneId == 0)
+            if (identity.sceneId != 0)
             {
+                UnSpawnInternal(obj, resetState: true);
+            }
+            // is this a prefab?
+            // then we destroy it completely.
+            else
+            {
+                // unspawn without calling ResetState.
+                // otherwise isServer/isClient flags might be reset in OnDestroy.
+                // fixes: https://github.com/MirrorNetworking/Mirror/issues/3832
+                UnSpawnInternal(obj, resetState: false);
                 identity.destroyCalled = true;
 
                 // Destroy if application is running
@@ -1695,6 +1986,11 @@ namespace Mirror
                 if (identity.visibility != Visibility.ForceHidden)
                 {
                     AddAllReadyServerConnectionsToObservers(identity);
+                }
+                else if (identity.connectionToClient != null)
+                {
+                    // force hidden, but add owner connection
+                    identity.AddObserver(identity.connectionToClient);
                 }
             }
         }
@@ -1749,11 +2045,18 @@ namespace Mirror
 
         // broadcasting ////////////////////////////////////////////////////////
         // helper function to get the right serialization for a connection
-        static NetworkWriter SerializeForConnection(NetworkIdentity identity, NetworkConnectionToClient connection)
+        // -> unreliableBaselineElapsed: even though we only care about RELIABLE
+        //    components here, GetServerSerializationAtTick still caches all
+        //    the serializations for this frame. and when caching we already
+        //    need to know if the unreliable baseline will be needed or not.
+        static NetworkWriter SerializeForConnection_ReliableComponents(
+            NetworkIdentity identity,
+            NetworkConnectionToClient connection,
+            bool unreliableBaselineElapsed)
         {
             // get serialization for this entity (cached)
             // IMPORTANT: int tick avoids floating point inaccuracy over days/weeks
-            NetworkIdentitySerialization serialization = identity.GetServerSerializationAtTick(Time.frameCount);
+            NetworkIdentitySerialization serialization = identity.GetServerSerializationAtTick(Time.frameCount, unreliableBaselineElapsed);
 
             // is this entity owned by this connection?
             bool owned = identity.connectionToClient == connection;
@@ -1763,25 +2066,68 @@ namespace Mirror
             if (owned)
             {
                 // was it dirty / did we actually serialize anything?
-                if (serialization.ownerWriter.Position > 0)
-                    return serialization.ownerWriter;
+                if (serialization.ownerWriterReliable.Position > 0)
+                    return serialization.ownerWriterReliable;
             }
             // observers writer if not owned
             else
             {
                 // was it dirty / did we actually serialize anything?
-                if (serialization.observersWriter.Position > 0)
-                    return serialization.observersWriter;
+                if (serialization.observersWriterReliable.Position > 0)
+                    return serialization.observersWriterReliable;
             }
 
             // nothing was serialized
             return null;
         }
 
+        // helper function to get the right serialization for a connection
+        static (NetworkWriter, NetworkWriter) SerializeForConnection_UnreliableComponents(
+            NetworkIdentity identity,
+            NetworkConnectionToClient connection,
+            bool unreliableBaselineElapsed)
+        {
+            // get serialization for this entity (cached)
+            // IMPORTANT: int tick avoids floating point inaccuracy over days/weeks
+            NetworkIdentitySerialization serialization = identity.GetServerSerializationAtTick(Time.frameCount, unreliableBaselineElapsed);
+
+            // is this entity owned by this connection?
+            bool owned = identity.connectionToClient == connection;
+
+            NetworkWriter baselineWriter = null;
+            NetworkWriter deltaWriter = null;
+
+            // send serialized data
+            // owner writer if owned
+            if (owned)
+            {
+                // was it dirty / did we actually serialize anything?
+                if (serialization.ownerWriterUnreliableBaseline.Position > 0)
+                    baselineWriter = serialization.ownerWriterUnreliableBaseline;
+
+                if (serialization.ownerWriterUnreliableDelta.Position > 0)
+                    deltaWriter = serialization.ownerWriterUnreliableDelta;
+            }
+            // observers writer if not owned
+            else
+            {
+                // was it dirty / did we actually serialize anything?
+                if (serialization.observersWriterUnreliableBaseline.Position > 0)
+                    baselineWriter = serialization.observersWriterUnreliableBaseline;
+
+                if (serialization.observersWriterUnreliableDelta.Position > 0)
+                    deltaWriter = serialization.observersWriterUnreliableDelta;
+            }
+
+            // nothing was serialized
+            return (baselineWriter, deltaWriter);
+        }
+
         // helper function to broadcast the world to a connection
-        static void BroadcastToConnection(NetworkConnectionToClient connection)
+        static void BroadcastToConnection(NetworkConnectionToClient connection, bool unreliableBaselineElapsed)
         {
             // for each entity that this connection is seeing
+            bool hasNull = false;
             foreach (NetworkIdentity identity in connection.observing)
             {
                 // make sure it's not null or destroyed.
@@ -1790,9 +2136,24 @@ namespace Mirror
                 //  NetworkServer.Destroy)
                 if (identity != null)
                 {
+                    // 'Reliable' sync: send Reliable components over reliable with initial/delta
                     // get serialization for this entity viewed by this connection
                     // (if anything was serialized this time)
-                    NetworkWriter serialization = SerializeForConnection(identity, connection);
+                    NetworkWriter serialization = SerializeForConnection_ReliableComponents(identity, connection,
+                        // IMPORTANT: even for Reliable components we must pass unreliableBaselineElapsed!
+                        //
+                        // consider this (in one frame):
+                        //   Serialize Reliable (unreliableBaseline=false)
+                        //     GetServerSerializationAtTick (unreliableBaseline=false)
+                        //       serializes new, clears dirty bits
+                        //   Serialize Unreliable (unreliableBaseline=true)
+                        //     GetServerSerializationAtTick (unreliableBaseline=true)
+                        //       last.baseline != baseline
+                        //         serializes new, which does nothing since dirty bits were already cleared above!
+                        //
+                        // TODO make this less magic in the future. too easy to miss.
+                        unreliableBaselineElapsed);
+
                     if (serialization != null)
                     {
                         EntityStateMessage message = new EntityStateMessage
@@ -1802,13 +2163,66 @@ namespace Mirror
                         };
                         connection.Send(message);
                     }
+
+                    // 'Unreliable' sync: send Unreliable components over unreliable
+                    // state is 'initial' for reliable baseline, and 'not initial' for unreliable deltas.
+                    //   note that syncInterval is always ignored for unreliable in order to have tick aligned [SyncVars].
+                    //   even if we pass SyncMethod.Reliable, it serializes with initialState=true.
+                    (NetworkWriter baselineSerialization, NetworkWriter deltaSerialization) = SerializeForConnection_UnreliableComponents(identity, connection, unreliableBaselineElapsed);
+
+                    // send unreliable delta first. ideally we want this to arrive before the new baseline.
+                    // reliable baseline also clears dirty bits, so unreliable must be sent first.
+                    if (deltaSerialization != null)
+                    {
+                        EntityStateMessageUnreliableDelta message = new EntityStateMessageUnreliableDelta
+                        {
+                            baselineTick = identity.lastUnreliableBaselineSent,
+                            netId = identity.netId,
+                            payload = deltaSerialization.ToArraySegment()
+                        };
+                        connection.Send(message, Channels.Unreliable);
+
+                        // quake sends unreliable messages twice to make up for message drops.
+                        // this double bandwidth, but allows for smaller buffer time / faster sync.
+                        // best to turn this off unless the game is extremely fast paced.
+                        if (unreliableRedundancy) connection.Send(message, Channels.Unreliable);
+                    }
+
+                    // if it's for a baseline sync, then send a reliable baseline message too.
+                    // this will likely arrive slightly after the unreliable delta above.
+                    if (unreliableBaselineElapsed)
+                    {
+                        if (baselineSerialization != null)
+                        {
+                            // remember last sent baseline tick for this entity.
+                            // (byte) to minimize bandwidth. we don't need the full tick,
+                            // just something small to compare against.
+                            identity.lastUnreliableBaselineSent = (byte)Time.frameCount;
+
+                            EntityStateMessageUnreliableBaseline message = new EntityStateMessageUnreliableBaseline
+                            {
+                                baselineTick = identity.lastUnreliableBaselineSent,
+                                netId = identity.netId,
+                                payload = baselineSerialization.ToArraySegment()
+                            };
+                            connection.Send(message, Channels.Reliable);
+                        }
+                    }
                 }
                 // spawned list should have no null entries because we
                 // always call Remove in OnObjectDestroy everywhere.
                 // if it does have null then someone used
                 // GameObject.Destroy instead of NetworkServer.Destroy.
-                else Debug.LogWarning($"Found 'null' entry in observing list for connectionId={connection.connectionId}. Please call NetworkServer.Destroy to destroy networked objects. Don't use GameObject.Destroy.");
+                else
+                {
+                    hasNull = true;
+                    Debug.LogWarning($"Found 'null' entry in observing list for connectionId={connection.connectionId}. Please call NetworkServer.Destroy to destroy networked objects. Don't use GameObject.Destroy.");
+                }
             }
+
+            // recover from null entries.
+            // otherwise every broadcast will spam the warning and slow down performance until restart.
+            if (hasNull) connection.observing.RemoveWhere(identity => identity == null);
         }
 
         // helper function to check a connection for inactivity and disconnect if necessary
@@ -1832,7 +2246,8 @@ namespace Mirror
         internal static readonly List<NetworkConnectionToClient> connectionsCopy =
             new List<NetworkConnectionToClient>();
 
-        static void Broadcast()
+        // unreliableFullSendIntervalElapsed: indicates that unreliable sync components need a reliable baseline sync this time.
+        static void Broadcast(bool unreliableBaselineElapsed)
         {
             // copy all connections into a helper collection so that
             // OnTransportDisconnected can be called while iterating.
@@ -1869,36 +2284,12 @@ namespace Mirror
                     connection.Send(new TimeSnapshotMessage(), Channels.Unreliable);
 
                     // broadcast world state to this connection
-                    BroadcastToConnection(connection);
+                    BroadcastToConnection(connection, unreliableBaselineElapsed);
                 }
 
                 // update connection to flush out batched messages
                 connection.Update();
             }
-
-            // TODO this is way too slow because we iterate ALL spawned :/
-            // TODO this is way too complicated :/
-            // to understand what this tries to prevent, consider this example:
-            //   monster has health=100
-            //   we change health=200, dirty bit is set
-            //   player comes in range, gets full serialization spawn packet.
-            //   next Broadcast(), player gets the health=200 change because dirty bit was set.
-            //
-            // this code clears all dirty bits if no players are around to prevent it.
-            // BUT there are two issues:
-            //   1. what if a playerB was around the whole time?
-            //   2. why don't we handle broadcast and spawn packets both HERE?
-            //      handling spawn separately is why we need this complex magic
-            //
-            // see test: DirtyBitsAreClearedForSpawnedWithoutObservers()
-            // see test: SyncObjectChanges_DontGrowWithoutObservers()
-            //
-            // PAUL: we also do this to avoid ever growing SyncList .changes
-            //ClearSpawnedDirtyBits();
-            //
-            // this was moved to NetworkIdentity.AddObserver!
-            // same result, but no more O(N) loop in here!
-            // TODO remove this comment after moving spawning into Broadcast()!
         }
 
         // update //////////////////////////////////////////////////////////////
@@ -1946,8 +2337,10 @@ namespace Mirror
                 // NetworkTransform, so they can sync on same interval as time
                 // snapshots _but_ not every single tick.
                 // Unity 2019 doesn't have Time.timeAsDouble yet
-                if (!Application.isPlaying || AccurateInterval.Elapsed(NetworkTime.localTime, sendInterval, ref lastSendTime))
-                    Broadcast();
+                bool sendIntervalElapsed = AccurateInterval.Elapsed(NetworkTime.localTime, sendInterval, ref lastSendTime);
+                bool unreliableBaselineElapsed = AccurateInterval.Elapsed(NetworkTime.localTime, unreliableBaselineInterval, ref lastUnreliableBaselineTime);
+                if (!Application.isPlaying || sendIntervalElapsed)
+                    Broadcast(unreliableBaselineElapsed);
             }
 
             // process all outgoing messages after updating the world

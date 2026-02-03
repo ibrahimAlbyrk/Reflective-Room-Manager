@@ -60,20 +60,18 @@ namespace Mirror.SimpleWeb
                 bool success = sslHelper.TryCreateStream(conn, serverAddress);
                 if (!success)
                 {
-                    Log.Warn($"[SWT-WebSocketClientStandAlone]: Failed to create Stream with {serverAddress}");
-                    conn.Dispose();
+                    Log.Warn("[SWT-WebSocketClientStandAlone]: Failed to create Stream with {0}", serverAddress);
                     return;
                 }
 
                 success = handshake.TryHandshake(conn, serverAddress);
                 if (!success)
                 {
-                    Log.Warn($"[SWT-WebSocketClientStandAlone]: Failed Handshake with {serverAddress}");
-                    conn.Dispose();
+                    Log.Warn("[SWT-WebSocketClientStandAlone]: Failed Handshake with {0}", serverAddress);
                     return;
                 }
 
-                Log.Info($"[SWT-WebSocketClientStandAlone]: HandShake Successful with {serverAddress}");
+                Log.Info("[SWT-WebSocketClientStandAlone]: HandShake Successful with {0}", serverAddress);
 
                 state = ClientState.Connected;
 
@@ -100,13 +98,14 @@ namespace Mirror.SimpleWeb
                     bufferPool);
                 ReceiveLoop.Loop(config);
             }
-            catch (ThreadInterruptedException e) { Log.InfoException(e); }
-            catch (ThreadAbortException e) { Log.InfoException(e); }
-            catch (Exception e) { Log.Exception(e); }
+            catch (ThreadInterruptedException e) { Log.InfoException("[SWT-WebSocketClientStandAlone]", e); }
+            catch (ThreadAbortException) { Log.Error("[SWT-WebSocketClientStandAlone]: Thread Abort Exception"); }
+            catch (Exception e) { Log.Exception("[SWT-WebSocketClientStandAlone]", e); }
             finally
             {
                 // close here in case connect fails
-                conn?.Dispose();
+                if (conn != null && !conn.hasDisposed)
+                    conn.Dispose();
             }
         }
 
@@ -124,8 +123,8 @@ namespace Mirror.SimpleWeb
 
             if (conn == null)
                 state = ClientState.NotConnected;
-            else
-                conn?.Dispose();
+            else if (!conn.hasDisposed)
+                conn.Dispose();
         }
 
         public override void Send(ArraySegment<byte> segment)

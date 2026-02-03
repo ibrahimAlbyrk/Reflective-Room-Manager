@@ -124,7 +124,7 @@ namespace Mirror.SimpleWeb
                 return buffer;
             else
             {
-                Log.Flood($"[SWT-BufferBucket]: BufferBucket({arraySize}) create new");
+                Log.Flood("[SWT-BufferBucket]: BufferBucket({0}) create new", arraySize);
                 return new ArrayBuffer(this, arraySize);
             }
         }
@@ -140,14 +140,14 @@ namespace Mirror.SimpleWeb
         void IncrementCreated()
         {
             int next = Interlocked.Increment(ref _current);
-            Log.Flood($"[SWT-BufferBucket]: BufferBucket({arraySize}) count:{next}");
+            Log.Flood("[SWT-BufferBucket]: BufferBucket({0}) count:{1}", arraySize, next);
         }
 
         [Conditional("DEBUG")]
         void DecrementCreated()
         {
             int next = Interlocked.Decrement(ref _current);
-            Log.Flood($"[SWT-BufferBucket]: BufferBucket({arraySize}) count:{next}");
+            Log.Flood("[SWT-BufferBucket]: BufferBucket({0}) count:{1}", arraySize, next);
         }
     }
 
@@ -226,12 +226,12 @@ namespace Mirror.SimpleWeb
         void Validate()
         {
             if (buckets[0].arraySize != smallest)
-                Log.Error($"[SWT-BufferPool]: BufferPool Failed to create bucket for smallest. bucket:{buckets[0].arraySize} smallest:{smallest}");
+                Log.Error("[SWT-BufferPool]: BufferPool Failed to create bucket for smallest. bucket:{0} smallest:{1}", buckets[0].arraySize, smallest);
 
             int largestBucket = buckets[bucketCount - 1].arraySize;
             // rounded using Ceiling, so allowed to be 1 more that largest
             if (largestBucket != largest && largestBucket != largest + 1)
-                Log.Error($"[SWT-BufferPool]: BufferPool Failed to create bucket for largest. bucket:{largestBucket} smallest:{largest}");
+                Log.Error("[SWT-BufferPool]: BufferPool Failed to create bucket for largest. bucket:{0} smallest:{1}", largestBucket, largest);
         }
 
         public ArrayBuffer Take(int size)
