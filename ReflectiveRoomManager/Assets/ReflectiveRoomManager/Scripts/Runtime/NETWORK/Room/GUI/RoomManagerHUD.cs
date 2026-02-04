@@ -25,12 +25,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         [SerializeField] private bool _enableTeamHUD = true;
         [SerializeField] private bool _enableRolesHUD = true;
         [SerializeField] private bool _enablePartyHUD = true;
+        [SerializeField] private bool _enableDiscoveryHUD = true;
 
         // Module instances
         private StateHUDModule _stateModule;
         private TeamHUDModule _teamModule;
         private RolesHUDModule _rolesModule;
         private PartyHUDModule _partyModule;
+        private DiscoveryHUDModule _discoveryModule;
 
         // Active tabs
         private List<IHUDModule> _activeTabs = new();
@@ -80,6 +82,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 _partyModule = new PartyHUDModule();
                 _partyModule.RegisterEvents();
             }
+
+            // Discovery
+            if (_enableDiscoveryHUD && rm.EnableRoomDiscovery)
+            {
+                _discoveryModule = new DiscoveryHUDModule();
+                _discoveryModule.RegisterEvents();
+            }
         }
 
         private void OnDestroy()
@@ -88,6 +97,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             _teamModule?.UnregisterEvents();
             _rolesModule?.UnregisterEvents();
             _partyModule?.UnregisterEvents();
+            _discoveryModule?.UnregisterEvents();
         }
 
         #endregion
@@ -165,7 +175,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 RoomClient.JoinRoom(_roomName);
 
             if (GUILayout.Button("Rooms"))
+            {
                 _showingRoomList = true;
+                _discoveryModule?.SendQuery();
+            }
             GUILayout.EndHorizontal();
 
             if (!_isServer && _partyModule != null)
@@ -180,6 +193,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
         private void DrawRoomList(RoomManagerBase rm)
         {
+            // Use advanced discovery panel if available
+            if (!_isServer && _discoveryModule != null)
+            {
+                DrawDiscoveryPanel();
+                return;
+            }
+
+            // Fallback: simple room list
             var w = 250f;
             var h = 300f;
 
@@ -218,6 +239,24 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DrawDiscoveryPanel()
+        {
+            var w = 380f;
+            var h = 400f;
+
+            // Close button area
+            GUILayout.BeginArea(new Rect(Screen.width - w - 10 + offsetX, 10 + offsetY, w, 30));
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("X", GUILayout.Width(25)))
+                _showingRoomList = false;
+            GUILayout.EndHorizontal();
+            GUILayout.EndArea();
+
+            // Discovery panel
+            _discoveryModule.DrawPanel(Screen.width - w - 10 + offsetX, 35 + offsetY, w, h - 30);
         }
 
         #endregion
@@ -291,6 +330,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             _teamModule?.ClearData();
             _rolesModule?.ClearData();
             _partyModule?.ClearData();
+            _discoveryModule?.ClearData();
         }
 
         #endregion
