@@ -79,6 +79,8 @@ MonoBehaviour:
   _roleConfig: {fileID: 11400000, guid: 0e7621bc5fe18468bb7234f9bcf2ad77, type: 2}
   _enableRoomDiscovery: 1
   _discoveryCacheTTL: 5
+  _enableChatSystem: 1
+  _chatSettings: {fileID: 11400000, guid: 0d226455ca9a648b382550e575b513a4, type: 2}
 --- !u!114 &1949250419701008128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,6 +99,8 @@ MonoBehaviour:
   _enableTeamHUD: 1
   _enableRolesHUD: 1
   _enablePartyHUD: 1
+  _enableDiscoveryHUD: 1
+  _enableChatHUD: 1
 --- !u!114 &7848238772252834064
 MonoBehaviour:
   m_ObjectHideFlags: 0
