@@ -51,23 +51,24 @@ MonoBehaviour:
   headlessStartMode: 1
   editorAutoStart: 0
   sendRate: 60
-  autoStartServerBuild: 0
-  autoConnectClientBuild: 0
-  offlineScene: 
-  onlineScene: 
+  unreliableBaselineRate: 1
+  unreliableRedundancy: 0
   transport: {fileID: 8166190489961329328}
   networkAddress: localhost
   maxConnections: 100
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
+  exceptionsDisconnect: 1
   authenticator: {fileID: 0}
+  offlineScene: 
+  onlineScene: 
+  offlineSceneLoadDelay: 0
   playerPrefab: {fileID: 4239554022242706235, guid: 61e7b7f97e3a72a47a24d897a18a7211, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 7135866885179959075, guid: 8a9e9dc0b4c583a479acdfaf2d784432, type: 3}
   - {fileID: 4239554022242706235, guid: 12ff49afde7e5f64c9c887af499df93f, type: 3}
-  exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
     bufferLimit: 32
@@ -112,7 +113,7 @@ MonoBehaviour:
   ReliableMaxMessageSize: 297433
   UnreliableMaxMessageSize: 1194
   debugLog: 0
-  statisticsGUI: 1
+  statisticsGUI: 0
   statisticsLog: 0
 --- !u!114 &2422936330014316436
 MonoBehaviour:
