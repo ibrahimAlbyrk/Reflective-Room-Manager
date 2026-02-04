@@ -10,6 +10,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
     using State;
     using State.Messages;
     using State.Handlers;
+    using Roles;
+    using Roles.Messages;
+    using Roles.Handlers;
     using REFLECTIVE.Runtime.NETWORK.Party;
     using REFLECTIVE.Runtime.NETWORK.Party.Messages;
     using REFLECTIVE.Runtime.NETWORK.Team;
@@ -21,44 +24,58 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         [SerializeField] private float offsetX;
         [SerializeField] private float offsetY;
 
-        private static string _roomNameField = "Room Name";
-        private static string _maxPlayers = "Max Player";
-
+        // Room fields
+        private static string _roomNameField = "Room";
+        private static string _maxPlayers = "4";
         private static bool _isServer;
-
         private static bool _showingRoomList;
-        private static bool _showingPartyPanel;
-        private static bool _showingTeamPanel;
-
-        private static Vector2 _scrollPosition;
-        private static Vector2 _partyScrollPosition;
-        private static Vector2 _teamScrollPosition;
-
-        private static GUIStyle backgroundStyle;
+        private static Vector2 _roomListScroll;
 
         // Party fields
-        private static string _partyNameField = "My Party";
+        private static string _partyNameField = "Party";
         private static string _inviteTargetId = "0";
+        private static bool _showingPartyPanel;
+        private static Vector2 _partyScroll;
 
-        // Client-side cached data
+        // Party client data
         private static uint _currentPartyId;
         private static string _currentPartyName;
         private static int _currentPartyLeaderId;
         private static List<PartyMemberData> _partyMembers = new();
         private static List<PendingInvite> _pendingInvites = new();
 
-        // Team client-side cached data
+        // Team client data
         private static uint _currentTeamId;
         private static string _currentTeamName;
         private static Color _currentTeamColor = Color.white;
         private static TeamData[] _allTeams;
+        private static Vector2 _teamScroll;
 
-        // State Machine client-side cached data
+        // State Machine client data
         private static byte _currentStateId;
         private static float _stateElapsedTime;
         private static Dictionary<string, string> _stateData = new();
         private static bool _isReady;
-        private static bool _showingStatePanel = true;
+
+        // Role System client data
+        private static RoomRole _myRole = RoomRole.Guest;
+        private static int _myCustomPermissions;
+        private static Dictionary<uint, RoomRoleEntry> _playerRoles = new();
+        private static Vector2 _roleScroll;
+        private static string _roleTargetId = "0";
+        private static int _selectedRoleIndex = 1;
+        private static int _cachedLocalConnectionId = -1;
+
+        // Tab system for in-room view
+        private static int _selectedTab;
+        private static readonly string[] TabNames = { "State", "Team", "Roles" };
+
+        // Styles
+        private static GUIStyle _boxStyle;
+        private static GUIStyle _headerStyle;
+        private static GUIStyle _tabStyle;
+        private static GUIStyle _tabActiveStyle;
+        private static bool _stylesInitialized;
 
         private struct PendingInvite
         {
@@ -66,75 +83,78 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             public string InviterName;
         }
 
-        protected virtual void Start()
-        {
-            RegisterClientEventHandlers();
-        }
+        #region Lifecycle
 
-        protected virtual void OnDestroy()
-        {
-            UnregisterClientEventHandlers();
-        }
+        protected virtual void Start() => RegisterClientEventHandlers();
+        protected virtual void OnDestroy() => UnregisterClientEventHandlers();
 
         private void RegisterClientEventHandlers()
         {
-            var roomManager = RoomManagerBase.Instance;
-            if (roomManager == null) return;
+            var rm = RoomManagerBase.Instance;
+            if (rm == null) return;
 
-            // Party events
-            if (roomManager.EnablePartySystem && roomManager.ClientPartyEvents != null)
+            if (rm.EnablePartySystem && rm.ClientPartyEvents != null)
             {
-                roomManager.ClientPartyEvents.OnClientPartySync += OnPartySync;
-                roomManager.ClientPartyEvents.OnClientInviteReceived += OnInviteReceived;
-                roomManager.ClientPartyEvents.OnClientPartyLeft += OnPartyLeft;
+                rm.ClientPartyEvents.OnClientPartySync += OnPartySync;
+                rm.ClientPartyEvents.OnClientInviteReceived += OnInviteReceived;
+                rm.ClientPartyEvents.OnClientPartyLeft += OnPartyLeft;
             }
 
-            // Team events
-            if (roomManager.EnableTeamSystem && roomManager.ClientTeamEvents != null)
+            if (rm.EnableTeamSystem && rm.ClientTeamEvents != null)
             {
-                roomManager.ClientTeamEvents.OnClientTeamAssigned += OnTeamAssigned;
-                roomManager.ClientTeamEvents.OnClientTeamsUpdated += OnTeamsUpdated;
-                roomManager.ClientTeamEvents.OnClientTeamLeft += OnTeamLeft;
+                rm.ClientTeamEvents.OnClientTeamAssigned += OnTeamAssigned;
+                rm.ClientTeamEvents.OnClientTeamsUpdated += OnTeamsUpdated;
+                rm.ClientTeamEvents.OnClientTeamLeft += OnTeamLeft;
             }
 
-            // State Machine events
-            if (roomManager.EnableStateMachine)
+            if (rm.EnableStateMachine)
             {
                 RoomStateNetworkHandlers.OnClientRoomStateChanged += OnStateChanged;
                 RoomStateNetworkHandlers.OnClientRoomStateSync += OnStateSync;
+            }
+
+            if (rm.EnableRoleSystem)
+            {
+                RoomRoleNetworkHandlers.OnClientRoomRoleChanged += OnRoleChanged;
+                RoomRoleNetworkHandlers.OnClientRoomRoleListReceived += OnRoleListReceived;
             }
         }
 
         private void UnregisterClientEventHandlers()
         {
-            var roomManager = RoomManagerBase.Instance;
-            if (roomManager == null) return;
+            var rm = RoomManagerBase.Instance;
+            if (rm == null) return;
 
-            // Party events
-            if (roomManager.EnablePartySystem && roomManager.ClientPartyEvents != null)
+            if (rm.EnablePartySystem && rm.ClientPartyEvents != null)
             {
-                roomManager.ClientPartyEvents.OnClientPartySync -= OnPartySync;
-                roomManager.ClientPartyEvents.OnClientInviteReceived -= OnInviteReceived;
-                roomManager.ClientPartyEvents.OnClientPartyLeft -= OnPartyLeft;
+                rm.ClientPartyEvents.OnClientPartySync -= OnPartySync;
+                rm.ClientPartyEvents.OnClientInviteReceived -= OnInviteReceived;
+                rm.ClientPartyEvents.OnClientPartyLeft -= OnPartyLeft;
             }
 
-            // Team events
-            if (roomManager.EnableTeamSystem && roomManager.ClientTeamEvents != null)
+            if (rm.EnableTeamSystem && rm.ClientTeamEvents != null)
             {
-                roomManager.ClientTeamEvents.OnClientTeamAssigned -= OnTeamAssigned;
-                roomManager.ClientTeamEvents.OnClientTeamsUpdated -= OnTeamsUpdated;
-                roomManager.ClientTeamEvents.OnClientTeamLeft -= OnTeamLeft;
+                rm.ClientTeamEvents.OnClientTeamAssigned -= OnTeamAssigned;
+                rm.ClientTeamEvents.OnClientTeamsUpdated -= OnTeamsUpdated;
+                rm.ClientTeamEvents.OnClientTeamLeft -= OnTeamLeft;
             }
 
-            // State Machine events
-            if (roomManager.EnableStateMachine)
+            if (rm.EnableStateMachine)
             {
                 RoomStateNetworkHandlers.OnClientRoomStateChanged -= OnStateChanged;
                 RoomStateNetworkHandlers.OnClientRoomStateSync -= OnStateSync;
             }
+
+            if (rm.EnableRoleSystem)
+            {
+                RoomRoleNetworkHandlers.OnClientRoomRoleChanged -= OnRoleChanged;
+                RoomRoleNetworkHandlers.OnClientRoomRoleListReceived -= OnRoleListReceived;
+            }
         }
 
-        #region Client Event Handlers
+        #endregion
+
+        #region Event Handlers
 
         private void OnPartySync(PartySyncMessage msg)
         {
@@ -168,15 +188,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         private void OnTeamsUpdated(TeamData[] teams)
         {
             _allTeams = teams;
-
-            // Update current team color
             if (_currentTeamId != 0 && teams != null)
             {
-                var currentTeam = teams.FirstOrDefault(t => t.TeamID == _currentTeamId);
-                if (currentTeam.TeamID != 0)
-                {
-                    _currentTeamColor = currentTeam.TeamColor;
-                }
+                var t = teams.FirstOrDefault(x => x.TeamID == _currentTeamId);
+                if (t.TeamID != 0) _currentTeamColor = t.TeamColor;
             }
         }
 
@@ -189,741 +204,775 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             }
         }
 
-        private void OnStateChanged(uint roomId, RoomStateData stateData)
+        private void OnStateChanged(uint roomId, RoomStateData data)
         {
-            _currentStateId = stateData.StateTypeID;
-            _stateElapsedTime = stateData.ElapsedTime;
-            _stateData = stateData.Data ?? new Dictionary<string, string>();
-
-            // Reset ready state when transitioning out of lobby
-            if (_currentStateId != 0)
-                _isReady = false;
+            _currentStateId = data.StateTypeID;
+            _stateElapsedTime = data.ElapsedTime;
+            _stateData = data.Data ?? new Dictionary<string, string>();
+            if (_currentStateId != 0) _isReady = false;
         }
 
-        private void OnStateSync(uint roomId, byte stateTypeId, float elapsedTime, Dictionary<string, string> stateData)
+        private void OnStateSync(uint roomId, byte stateId, float elapsed, Dictionary<string, string> data)
         {
-            _currentStateId = stateTypeId;
-            _stateElapsedTime = elapsedTime;
-            if (stateData != null)
-                _stateData = stateData;
+            _currentStateId = stateId;
+            _stateElapsedTime = elapsed;
+            if (data != null) _stateData = data;
+        }
+
+        private void OnRoleChanged(uint roomId, uint connId, RoomRole role, int perms)
+        {
+            _playerRoles[connId] = new RoomRoleEntry { ConnectionID = connId, Role = role, CustomPermissions = perms };
+            var local = GetLocalConnectionId();
+            if (local >= 0 && local == (int)connId)
+            {
+                _myRole = role;
+                _myCustomPermissions = perms;
+            }
+        }
+
+        private void OnRoleListReceived(uint roomId, RoomRoleEntry[] roles)
+        {
+            _playerRoles.Clear();
+            var local = GetLocalConnectionId();
+            foreach (var e in roles)
+            {
+                _playerRoles[e.ConnectionID] = e;
+                if (local >= 0 && local == (int)e.ConnectionID)
+                {
+                    _myRole = e.Role;
+                    _myCustomPermissions = e.CustomPermissions;
+                }
+            }
         }
 
         #endregion
+
+        #region Main GUI
 
         protected virtual void OnGUI()
         {
             if (!NetworkClient.active && !NetworkServer.active) return;
 
+            InitStyles();
             _isServer = !NetworkClient.isConnected && NetworkServer.active;
 
-            var roomManager = RoomManagerBase.Instance;
+            var rm = RoomManagerBase.Instance;
+            if (!rm) return;
 
-            if (!roomManager) return;
-
-            // Show pending invites (always visible)
-            if (!_isServer && roomManager.EnablePartySystem)
-            {
-                ShowPendingInvites();
-            }
+            // Pending party invites (top-left)
+            if (!_isServer && rm.EnablePartySystem && _pendingInvites.Count > 0)
+                DrawPendingInvites();
 
             if (!_isServer)
             {
-                var currentRoom = roomManager.GetCurrentRoomInfo();
-
-                if (!string.IsNullOrEmpty(currentRoom.RoomName))
+                var room = rm.GetCurrentRoomInfo();
+                if (!string.IsNullOrEmpty(room.RoomName))
                 {
-                    ShowCurrentRoom(currentRoom);
-
-                    // Show State Machine panel when in room
-                    if (roomManager.EnableStateMachine)
-                    {
-                        ShowStatePanel(currentRoom);
-                    }
-
-                    // Show Team panel when in room
-                    if (roomManager.EnableTeamSystem)
-                    {
-                        ShowTeamPanel();
-                    }
+                    DrawInRoomUI(rm, room);
                     return;
                 }
             }
 
+            // Lobby UI
             if (_showingRoomList)
-            {
-                ShowRoomList();
-                return;
-            }
-
-            if (_showingPartyPanel && !_isServer)
-            {
-                ShowPartyPanel();
-                return;
-            }
-
-            ShowRoomButtons();
-
-            // Show Party button when not in room (client only)
-            if (!_isServer && roomManager.EnablePartySystem)
-            {
-                ShowPartyButton();
-            }
-        }
-
-        private void ShowRoomButtons()
-        {
-            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, 100f));
-
-            GUILayout.BeginVertical();
-
-            _roomNameField = GUILayout.TextField(_roomNameField,
-                GUILayout.MinWidth(20));
-            _maxPlayers = GUILayout.TextField(_maxPlayers,
-                GUILayout.MinWidth(2));
-
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Create Room"))
-            {
-                var roomInfo = new RoomInfo
-                {
-                    RoomName = _roomNameField,
-                    SceneName = RoomManagerBase.Instance.RoomScene,
-                    MaxPlayers = int.TryParse(_maxPlayers, out var result) ? result : 2,
-                    CustomData = new Dictionary<string, string>()
-                };
-
-                if (_isServer)
-                    RoomServer.CreateRoom(roomInfo);
-                else
-                    RoomClient.CreateRoom(roomInfo);
-            }
-
-            if (!_isServer)
-            {
-                if (GUILayout.Button("Join Room"))
-                {
-                    RoomClient.JoinRoom(_roomNameField);
-                }
-
-                GUILayout.EndHorizontal();
-
-                if (GUILayout.Button("Show Rooms"))
-                {
-                    _showingRoomList = true;
-                }
-            }
+                DrawRoomList(rm);
+            else if (_showingPartyPanel && !_isServer)
+                DrawPartyPanel();
             else
-            {
-                if (GUILayout.Button("Show Rooms"))
-                {
-                    _showingRoomList = true;
-                }
-
-                GUILayout.EndHorizontal();
-            }
-
-            GUILayout.EndVertical();
-
-            GUILayout.EndArea();
+                DrawLobbyUI(rm);
         }
 
-        private void ShowCurrentRoom(RoomInfo roomInfo)
+        private static void InitStyles()
         {
-            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, 200f));
+            if (_stylesInitialized) return;
 
-            GUILayout.Label($"Room Name : {roomInfo.RoomName}");
-            GUILayout.Label($"Max Player Count : {roomInfo.MaxPlayers}");
-            GUILayout.Label($"Current Player Count : {roomInfo.CurrentPlayers}");
-
-            if (GUILayout.Button("Exit Room"))
+            _boxStyle = new GUIStyle(UnityEngine.GUI.skin.box)
             {
-                RoomClient.ExitRoom();
-                // Clear team data on exit
-                _currentTeamId = 0;
-                _currentTeamName = null;
-                _allTeams = null;
-                // Clear state data on exit
-                _currentStateId = 0;
-                _stateElapsedTime = 0f;
-                _stateData.Clear();
-                _isReady = false;
-            }
-
-            GUILayout.EndArea();
-        }
-
-        private void ShowRoomList()
-        {
-            backgroundStyle ??= new GUIStyle
-            {
-                normal =
-                {
-                    background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.5f))
-                }
+                normal = { background = MakeTex(2, 2, new Color(0.1f, 0.1f, 0.1f, 0.85f)) },
+                padding = new RectOffset(8, 8, 8, 8)
             };
 
-            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, Screen.height - 30));
+            _headerStyle = new GUIStyle(UnityEngine.GUI.skin.label)
+            {
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter
+            };
 
-            GUILayout.BeginVertical();
+            _tabStyle = new GUIStyle(UnityEngine.GUI.skin.button)
+            {
+                fixedHeight = 25,
+                margin = new RectOffset(2, 2, 2, 2)
+            };
 
-            if (GUILayout.Button("Close Rooms"))
+            // Active tab - use text color instead of background to avoid visual glitches
+            _tabActiveStyle = new GUIStyle(UnityEngine.GUI.skin.button)
+            {
+                fixedHeight = 25,
+                margin = new RectOffset(2, 2, 2, 2),
+                fontStyle = FontStyle.Bold
+            };
+            _tabActiveStyle.normal.textColor = new Color(0.4f, 1f, 0.4f);
+            _tabActiveStyle.hover.textColor = new Color(0.5f, 1f, 0.5f);
+
+            _stylesInitialized = true;
+        }
+
+        #endregion
+
+        #region Lobby UI
+
+        private void DrawLobbyUI(RoomManagerBase rm)
+        {
+            var w = 220f;
+            var h = _isServer ? 100f : 130f;
+            if (!_isServer && rm.EnablePartySystem) h += 25f;
+
+            GUILayout.BeginArea(new Rect(Screen.width - w - 10 + offsetX, 10 + offsetY, w, h), _boxStyle);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Name:", GUILayout.Width(45));
+            _roomNameField = GUILayout.TextField(_roomNameField);
+            GUILayout.Label("Max:", GUILayout.Width(30));
+            _maxPlayers = GUILayout.TextField(_maxPlayers, GUILayout.Width(25));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Create"))
+            {
+                var info = new RoomInfo
+                {
+                    RoomName = _roomNameField,
+                    SceneName = rm.RoomScene,
+                    MaxPlayers = int.TryParse(_maxPlayers, out var mp) ? mp : 4,
+                    CustomData = new Dictionary<string, string>()
+                };
+                if (_isServer) RoomServer.CreateRoom(info);
+                else RoomClient.CreateRoom(info);
+            }
+
+            if (!_isServer && GUILayout.Button("Join"))
+                RoomClient.JoinRoom(_roomNameField);
+
+            if (GUILayout.Button("Rooms"))
+                _showingRoomList = true;
+            GUILayout.EndHorizontal();
+
+            if (!_isServer && rm.EnablePartySystem)
+            {
+                var partyLabel = _currentPartyId != 0 ? $"Party ({_partyMembers.Count})" : "Party";
+                if (GUILayout.Button(partyLabel))
+                    _showingPartyPanel = true;
+            }
+
+            GUILayout.EndArea();
+        }
+
+        private void DrawRoomList(RoomManagerBase rm)
+        {
+            var w = 250f;
+            var h = 300f;
+
+            GUILayout.BeginArea(new Rect(Screen.width - w - 10 + offsetX, 10 + offsetY, w, h), _boxStyle);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("ROOMS", _headerStyle);
+            if (GUILayout.Button("X", GUILayout.Width(25)))
                 _showingRoomList = false;
+            GUILayout.EndHorizontal();
+
+            _roomListScroll = GUILayout.BeginScrollView(_roomListScroll, GUILayout.Height(h - 50));
 
             if (_isServer)
             {
-                var rooms = RoomManagerBase.Instance.GetRooms().ToList();
-
-                var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
-
-                UnityEngine.GUI.Box(new Rect(0, 25, 200f, height), "", backgroundStyle);
-                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
-
-                foreach (var room in rooms.Where(room => GUILayout.Button($"{room.Name} - {room.CurrentPlayers}/{room.MaxPlayers}")))
+                foreach (var room in rm.GetRooms())
                 {
-                    RoomServer.RemoveRoom(room.Name, forced: true);
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label($"{room.Name} ({room.CurrentPlayers}/{room.MaxPlayers})");
+                    if (GUILayout.Button("Del", GUILayout.Width(35)))
+                        RoomServer.RemoveRoom(room.Name, forced: true);
+                    GUILayout.EndHorizontal();
                 }
             }
             else
             {
-                var rooms = RoomManagerBase.Instance.GetRoomInfos().ToList();
-
-                var height = Mathf.Min(rooms.Count * 25f, Screen.height - 25);
-
-                UnityEngine.GUI.Box(new Rect(0, 25, 200f, height), "", backgroundStyle);
-                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
-
-                foreach (var room in rooms.Where(room => GUILayout.Button($"{room.RoomName} - {room.CurrentPlayers}/{room.MaxPlayers}")))
+                foreach (var room in rm.GetRoomInfos())
                 {
-                    RoomClient.JoinRoom(room.RoomName);
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label($"{room.RoomName} ({room.CurrentPlayers}/{room.MaxPlayers})");
+                    if (GUILayout.Button("Join", GUILayout.Width(40)))
+                        RoomClient.JoinRoom(room.RoomName);
+                    GUILayout.EndHorizontal();
                 }
             }
 
             GUILayout.EndScrollView();
-            GUILayout.EndVertical();
-
             GUILayout.EndArea();
         }
 
-        #region Party GUI
+        #endregion
 
-        private void ShowPartyButton()
+        #region In-Room UI
+
+        private void DrawInRoomUI(RoomManagerBase rm, RoomInfo room)
         {
-            var yOffset = 140f;
-            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, yOffset + offsetY, 200f, 30f));
+            // Top bar - Room info
+            DrawRoomInfoBar(room);
 
-            var buttonText = _currentPartyId != 0 ? $"Party: {_currentPartyName}" : "Party";
-            if (GUILayout.Button(buttonText))
+            // Count active tabs
+            var tabs = new List<string>();
+            if (rm.EnableStateMachine) tabs.Add("State");
+            if (rm.EnableTeamSystem) tabs.Add("Team");
+            if (rm.EnableRoleSystem) tabs.Add("Roles");
+
+            if (tabs.Count == 0) return;
+
+            // Main panel with tabs
+            var panelW = 280f;
+            var panelH = 320f;
+
+            GUILayout.BeginArea(new Rect(Screen.width - panelW - 10 + offsetX, 55 + offsetY, panelW, panelH), _boxStyle);
+
+            // Tab bar
+            GUILayout.BeginHorizontal();
+            for (var i = 0; i < tabs.Count; i++)
             {
-                _showingPartyPanel = true;
+                var style = _selectedTab == i ? _tabActiveStyle : _tabStyle;
+                if (GUILayout.Button(tabs[i], style))
+                    _selectedTab = i;
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
+            // Tab content
+            _selectedTab = Mathf.Clamp(_selectedTab, 0, tabs.Count - 1);
+            var currentTab = tabs.Count > 0 ? tabs[_selectedTab] : "";
+
+            switch (currentTab)
+            {
+                case "State":
+                    DrawStateTab(rm, room);
+                    break;
+                case "Team":
+                    DrawTeamTab(room);
+                    break;
+                case "Roles":
+                    DrawRolesTab(room);
+                    break;
             }
 
             GUILayout.EndArea();
         }
 
-        private void ShowPartyPanel()
+        private void DrawRoomInfoBar(RoomInfo room)
         {
-            backgroundStyle ??= new GUIStyle
+            var barW = 350f;
+            var barH = 35f;
+
+            GUILayout.BeginArea(new Rect(Screen.width - barW - 10 + offsetX, 10 + offsetY, barW, barH), _boxStyle);
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Label($"{room.RoomName}", GUILayout.Width(100));
+            GUILayout.Label($"{room.CurrentPlayers}/{room.MaxPlayers}", GUILayout.Width(40));
+
+            // Role indicator
+            var roleColor = GetRoleColor(_myRole);
+            var oldColor = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = roleColor;
+            GUILayout.Label($"[{_myRole}]", GUILayout.Width(70));
+            UnityEngine.GUI.color = oldColor;
+
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Exit", GUILayout.Width(50)))
             {
-                normal =
-                {
-                    background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.5f))
-                }
-            };
+                RoomClient.ExitRoom();
+                ClearRoomData();
+            }
 
-            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, 30 + offsetY, 200f, 300f));
-            UnityEngine.GUI.Box(new Rect(0, 0, 200f, 300f), "", backgroundStyle);
+            GUILayout.EndHorizontal();
+            GUILayout.EndArea();
+        }
 
-            GUILayout.BeginVertical();
+        private static void ClearRoomData()
+        {
+            _currentTeamId = 0;
+            _currentTeamName = null;
+            _allTeams = null;
+            _currentStateId = 0;
+            _stateElapsedTime = 0f;
+            _stateData.Clear();
+            _isReady = false;
+            _myRole = RoomRole.Guest;
+            _myCustomPermissions = 0;
+            _playerRoles.Clear();
+            _cachedLocalConnectionId = -1;
+        }
 
-            GUILayout.Label("--- PARTY ---");
+        #endregion
 
-            if (GUILayout.Button("Close"))
+        #region State Tab
+
+        private void DrawStateTab(RoomManagerBase rm, RoomInfo room)
+        {
+            var stateName = GetStateName(_currentStateId);
+            var stateColor = GetStateColor(_currentStateId);
+
+            GUILayout.BeginHorizontal();
+            var oldColor = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = stateColor;
+            GUILayout.Label($"● {stateName}", GUILayout.Width(100));
+            UnityEngine.GUI.color = oldColor;
+            GUILayout.Label($"Time: {FormatTime(_stateElapsedTime)}");
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            switch (_currentStateId)
             {
-                _showingPartyPanel = false;
+                case 0: DrawLobbyState(rm, room); break;
+                case 1: DrawStartingState(rm); break;
+                case 2: DrawPlayingState(rm); break;
+                case 3: DrawPausedState(rm); break;
+                case 4: DrawEndedState(rm); break;
+            }
+        }
+
+        private void DrawLobbyState(RoomManagerBase rm, RoomInfo room)
+        {
+            _stateData.TryGetValue("ReadyPlayers", out var readyStr);
+            int.TryParse(readyStr ?? "0", out var readyCount);
+
+            GUILayout.Label($"Ready: {readyCount}/{room.CurrentPlayers}");
+
+            if (_stateData.TryGetValue("CountdownActive", out var cdStr) && cdStr == "True")
+            {
+                _stateData.TryGetValue("CountdownRemaining", out var remStr);
+                float.TryParse(remStr ?? "0", out var remaining);
+
+                var old = UnityEngine.GUI.color;
+                UnityEngine.GUI.color = Color.yellow;
+                GUILayout.Label($"Starting in {remaining:F0}s...");
+                UnityEngine.GUI.color = old;
             }
 
             GUILayout.Space(10);
 
+            var btnText = _isReady ? "✓ READY" : "Ready Up";
+            var btnColor = _isReady ? Color.green : Color.white;
+            var old2 = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = btnColor;
+
+            if (GUILayout.Button(btnText, GUILayout.Height(35)))
+            {
+                SendStateAction(_isReady ? RoomStateAction.UnmarkReady : RoomStateAction.MarkReady);
+                _isReady = !_isReady;
+            }
+
+            UnityEngine.GUI.color = old2;
+        }
+
+        private void DrawStartingState(RoomManagerBase rm)
+        {
+            var duration = rm?.StateConfig?.StartingCountdownDuration ?? 3f;
+            var remaining = Mathf.Max(0f, duration - _stateElapsedTime);
+
+            var bigStyle = new GUIStyle(UnityEngine.GUI.skin.label)
+            {
+                fontSize = 64,
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold
+            };
+            bigStyle.normal.textColor = Color.cyan;
+
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(Mathf.CeilToInt(remaining).ToString(), bigStyle, GUILayout.Height(80));
+            GUILayout.Label("GET READY!", _headerStyle);
+            GUILayout.FlexibleSpace();
+        }
+
+        private void DrawPlayingState(RoomManagerBase rm)
+        {
+            var maxDur = rm?.StateConfig?.MaxGameDuration ?? 0f;
+
+            if (maxDur > 0f)
+            {
+                var remaining = Mathf.Max(0f, maxDur - _stateElapsedTime);
+                GUILayout.Label($"Remaining: {FormatTime(remaining)}");
+            }
+
+            GUILayout.Space(10);
+
+            GUILayout.BeginHorizontal();
+            if (rm?.StateConfig?.AllowPausing == true)
+            {
+                if (GUILayout.Button("Pause"))
+                    SendStateAction(RoomStateAction.PauseGame);
+            }
+
+            if (GUILayout.Button("End Game"))
+                SendStateAction(RoomStateAction.EndGame);
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawPausedState(RoomManagerBase rm)
+        {
+            var timeout = rm?.StateConfig?.PauseTimeout ?? 30f;
+
+            var old = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = Color.yellow;
+            GUILayout.Label("PAUSED", _headerStyle);
+            UnityEngine.GUI.color = old;
+
+            if (timeout > 0f)
+            {
+                var rem = Mathf.Max(0f, timeout - _stateElapsedTime);
+                GUILayout.Label($"Auto-resume in {rem:F0}s");
+            }
+
+            GUILayout.Space(10);
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Resume"))
+                SendStateAction(RoomStateAction.ResumeGame);
+            if (GUILayout.Button("End"))
+                SendStateAction(RoomStateAction.EndGame);
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawEndedState(RoomManagerBase rm)
+        {
+            var duration = rm?.StateConfig?.EndScreenDuration ?? 10f;
+            var autoReturn = rm?.StateConfig?.AutoReturnToLobby ?? true;
+
+            var old = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = Color.red;
+            GUILayout.Label("GAME OVER", _headerStyle);
+            UnityEngine.GUI.color = old;
+
+            if (autoReturn && duration > 0f)
+            {
+                var rem = Mathf.Max(0f, duration - _stateElapsedTime);
+                GUILayout.Label($"Returning to lobby in {rem:F0}s");
+            }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Return to Lobby"))
+                SendStateAction(RoomStateAction.RestartGame);
+        }
+
+        private void SendStateAction(RoomStateAction action)
+        {
+            var rm = RoomManagerBase.Instance;
+            var room = rm?.GetCurrentRoomInfo();
+            if (room == null || string.IsNullOrEmpty(room.Value.RoomName)) return;
+            NetworkClient.Send(new RoomStateActionMessage(room.Value.ID, action, null));
+        }
+
+        #endregion
+
+        #region Team Tab
+
+        private void DrawTeamTab(RoomInfo room)
+        {
+            // My team
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Your Team:", GUILayout.Width(70));
+            if (_currentTeamId != 0)
+            {
+                var old = UnityEngine.GUI.color;
+                UnityEngine.GUI.color = _currentTeamColor;
+                GUILayout.Label(_currentTeamName ?? "Unknown");
+                UnityEngine.GUI.color = old;
+            }
+            else
+            {
+                GUILayout.Label("None");
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            if (_allTeams == null || _allTeams.Length == 0)
+            {
+                GUILayout.Label("No teams available");
+                return;
+            }
+
+            GUILayout.Label("All Teams:");
+            _teamScroll = GUILayout.BeginScrollView(_teamScroll, GUILayout.Height(180));
+
+            foreach (var team in _allTeams)
+            {
+                var old = UnityEngine.GUI.color;
+                UnityEngine.GUI.color = team.TeamColor;
+
+                GUILayout.BeginHorizontal();
+                var isMine = team.TeamID == _currentTeamId;
+                var mark = isMine ? "★ " : "";
+                var memberCount = team.Members?.Length ?? 0;
+                GUILayout.Label($"{mark}{team.TeamName} ({memberCount}/{team.MaxSize})", GUILayout.Width(150));
+
+                UnityEngine.GUI.color = old;
+
+                if (!isMine && GUILayout.Button("Join", GUILayout.Width(45)))
+                    NetworkClient.Send(new TeamSwapRequestMessage { TargetTeamID = team.TeamID });
+
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.EndScrollView();
+        }
+
+        #endregion
+
+        #region Roles Tab
+
+        private void DrawRolesTab(RoomInfo room)
+        {
+            // My role summary
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Role:", GUILayout.Width(40));
+            var old = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = GetRoleColor(_myRole);
+            GUILayout.Label($"{_myRole}", GUILayout.Width(80));
+            UnityEngine.GUI.color = old;
+            GUILayout.Label($"({GetPermissionSummary(_myRole)})");
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
+            // Player list
+            GUILayout.Label("Players:");
+            _roleScroll = GUILayout.BeginScrollView(_roleScroll, GUILayout.Height(100));
+
+            var localId = GetLocalConnectionId();
+            foreach (var kvp in _playerRoles)
+            {
+                var e = kvp.Value;
+                var isMe = localId >= 0 && localId == (int)e.ConnectionID;
+                var mark = isMe ? " ★" : "";
+
+                GUILayout.BeginHorizontal();
+                old = UnityEngine.GUI.color;
+                UnityEngine.GUI.color = GetRoleColor(e.Role);
+                GUILayout.Label($"#{e.ConnectionID}{mark}: {e.Role}");
+                UnityEngine.GUI.color = old;
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.EndScrollView();
+
+            // Role assignment (only for Moderator+)
+            if (_myRole >= RoomRole.Moderator)
+            {
+                GUILayout.Space(5);
+                GUILayout.Label("Assign Role:", _headerStyle);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("ID:", GUILayout.Width(25));
+                _roleTargetId = GUILayout.TextField(_roleTargetId, GUILayout.Width(35));
+
+                var roles = new[] { "G", "M", "Mod", "Adm", "Own" };
+                _selectedRoleIndex = GUILayout.SelectionGrid(_selectedRoleIndex, roles, 5);
+                GUILayout.EndHorizontal();
+
+                if (GUILayout.Button("Assign"))
+                {
+                    if (uint.TryParse(_roleTargetId, out var targetId))
+                    {
+                        NetworkClient.Send(new RoleAssignmentRequest
+                        {
+                            RoomID = room.ID,
+                            TargetConnectionID = targetId,
+                            Role = (RoomRole)_selectedRoleIndex
+                        });
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Party Panel
+
+        private void DrawPartyPanel()
+        {
+            var w = 220f;
+            var h = 280f;
+
+            GUILayout.BeginArea(new Rect(Screen.width - w - 10 + offsetX, 10 + offsetY, w, h), _boxStyle);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("PARTY", _headerStyle);
+            if (GUILayout.Button("X", GUILayout.Width(25)))
+                _showingPartyPanel = false;
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
             if (_currentPartyId == 0)
             {
-                // Not in a party - show create options
                 GUILayout.Label("Party Name:");
                 _partyNameField = GUILayout.TextField(_partyNameField);
 
                 if (GUILayout.Button("Create Party"))
                 {
-                    var msg = new PartyCreateMessage
+                    NetworkClient.Send(new PartyCreateMessage
                     {
                         PartyName = _partyNameField,
                         MaxSize = 4,
                         IsPublic = false,
                         AutoAcceptFriends = false,
                         AllowVoiceChat = false
-                    };
-                    NetworkClient.Send(msg);
+                    });
                 }
             }
             else
             {
-                // In a party - show party info
-                GUILayout.Label($"Party: {_currentPartyName}");
-                GUILayout.Label($"Members: {_partyMembers.Count}");
+                GUILayout.Label($"{_currentPartyName} ({_partyMembers.Count})");
 
-                GUILayout.Space(5);
-
-                // Show members
-                _partyScrollPosition = GUILayout.BeginScrollView(_partyScrollPosition, GUILayout.Height(80));
-                foreach (var member in _partyMembers)
+                _partyScroll = GUILayout.BeginScrollView(_partyScroll, GUILayout.Height(100));
+                foreach (var m in _partyMembers)
                 {
-                    var leaderMark = member.ConnectionID == _currentPartyLeaderId ? " [L]" : "";
-                    var readyMark = member.IsReady ? " [R]" : "";
-                    GUILayout.Label($"  {member.PlayerName}{leaderMark}{readyMark}");
+                    var leader = m.ConnectionID == _currentPartyLeaderId ? " ★" : "";
+                    var ready = m.IsReady ? " ✓" : "";
+                    GUILayout.Label($"  {m.PlayerName}{leader}{ready}");
                 }
                 GUILayout.EndScrollView();
 
-                GUILayout.Space(5);
-
-                // Invite player
-                GUILayout.Label("Invite (Conn ID):");
-                _inviteTargetId = GUILayout.TextField(_inviteTargetId);
-
-                if (GUILayout.Button("Send Invite"))
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Invite ID:", GUILayout.Width(60));
+                _inviteTargetId = GUILayout.TextField(_inviteTargetId, GUILayout.Width(40));
+                if (GUILayout.Button("Send"))
                 {
-                    if (int.TryParse(_inviteTargetId, out var targetId))
+                    if (int.TryParse(_inviteTargetId, out var id))
                     {
-                        var msg = new PartyInviteMessage
+                        NetworkClient.Send(new PartyInviteMessage
                         {
                             PartyID = _currentPartyId,
-                            TargetConnectionID = targetId
-                        };
-                        NetworkClient.Send(msg);
+                            TargetConnectionID = id
+                        });
                     }
                 }
-
-                GUILayout.Space(5);
+                GUILayout.EndHorizontal();
 
                 if (GUILayout.Button("Leave Party"))
                 {
-                    var msg = new PartyLeaveMessage { PartyID = _currentPartyId };
-                    NetworkClient.Send(msg);
+                    NetworkClient.Send(new PartyLeaveMessage { PartyID = _currentPartyId });
                     _currentPartyId = 0;
                     _currentPartyName = null;
                     _partyMembers.Clear();
                 }
             }
 
-            GUILayout.EndVertical();
             GUILayout.EndArea();
         }
 
-        private void ShowPendingInvites()
+        private void DrawPendingInvites()
         {
-            if (_pendingInvites.Count == 0) return;
-
-            var yOffset = 30f;
-            GUILayout.BeginArea(new Rect(10 + offsetX, yOffset + offsetY, 250f, _pendingInvites.Count * 60f));
+            var y = 10f + offsetY;
 
             for (var i = _pendingInvites.Count - 1; i >= 0; i--)
             {
                 var invite = _pendingInvites[i];
 
-                GUILayout.BeginVertical("box");
-                GUILayout.Label($"Party invite from: {invite.InviterName}");
+                GUILayout.BeginArea(new Rect(10 + offsetX, y, 200f, 50f), _boxStyle);
+                GUILayout.Label($"Invite: {invite.InviterName}");
 
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Accept"))
                 {
-                    var msg = new PartyInviteResponseMessage
-                    {
-                        PartyID = invite.PartyId,
-                        Accepted = true
-                    };
-                    NetworkClient.Send(msg);
+                    NetworkClient.Send(new PartyInviteResponseMessage { PartyID = invite.PartyId, Accepted = true });
                     _pendingInvites.RemoveAt(i);
                 }
-
                 if (GUILayout.Button("Decline"))
                 {
-                    var msg = new PartyInviteResponseMessage
-                    {
-                        PartyID = invite.PartyId,
-                        Accepted = false
-                    };
-                    NetworkClient.Send(msg);
+                    NetworkClient.Send(new PartyInviteResponseMessage { PartyID = invite.PartyId, Accepted = false });
                     _pendingInvites.RemoveAt(i);
                 }
                 GUILayout.EndHorizontal();
 
-                GUILayout.EndVertical();
+                GUILayout.EndArea();
+                y += 55f;
             }
-
-            GUILayout.EndArea();
         }
 
         #endregion
 
-        #region Team GUI
+        #region Helpers
 
-        private void ShowTeamPanel()
+        private static int GetLocalConnectionId()
         {
-            backgroundStyle ??= new GUIStyle
+            if (_cachedLocalConnectionId >= 0) return _cachedLocalConnectionId;
+            if (NetworkServer.localConnection != null)
             {
-                normal =
-                {
-                    background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.5f))
-                }
-            };
-
-            // Position below the room info
-            var yOffset = 240f;
-            GUILayout.BeginArea(new Rect(Screen.width - 230f + offsetX, yOffset + offsetY, 200f, 250f));
-            UnityEngine.GUI.Box(new Rect(0, 0, 200f, 250f), "", backgroundStyle);
-
-            GUILayout.BeginVertical();
-
-            GUILayout.Label("--- TEAM ---");
-
-            if (_currentTeamId != 0)
-            {
-                // Draw colored team name
-                var originalColor = UnityEngine.GUI.color;
-                UnityEngine.GUI.color = _currentTeamColor;
-                GUILayout.Label($"Your Team: {_currentTeamName}");
-                UnityEngine.GUI.color = originalColor;
+                _cachedLocalConnectionId = NetworkServer.localConnection.connectionId;
+                return _cachedLocalConnectionId;
             }
-            else
-            {
-                GUILayout.Label("Not assigned to team");
-            }
+            return -1;
+        }
 
-            GUILayout.Space(10);
+        public static void SetLocalConnectionId(int id) => _cachedLocalConnectionId = id;
 
-            // Show all teams
-            if (_allTeams != null && _allTeams.Length > 0)
-            {
-                GUILayout.Label("All Teams:");
+        private static Color GetRoleColor(RoomRole role) => role switch
+        {
+            RoomRole.Guest => Color.gray,
+            RoomRole.Member => Color.white,
+            RoomRole.Moderator => Color.cyan,
+            RoomRole.Admin => Color.yellow,
+            RoomRole.Owner => new Color(1f, 0.6f, 0.2f),
+            _ => Color.white
+        };
 
-                _teamScrollPosition = GUILayout.BeginScrollView(_teamScrollPosition, GUILayout.Height(120));
+        private static string GetPermissionSummary(RoomRole role) => role switch
+        {
+            RoomRole.Owner => "All",
+            RoomRole.Admin => "Mod+Settings",
+            RoomRole.Moderator => "Kick/Mute",
+            RoomRole.Member => "Chat",
+            RoomRole.Guest => "View",
+            _ => "?"
+        };
 
-                foreach (var team in _allTeams)
-                {
-                    var originalColor = UnityEngine.GUI.color;
-                    UnityEngine.GUI.color = team.TeamColor;
+        private static string GetStateName(byte id) => id switch
+        {
+            0 => "Lobby",
+            1 => "Starting",
+            2 => "Playing",
+            3 => "Paused",
+            4 => "Ended",
+            _ => $"State {id}"
+        };
 
-                    var memberCount = team.Members?.Length ?? 0;
-                    var isMyTeam = team.TeamID == _currentTeamId ? " *" : "";
+        private static Color GetStateColor(byte id) => id switch
+        {
+            0 => Color.white,
+            1 => Color.cyan,
+            2 => Color.green,
+            3 => Color.yellow,
+            4 => Color.red,
+            _ => Color.gray
+        };
 
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label($"{team.TeamName}{isMyTeam} ({memberCount}/{team.MaxSize})");
+        private static string FormatTime(float sec)
+        {
+            var m = Mathf.FloorToInt(sec / 60f);
+            var s = Mathf.FloorToInt(sec % 60f);
+            return $"{m:D2}:{s:D2}";
+        }
 
-                    // Swap button (only if not current team)
-                    if (team.TeamID != _currentTeamId)
-                    {
-                        UnityEngine.GUI.color = originalColor;
-                        if (GUILayout.Button("Join", GUILayout.Width(40)))
-                        {
-                            var msg = new TeamSwapRequestMessage { TargetTeamID = team.TeamID };
-                            NetworkClient.Send(msg);
-                        }
-                    }
-
-                    UnityEngine.GUI.color = originalColor;
-                    GUILayout.EndHorizontal();
-
-                    // Show team stats
-                    GUILayout.Label($"  Score: {team.Stats.TotalScore} | K/D: {team.Stats.TotalKills}/{team.Stats.TotalDeaths}");
-                }
-
-                GUILayout.EndScrollView();
-            }
-
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
+        private static Texture2D MakeTex(int w, int h, Color c)
+        {
+            var pix = new Color[w * h];
+            for (var i = 0; i < pix.Length; i++) pix[i] = c;
+            var tex = new Texture2D(w, h);
+            tex.SetPixels(pix);
+            tex.Apply();
+            return tex;
         }
 
         #endregion
-
-        #region State Machine GUI
-
-        private void ShowStatePanel(RoomInfo roomInfo)
-        {
-            backgroundStyle ??= new GUIStyle
-            {
-                normal =
-                {
-                    background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.5f))
-                }
-            };
-
-            // Position on the left side of the screen (below potential pending invites)
-            var inviteOffset = _pendingInvites.Count > 0 ? _pendingInvites.Count * 60f + 10f : 0f;
-            GUILayout.BeginArea(new Rect(10 + offsetX, 30 + offsetY + inviteOffset, 220f, 280f));
-            UnityEngine.GUI.Box(new Rect(0, 0, 220f, 280f), "", backgroundStyle);
-
-            GUILayout.BeginVertical();
-
-            GUILayout.Label("--- GAME STATE ---");
-
-            // Current state with color coding
-            var stateColor = GetStateColor(_currentStateId);
-            var stateName = GetStateName(_currentStateId);
-            var originalColor = UnityEngine.GUI.color;
-            UnityEngine.GUI.color = stateColor;
-            GUILayout.Label($"State: {stateName}");
-            UnityEngine.GUI.color = originalColor;
-
-            // Elapsed time
-            GUILayout.Label($"Time: {_stateElapsedTime:F1}s");
-
-            GUILayout.Space(10);
-
-            // State-specific UI
-            switch (_currentStateId)
-            {
-                case 0: // Lobby
-                    ShowLobbyStateUI(roomInfo);
-                    break;
-                case 1: // Starting
-                    ShowStartingStateUI();
-                    break;
-                case 2: // Playing
-                    ShowPlayingStateUI();
-                    break;
-                case 3: // Paused
-                    ShowPausedStateUI();
-                    break;
-                case 4: // Ended
-                    ShowEndedStateUI();
-                    break;
-            }
-
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
-        }
-
-        private void ShowLobbyStateUI(RoomInfo roomInfo)
-        {
-            // Ready players count
-            var readyCount = 0;
-            if (_stateData.TryGetValue("ReadyPlayers", out var readyStr))
-                int.TryParse(readyStr, out readyCount);
-
-            GUILayout.Label($"Ready: {readyCount}/{roomInfo.CurrentPlayers}");
-
-            // Countdown active
-            var countdownActive = false;
-            if (_stateData.TryGetValue("CountdownActive", out var countdownStr))
-                bool.TryParse(countdownStr, out countdownActive);
-
-            if (countdownActive)
-            {
-                var countdownRemaining = 0f;
-                if (_stateData.TryGetValue("CountdownRemaining", out var remainingStr))
-                    float.TryParse(remainingStr, out countdownRemaining);
-
-                var originalColor = UnityEngine.GUI.color;
-                UnityEngine.GUI.color = Color.yellow;
-                GUILayout.Label($"Starting in: {countdownRemaining:F1}s");
-                UnityEngine.GUI.color = originalColor;
-            }
-
-            GUILayout.Space(10);
-
-            // Ready/Unready button
-            if (_isReady)
-            {
-                var originalColor = UnityEngine.GUI.color;
-                UnityEngine.GUI.color = Color.green;
-                if (GUILayout.Button("READY (Click to cancel)"))
-                {
-                    SendStateAction(RoomStateAction.UnmarkReady);
-                    _isReady = false;
-                }
-                UnityEngine.GUI.color = originalColor;
-            }
-            else
-            {
-                if (GUILayout.Button("Ready Up"))
-                {
-                    SendStateAction(RoomStateAction.MarkReady);
-                    _isReady = true;
-                }
-            }
-        }
-
-        private void ShowStartingStateUI()
-        {
-            var roomManager = RoomManagerBase.Instance;
-            var countdownDuration = roomManager?.StateConfig?.StartingCountdownDuration ?? 3f;
-            var remaining = Mathf.Max(0f, countdownDuration - _stateElapsedTime);
-
-            var originalColor = UnityEngine.GUI.color;
-            UnityEngine.GUI.color = Color.cyan;
-            GUILayout.Label($"Game starting in: {remaining:F1}s");
-            UnityEngine.GUI.color = originalColor;
-
-            // Big countdown display
-            var bigStyle = new GUIStyle(UnityEngine.GUI.skin.label)
-            {
-                fontSize = 48,
-                alignment = TextAnchor.MiddleCenter
-            };
-            bigStyle.normal.textColor = Color.white;
-            GUILayout.Label(Mathf.CeilToInt(remaining).ToString(), bigStyle, GUILayout.Height(60));
-        }
-
-        private void ShowPlayingStateUI()
-        {
-            var roomManager = RoomManagerBase.Instance;
-            var maxDuration = roomManager?.StateConfig?.MaxGameDuration ?? 0f;
-
-            if (maxDuration > 0f)
-            {
-                var remaining = Mathf.Max(0f, maxDuration - _stateElapsedTime);
-                GUILayout.Label($"Time remaining: {FormatTime(remaining)}");
-            }
-            else
-            {
-                GUILayout.Label($"Game time: {FormatTime(_stateElapsedTime)}");
-            }
-
-            GUILayout.Space(10);
-
-            var allowPausing = roomManager?.StateConfig?.AllowPausing ?? false;
-            if (allowPausing)
-            {
-                if (GUILayout.Button("Pause Game"))
-                {
-                    SendStateAction(RoomStateAction.PauseGame);
-                }
-            }
-
-            GUILayout.Space(5);
-
-            if (GUILayout.Button("End Game"))
-            {
-                SendStateAction(RoomStateAction.EndGame);
-            }
-        }
-
-        private void ShowPausedStateUI()
-        {
-            var roomManager = RoomManagerBase.Instance;
-            var pauseTimeout = roomManager?.StateConfig?.PauseTimeout ?? 30f;
-
-            var originalColor = UnityEngine.GUI.color;
-            UnityEngine.GUI.color = Color.yellow;
-            GUILayout.Label("--- GAME PAUSED ---");
-            UnityEngine.GUI.color = originalColor;
-
-            if (pauseTimeout > 0f)
-            {
-                var remaining = Mathf.Max(0f, pauseTimeout - _stateElapsedTime);
-                GUILayout.Label($"Auto-resume in: {remaining:F1}s");
-            }
-
-            GUILayout.Space(10);
-
-            if (GUILayout.Button("Resume Game"))
-            {
-                SendStateAction(RoomStateAction.ResumeGame);
-            }
-
-            GUILayout.Space(5);
-
-            if (GUILayout.Button("End Game"))
-            {
-                SendStateAction(RoomStateAction.EndGame);
-            }
-        }
-
-        private void ShowEndedStateUI()
-        {
-            var roomManager = RoomManagerBase.Instance;
-            var endScreenDuration = roomManager?.StateConfig?.EndScreenDuration ?? 10f;
-            var autoReturn = roomManager?.StateConfig?.AutoReturnToLobby ?? true;
-
-            var originalColor = UnityEngine.GUI.color;
-            UnityEngine.GUI.color = Color.red;
-            GUILayout.Label("--- GAME ENDED ---");
-            UnityEngine.GUI.color = originalColor;
-
-            if (autoReturn && endScreenDuration > 0f)
-            {
-                var remaining = Mathf.Max(0f, endScreenDuration - _stateElapsedTime);
-                GUILayout.Label($"Returning to lobby in: {remaining:F1}s");
-            }
-
-            GUILayout.Space(10);
-
-            if (GUILayout.Button("Return to Lobby"))
-            {
-                SendStateAction(RoomStateAction.RestartGame);
-            }
-        }
-
-        private void SendStateAction(RoomStateAction action, string payload = null)
-        {
-            var roomManager = RoomManagerBase.Instance;
-            if (roomManager == null) return;
-
-            var currentRoom = roomManager.GetCurrentRoomInfo();
-            if (string.IsNullOrEmpty(currentRoom.RoomName)) return;
-
-            var msg = new RoomStateActionMessage(currentRoom.ID, action, payload);
-            NetworkClient.Send(msg);
-        }
-
-        private static string GetStateName(byte stateId)
-        {
-            return stateId switch
-            {
-                0 => "Lobby",
-                1 => "Starting",
-                2 => "Playing",
-                3 => "Paused",
-                4 => "Ended",
-                _ => $"Unknown ({stateId})"
-            };
-        }
-
-        private static Color GetStateColor(byte stateId)
-        {
-            return stateId switch
-            {
-                0 => Color.white,        // Lobby - neutral
-                1 => Color.cyan,         // Starting - attention
-                2 => Color.green,        // Playing - active
-                3 => Color.yellow,       // Paused - warning
-                4 => Color.red,          // Ended - stopped
-                _ => Color.gray
-            };
-        }
-
-        private static string FormatTime(float seconds)
-        {
-            var minutes = Mathf.FloorToInt(seconds / 60f);
-            var secs = Mathf.FloorToInt(seconds % 60f);
-            return $"{minutes:D2}:{secs:D2}";
-        }
-
-        #endregion
-
-        private static Texture2D MakeTex(int width, int height, Color color)
-        {
-            var pix = new Color[width * height];
-
-            for (var i = 0; i < pix.Length; ++i)
-            {
-                pix[i] = color;
-            }
-
-            var result = new Texture2D(width, height);
-            result.SetPixels(pix);
-            result.Apply();
-
-            return result;
-        }
     }
 }
