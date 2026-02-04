@@ -68,6 +68,9 @@ MonoBehaviour:
   _reconnectionHandlerComponent: {fileID: 0}
   _disconnectedPlayerHandlerComponent: {fileID: 0}
   _playerStateSerializerComponent: {fileID: 0}
+  _enableStateMachine: 1
+  _stateConfig: {fileID: 11400000, guid: 542ad2064202a43958e310c2af25ae07, type: 2}
+  _stateSyncFrequency: 1
 --- !u!114 &1949250419701008128
 MonoBehaviour:
   m_ObjectHideFlags: 0
