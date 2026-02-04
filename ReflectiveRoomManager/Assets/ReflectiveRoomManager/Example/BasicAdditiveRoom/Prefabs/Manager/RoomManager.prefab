@@ -93,6 +93,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offsetX: 0
   offsetY: 0
+  _enableStateHUD: 1
+  _enableTeamHUD: 1
+  _enableRolesHUD: 1
+  _enablePartyHUD: 1
 --- !u!114 &7848238772252834064
 MonoBehaviour:
   m_ObjectHideFlags: 0
