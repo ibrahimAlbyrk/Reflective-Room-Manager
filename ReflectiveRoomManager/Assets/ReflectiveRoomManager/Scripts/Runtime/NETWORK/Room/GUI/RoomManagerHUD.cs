@@ -26,6 +26,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         [SerializeField] private bool _enableRolesHUD = true;
         [SerializeField] private bool _enablePartyHUD = true;
         [SerializeField] private bool _enableDiscoveryHUD = true;
+        [SerializeField] private bool _enableChatHUD = true;
 
         // Module instances
         private StateHUDModule _stateModule;
@@ -33,6 +34,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         private RolesHUDModule _rolesModule;
         private PartyHUDModule _partyModule;
         private DiscoveryHUDModule _discoveryModule;
+        private ChatHUDModule _chatModule;
 
         // Active tabs
         private List<IHUDModule> _activeTabs = new();
@@ -89,6 +91,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 _discoveryModule = new DiscoveryHUDModule();
                 _discoveryModule.RegisterEvents();
             }
+
+            // Chat
+            if (_enableChatHUD && rm.EnableChatSystem)
+            {
+                _chatModule = new ChatHUDModule();
+                _chatModule.RegisterEvents();
+                _activeTabs.Add(_chatModule);
+            }
         }
 
         private void OnDestroy()
@@ -98,6 +108,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             _rolesModule?.UnregisterEvents();
             _partyModule?.UnregisterEvents();
             _discoveryModule?.UnregisterEvents();
+            _chatModule?.UnregisterEvents();
         }
 
         #endregion
@@ -331,6 +342,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             _rolesModule?.ClearData();
             _partyModule?.ClearData();
             _discoveryModule?.ClearData();
+            _chatModule?.ClearData();
         }
 
         #endregion

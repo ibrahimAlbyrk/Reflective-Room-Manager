@@ -16,6 +16,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Validation;
     using Reconnection;
     using Discovery;
+    using Chat;
     using Connection.Manager;
     
     public abstract partial class RoomManagerBase
@@ -84,6 +85,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] protected bool _enableRoomDiscovery;
         [Tooltip("Cache TTL in seconds for discovery queries")]
         [SerializeField] protected float _discoveryCacheTTL = 5f;
+
+        [Header("Chat System")]
+        [Tooltip("Enable chat system for rooms and lobby")]
+        [SerializeField] protected bool _enableChatSystem;
+        [Tooltip("Chat system configuration")]
+        [SerializeField] protected ChatSettings _chatSettings;
 
         #endregion
 
@@ -188,6 +195,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public bool EnableRoomDiscovery => _enableRoomDiscovery;
         protected RoomDiscoveryService _discoveryService;
         public RoomDiscoveryService DiscoveryService => _discoveryService;
+
+        // Chat system
+        public bool EnableChatSystem => _enableChatSystem;
+        public ChatSettings ChatSettings => _chatSettings;
+        protected ChatManager _chatManager;
+        public ChatManager ChatManager => _chatManager;
 
         #endregion
     }
