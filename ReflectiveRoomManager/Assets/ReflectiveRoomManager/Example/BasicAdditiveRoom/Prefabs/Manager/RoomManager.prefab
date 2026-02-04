@@ -71,6 +71,8 @@ MonoBehaviour:
   _enableStateMachine: 1
   _stateConfig: {fileID: 11400000, guid: 542ad2064202a43958e310c2af25ae07, type: 2}
   _stateSyncFrequency: 1
+  _enableRoleSystem: 1
+  _roleConfig: {fileID: 11400000, guid: 0e7621bc5fe18468bb7234f9bcf2ad77, type: 2}
 --- !u!114 &1949250419701008128
 MonoBehaviour:
   m_ObjectHideFlags: 0
