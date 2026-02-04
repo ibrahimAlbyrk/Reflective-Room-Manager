@@ -46,6 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46086791d9063a645946ce416eda6874, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _enablePartySystem: 1
+  _partyConfig: {fileID: 11400000, guid: bb523e0caf12a40e58cd2a03c3c5e891, type: 2}
+  _enableTeamSystem: 1
+  _teamConfig: {fileID: 11400000, guid: fcf72cf55960a41378b828fdd73d5898, type: 2}
   _dontDestroyOnLoad: 1
   _physicsMode: 2
   _lobbyScene: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/Lobby_Scene.unity
