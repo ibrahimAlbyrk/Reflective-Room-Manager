@@ -234,6 +234,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 {
                     ShowCurrentRoom(currentRoom);
 
+                    // Show State Machine panel when in room
+                    if (roomManager.EnableStateMachine)
+                    {
+                        ShowStatePanel(currentRoom);
+                    }
+
                     // Show Team panel when in room
                     if (roomManager.EnableTeamSystem)
                     {
@@ -337,6 +343,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 _currentTeamId = 0;
                 _currentTeamName = null;
                 _allTeams = null;
+                // Clear state data on exit
+                _currentStateId = 0;
+                _stateElapsedTime = 0f;
+                _stateData.Clear();
+                _isReady = false;
             }
 
             GUILayout.EndArea();
@@ -629,6 +640,272 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
+        }
+
+        #endregion
+
+        #region State Machine GUI
+
+        private void ShowStatePanel(RoomInfo roomInfo)
+        {
+            backgroundStyle ??= new GUIStyle
+            {
+                normal =
+                {
+                    background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.5f))
+                }
+            };
+
+            // Position on the left side of the screen (below potential pending invites)
+            var inviteOffset = _pendingInvites.Count > 0 ? _pendingInvites.Count * 60f + 10f : 0f;
+            GUILayout.BeginArea(new Rect(10 + offsetX, 30 + offsetY + inviteOffset, 220f, 280f));
+            UnityEngine.GUI.Box(new Rect(0, 0, 220f, 280f), "", backgroundStyle);
+
+            GUILayout.BeginVertical();
+
+            GUILayout.Label("--- GAME STATE ---");
+
+            // Current state with color coding
+            var stateColor = GetStateColor(_currentStateId);
+            var stateName = GetStateName(_currentStateId);
+            var originalColor = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = stateColor;
+            GUILayout.Label($"State: {stateName}");
+            UnityEngine.GUI.color = originalColor;
+
+            // Elapsed time
+            GUILayout.Label($"Time: {_stateElapsedTime:F1}s");
+
+            GUILayout.Space(10);
+
+            // State-specific UI
+            switch (_currentStateId)
+            {
+                case 0: // Lobby
+                    ShowLobbyStateUI(roomInfo);
+                    break;
+                case 1: // Starting
+                    ShowStartingStateUI();
+                    break;
+                case 2: // Playing
+                    ShowPlayingStateUI();
+                    break;
+                case 3: // Paused
+                    ShowPausedStateUI();
+                    break;
+                case 4: // Ended
+                    ShowEndedStateUI();
+                    break;
+            }
+
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
+        }
+
+        private void ShowLobbyStateUI(RoomInfo roomInfo)
+        {
+            // Ready players count
+            var readyCount = 0;
+            if (_stateData.TryGetValue("ReadyPlayers", out var readyStr))
+                int.TryParse(readyStr, out readyCount);
+
+            GUILayout.Label($"Ready: {readyCount}/{roomInfo.CurrentPlayers}");
+
+            // Countdown active
+            var countdownActive = false;
+            if (_stateData.TryGetValue("CountdownActive", out var countdownStr))
+                bool.TryParse(countdownStr, out countdownActive);
+
+            if (countdownActive)
+            {
+                var countdownRemaining = 0f;
+                if (_stateData.TryGetValue("CountdownRemaining", out var remainingStr))
+                    float.TryParse(remainingStr, out countdownRemaining);
+
+                var originalColor = UnityEngine.GUI.color;
+                UnityEngine.GUI.color = Color.yellow;
+                GUILayout.Label($"Starting in: {countdownRemaining:F1}s");
+                UnityEngine.GUI.color = originalColor;
+            }
+
+            GUILayout.Space(10);
+
+            // Ready/Unready button
+            if (_isReady)
+            {
+                var originalColor = UnityEngine.GUI.color;
+                UnityEngine.GUI.color = Color.green;
+                if (GUILayout.Button("READY (Click to cancel)"))
+                {
+                    SendStateAction(RoomStateAction.UnmarkReady);
+                    _isReady = false;
+                }
+                UnityEngine.GUI.color = originalColor;
+            }
+            else
+            {
+                if (GUILayout.Button("Ready Up"))
+                {
+                    SendStateAction(RoomStateAction.MarkReady);
+                    _isReady = true;
+                }
+            }
+        }
+
+        private void ShowStartingStateUI()
+        {
+            var roomManager = RoomManagerBase.Instance;
+            var countdownDuration = roomManager?.StateConfig?.StartingCountdownDuration ?? 3f;
+            var remaining = Mathf.Max(0f, countdownDuration - _stateElapsedTime);
+
+            var originalColor = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = Color.cyan;
+            GUILayout.Label($"Game starting in: {remaining:F1}s");
+            UnityEngine.GUI.color = originalColor;
+
+            // Big countdown display
+            var bigStyle = new GUIStyle(UnityEngine.GUI.skin.label)
+            {
+                fontSize = 48,
+                alignment = TextAnchor.MiddleCenter
+            };
+            bigStyle.normal.textColor = Color.white;
+            GUILayout.Label(Mathf.CeilToInt(remaining).ToString(), bigStyle, GUILayout.Height(60));
+        }
+
+        private void ShowPlayingStateUI()
+        {
+            var roomManager = RoomManagerBase.Instance;
+            var maxDuration = roomManager?.StateConfig?.MaxGameDuration ?? 0f;
+
+            if (maxDuration > 0f)
+            {
+                var remaining = Mathf.Max(0f, maxDuration - _stateElapsedTime);
+                GUILayout.Label($"Time remaining: {FormatTime(remaining)}");
+            }
+            else
+            {
+                GUILayout.Label($"Game time: {FormatTime(_stateElapsedTime)}");
+            }
+
+            GUILayout.Space(10);
+
+            var allowPausing = roomManager?.StateConfig?.AllowPausing ?? false;
+            if (allowPausing)
+            {
+                if (GUILayout.Button("Pause Game"))
+                {
+                    SendStateAction(RoomStateAction.PauseGame);
+                }
+            }
+
+            GUILayout.Space(5);
+
+            if (GUILayout.Button("End Game"))
+            {
+                SendStateAction(RoomStateAction.EndGame);
+            }
+        }
+
+        private void ShowPausedStateUI()
+        {
+            var roomManager = RoomManagerBase.Instance;
+            var pauseTimeout = roomManager?.StateConfig?.PauseTimeout ?? 30f;
+
+            var originalColor = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = Color.yellow;
+            GUILayout.Label("--- GAME PAUSED ---");
+            UnityEngine.GUI.color = originalColor;
+
+            if (pauseTimeout > 0f)
+            {
+                var remaining = Mathf.Max(0f, pauseTimeout - _stateElapsedTime);
+                GUILayout.Label($"Auto-resume in: {remaining:F1}s");
+            }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Resume Game"))
+            {
+                SendStateAction(RoomStateAction.ResumeGame);
+            }
+
+            GUILayout.Space(5);
+
+            if (GUILayout.Button("End Game"))
+            {
+                SendStateAction(RoomStateAction.EndGame);
+            }
+        }
+
+        private void ShowEndedStateUI()
+        {
+            var roomManager = RoomManagerBase.Instance;
+            var endScreenDuration = roomManager?.StateConfig?.EndScreenDuration ?? 10f;
+            var autoReturn = roomManager?.StateConfig?.AutoReturnToLobby ?? true;
+
+            var originalColor = UnityEngine.GUI.color;
+            UnityEngine.GUI.color = Color.red;
+            GUILayout.Label("--- GAME ENDED ---");
+            UnityEngine.GUI.color = originalColor;
+
+            if (autoReturn && endScreenDuration > 0f)
+            {
+                var remaining = Mathf.Max(0f, endScreenDuration - _stateElapsedTime);
+                GUILayout.Label($"Returning to lobby in: {remaining:F1}s");
+            }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Return to Lobby"))
+            {
+                SendStateAction(RoomStateAction.RestartGame);
+            }
+        }
+
+        private void SendStateAction(RoomStateAction action, string payload = null)
+        {
+            var roomManager = RoomManagerBase.Instance;
+            if (roomManager == null) return;
+
+            var currentRoom = roomManager.GetCurrentRoomInfo();
+            if (string.IsNullOrEmpty(currentRoom.RoomName)) return;
+
+            var msg = new RoomStateActionMessage(currentRoom.ID, action, payload);
+            NetworkClient.Send(msg);
+        }
+
+        private static string GetStateName(byte stateId)
+        {
+            return stateId switch
+            {
+                0 => "Lobby",
+                1 => "Starting",
+                2 => "Playing",
+                3 => "Paused",
+                4 => "Ended",
+                _ => $"Unknown ({stateId})"
+            };
+        }
+
+        private static Color GetStateColor(byte stateId)
+        {
+            return stateId switch
+            {
+                0 => Color.white,        // Lobby - neutral
+                1 => Color.cyan,         // Starting - attention
+                2 => Color.green,        // Playing - active
+                3 => Color.yellow,       // Paused - warning
+                4 => Color.red,          // Ended - stopped
+                _ => Color.gray
+            };
+        }
+
+        private static string FormatTime(float seconds)
+        {
+            var minutes = Mathf.FloorToInt(seconds / 60f);
+            var secs = Mathf.FloorToInt(seconds % 60f);
+            return $"{minutes:D2}:{secs:D2}";
         }
 
         #endregion
