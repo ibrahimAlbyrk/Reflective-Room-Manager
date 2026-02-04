@@ -13,6 +13,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Reconnection;
     using Reconnection.Messages;
     using Connection.Manager;
+    using State.Handlers;
 
     [DisallowMultipleComponent]
     public abstract partial class RoomManagerBase : MonoBehaviour
@@ -87,11 +88,66 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             // Reconnection initialization
             if (_enableReconnection)
                 InitializeReconnection();
+
+            // State machine initialization
+            InitializeStateMachineHandlers();
         }
 
         protected virtual void Update()
         {
             _cleanupService?.Update(m_rooms, room => RemoveRoom(room, forced: true));
+
+            // Update state machines
+            if (_enableStateMachine && NetworkServer.active)
+            {
+                UpdateStateMachines(Time.deltaTime);
+            }
+        }
+
+        private void InitializeStateMachineHandlers()
+        {
+            if (!_enableStateMachine) return;
+
+            if (_stateConfig == null)
+            {
+                Debug.LogError("[RoomManagerBase] State machine enabled but no config assigned!");
+                _enableStateMachine = false;
+                return;
+            }
+
+            RoomStateNetworkHandlers.RegisterServerHandlers();
+            RoomStateNetworkHandlers.RegisterClientHandlers();
+        }
+
+        private void UpdateStateMachines(float deltaTime)
+        {
+            foreach (var room in m_rooms)
+            {
+                room.UpdateStateMachine(deltaTime);
+            }
+
+            // Periodic state sync
+            if (_stateSyncFrequency > 0)
+            {
+                _stateSyncTimer += deltaTime;
+                var syncInterval = 1f / _stateSyncFrequency;
+                if (_stateSyncTimer >= syncInterval)
+                {
+                    _stateSyncTimer = 0f;
+                    BroadcastStateSyncToAllRooms();
+                }
+            }
+        }
+
+        private void BroadcastStateSyncToAllRooms()
+        {
+            foreach (var room in m_rooms)
+            {
+                if (room.StateMachine != null)
+                {
+                    RoomStateNetworkHandlers.BroadcastStateSync(room);
+                }
+            }
         }
 
         private void InitializeReconnection()
@@ -196,6 +252,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.RoomConnections.OnClientRoomListRemove.RemoveListener(RemoveRoomList);
 
             _connectionManager.RoomConnections.OnClientRoomIDMessage.RemoveListener(GetRoomIDForClient);
+
+            // Clean up state machine handlers
+            if (_enableStateMachine)
+            {
+                RoomStateNetworkHandlers.UnregisterServerHandlers();
+                RoomStateNetworkHandlers.UnregisterClientHandlers();
+                RoomStateNetworkHandlers.ClearClientEvents();
+            }
 
             CoroutineRunner.Cleanup();
         }

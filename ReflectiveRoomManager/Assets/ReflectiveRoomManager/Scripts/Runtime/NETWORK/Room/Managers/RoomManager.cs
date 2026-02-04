@@ -6,6 +6,8 @@ using UnityEngine;
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Enums;
+    using State;
+    using State.Handlers;
     using Structs;
     using Container;
     using Utilities;
@@ -54,7 +56,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             };
 
             room.SetCustomData(roomInfo.CustomData);
-            
+
+            // Initialize state machine if enabled
+            if (_enableStateMachine && _stateConfig != null)
+            {
+                var configOverride = RoomStateConfigOverride.FromCustomData(roomInfo.CustomData ?? new Dictionary<string, string>());
+                room.InitializeStateMachine(_stateConfig, m_eventManager, configOverride);
+            }
+
             RoomListUtility.AddRoomToList(m_rooms, room);
             
             //If it is a client, add in to the room
@@ -119,7 +128,22 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
+            // Check state machine validation
+            if (_enableStateMachine && !room.CanPlayerJoinState(conn, out var stateReason))
+            {
+                Debug.LogWarning($"Room join denied by state: {stateReason}");
+                RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Fail);
+                return;
+            }
+
             room.AddConnection(conn);
+
+            // Notify state machine
+            if (_enableStateMachine)
+            {
+                room.NotifyStateMachinePlayerJoined(conn);
+                RoomStateNetworkHandlers.SendStateToConnection(room, conn);
+            }
 
             RoomMessageUtility.SendRoomUpdateMessage(
                 RoomListUtility.ConvertToRoomList(room), RoomMessageState.Update);
@@ -195,21 +219,28 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         internal override void ExitRoom(NetworkConnection conn, bool isDisconnected)
         {
-            var exitedRoom = m_rooms.FirstOrDefault(room => room.RemoveConnection(conn));
-            
-            if (exitedRoom == null) 
+            // Find room containing this connection first (before removing)
+            var exitedRoom = m_rooms.FirstOrDefault(room => room.Connections.Contains(conn));
+
+            if (exitedRoom == null)
             {
-                // Handle exit failed (user not in any room).
-                
                 Debug.LogWarning($"There is no such room for exit");
-                
                 return;
             }
+
+            // Notify state machine before removal
+            if (_enableStateMachine)
+            {
+                exitedRoom.NotifyStateMachinePlayerLeft(conn);
+            }
+
+            // Now remove the connection
+            exitedRoom.RemoveConnection(conn);
 
             if (exitedRoom.CurrentPlayers < 1 && exitedRoom.ReservedSlots < 1 && !exitedRoom.IsServer)
                 RemoveRoom(exitedRoom);
             else
-                RoomListUtility.UpdateRoomToList(m_rooms,exitedRoom);
+                RoomListUtility.UpdateRoomToList(m_rooms, exitedRoom);
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
             

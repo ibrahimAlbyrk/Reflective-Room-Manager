@@ -8,6 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Loader;
     using Events;
     using Scenes;
+    using State;
     using Structs;
     using Identifier;
     using Utilities;
@@ -61,6 +62,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] private MonoBehaviour _reconnectionHandlerComponent;
         [SerializeField] private MonoBehaviour _disconnectedPlayerHandlerComponent;
         [SerializeField] private MonoBehaviour _playerStateSerializerComponent;
+
+        [Header("State Machine")]
+        [Tooltip("Enable state machine for rooms")]
+        [SerializeField] protected bool _enableStateMachine;
+        [Tooltip("State machine configuration")]
+        [SerializeField] protected RoomStateConfig _stateConfig;
+        [Tooltip("State sync frequency in Hz (0 = disabled)")]
+        [SerializeField] protected float _stateSyncFrequency = 1f;
 
         #endregion
 
@@ -151,6 +160,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         private Coroutine _shutdownCoroutine;
 
         public bool IsShuttingDown => _isShuttingDown;
+
+        // State machine
+        public bool EnableStateMachine => _enableStateMachine;
+        public RoomStateConfig StateConfig => _stateConfig;
+        private float _stateSyncTimer;
 
         #endregion
     }

@@ -11,7 +11,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     /// Represents a room in a networked game session.
     /// </summary>
     [Serializable]
-    public class Room
+    public partial class Room
     {
         public uint ID;
 

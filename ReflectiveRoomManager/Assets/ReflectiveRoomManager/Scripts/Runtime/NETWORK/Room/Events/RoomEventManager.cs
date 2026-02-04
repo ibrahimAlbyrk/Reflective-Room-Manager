@@ -4,8 +4,8 @@ using Mirror;
 namespace REFLECTIVE.Runtime.NETWORK.Room.Events
 {
     using Structs;
-    
-    public class RoomEventManager
+
+    public partial class RoomEventManager
     {
         /// <summary>Called on the server when the room is created</summary>
         public event Action<RoomInfo> OnServerCreatedRoom;
