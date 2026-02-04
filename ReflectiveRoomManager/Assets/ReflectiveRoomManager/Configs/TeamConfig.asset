@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eab6fc35712b4f21ac7006db9632e0f, type: 3}
+  m_Name: TeamConfig
+  m_EditorClassIdentifier: ReflectiveRM.Runtime::REFLECTIVE.Runtime.NETWORK.Team.Config.TeamConfig
+  TeamCount: 2
+  DefaultMaxTeamSize: 10
+  DefaultFormationMode: 1
+  AllowManualSwap: 1
+  EnableAutoBalance: 0
+  AutoBalanceScoreDiffThreshold: 500
+  AutoBalanceMinPlayers: 4
+  TeamColors:
+  - {r: 1, g: 0.2, b: 0.2, a: 1}
+  - {r: 0.2, g: 0.4, b: 1, a: 1}
+  - {r: 0.2, g: 0.8, b: 0.2, a: 1}
+  - {r: 1, g: 0.8, b: 0.2, a: 1}
+  - {r: 0.8, g: 0.2, b: 0.8, a: 1}
+  - {r: 0.2, g: 0.8, b: 0.8, a: 1}
+  - {r: 1, g: 0.5, b: 0.2, a: 1}
+  - {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  TeamNames:
+  - Red Team
+  - Blue Team
+  - Green Team
+  - Yellow Team
+  - Purple Team
+  - Cyan Team
+  - Orange Team
+  - Gray Team
+  EnableDebugLogs: 1
