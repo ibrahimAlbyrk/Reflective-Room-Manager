@@ -6,6 +6,8 @@ using UnityEngine;
 namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Enums;
+    using Roles;
+    using Roles.Handlers;
     using State;
     using State.Handlers;
     using Structs;
@@ -62,6 +64,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             {
                 var configOverride = RoomStateConfigOverride.FromCustomData(roomInfo.CustomData ?? new Dictionary<string, string>());
                 room.InitializeStateMachine(_stateConfig, m_eventManager, configOverride);
+            }
+
+            // Initialize role manager if enabled
+            if (_enableRoleSystem && _roleConfig != null)
+            {
+                room.InitializeRoleManager(_roleConfig, m_eventManager);
             }
 
             RoomListUtility.AddRoomToList(m_rooms, room);
@@ -136,7 +144,24 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
+            // Determine if this is the room creator (first connection)
+            var isRoomCreator = room.CurrentPlayers == 0;
+
             room.AddConnection(conn);
+
+            // Notify role manager
+            if (_enableRoleSystem && room.RoleManager != null)
+            {
+                if (isRoomCreator)
+                {
+                    room.AssignInitialOwner(conn);
+                }
+                else
+                {
+                    room.NotifyPlayerJoinedForRoles(conn);
+                }
+                RoomRoleNetworkHandlers.SendRoleListToClient(conn, room);
+            }
 
             // Notify state machine
             if (_enableStateMachine)
@@ -198,6 +223,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             m_eventManager.Invoke_OnServerRoomRemoving(room.ID);
 
+            // Cleanup role manager
+            if (_enableRoleSystem && room.RoleManager != null)
+            {
+                room.CleanupRoleManager();
+            }
+
             UnLoadRoom(room);
 
             removedConnections.ForEach(connection =>
@@ -232,6 +263,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (_enableStateMachine)
             {
                 exitedRoom.NotifyStateMachinePlayerLeft(conn);
+            }
+
+            // Notify role manager before removal
+            if (_enableRoleSystem && exitedRoom.RoleManager != null)
+            {
+                exitedRoom.NotifyPlayerLeftForRoles(conn);
             }
 
             // Now remove the connection

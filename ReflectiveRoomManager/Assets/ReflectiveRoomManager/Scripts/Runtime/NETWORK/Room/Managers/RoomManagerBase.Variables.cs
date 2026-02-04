@@ -7,6 +7,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 {
     using Loader;
     using Events;
+    using Roles;
     using Scenes;
     using State;
     using Structs;
@@ -70,6 +71,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] protected RoomStateConfig _stateConfig;
         [Tooltip("State sync frequency in Hz (0 = disabled)")]
         [SerializeField] protected float _stateSyncFrequency = 1f;
+
+        [Header("Role System")]
+        [Tooltip("Enable role-based permissions for rooms")]
+        [SerializeField] protected bool _enableRoleSystem;
+        [Tooltip("Role system configuration")]
+        [SerializeField] protected RoomRoleConfig _roleConfig;
 
         #endregion
 
@@ -165,6 +172,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         public bool EnableStateMachine => _enableStateMachine;
         public RoomStateConfig StateConfig => _stateConfig;
         private float _stateSyncTimer;
+
+        // Role system
+        public bool EnableRoleSystem => _enableRoleSystem;
+        public RoomRoleConfig RoleConfig => _roleConfig;
 
         #endregion
     }

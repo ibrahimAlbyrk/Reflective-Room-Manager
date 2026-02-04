@@ -14,6 +14,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Reconnection.Messages;
     using Connection.Manager;
     using State.Handlers;
+    using Roles.Handlers;
 
     [DisallowMultipleComponent]
     public abstract partial class RoomManagerBase : MonoBehaviour
@@ -91,6 +92,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // State machine initialization
             InitializeStateMachineHandlers();
+
+            // Role system initialization
+            InitializeRoleSystemHandlers();
         }
 
         protected virtual void Update()
@@ -117,6 +121,21 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             RoomStateNetworkHandlers.RegisterServerHandlers();
             RoomStateNetworkHandlers.RegisterClientHandlers();
+        }
+
+        private void InitializeRoleSystemHandlers()
+        {
+            if (!_enableRoleSystem) return;
+
+            if (_roleConfig == null)
+            {
+                Debug.LogError("[RoomManagerBase] Role system enabled but no config assigned!");
+                _enableRoleSystem = false;
+                return;
+            }
+
+            RoomRoleNetworkHandlers.RegisterServerHandlers();
+            RoomRoleNetworkHandlers.RegisterClientHandlers();
         }
 
         private void UpdateStateMachines(float deltaTime)
@@ -259,6 +278,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 RoomStateNetworkHandlers.UnregisterServerHandlers();
                 RoomStateNetworkHandlers.UnregisterClientHandlers();
                 RoomStateNetworkHandlers.ClearClientEvents();
+            }
+
+            // Clean up role system handlers
+            if (_enableRoleSystem)
+            {
+                RoomRoleNetworkHandlers.UnregisterServerHandlers();
+                RoomRoleNetworkHandlers.UnregisterClientHandlers();
+                RoomRoleNetworkHandlers.ClearClientEvents();
             }
 
             CoroutineRunner.Cleanup();
