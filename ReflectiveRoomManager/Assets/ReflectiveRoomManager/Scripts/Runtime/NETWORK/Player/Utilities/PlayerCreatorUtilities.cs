@@ -78,7 +78,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
 
             var player = connectionToClient.identity.gameObject;
 
-            NetworkServer.RemovePlayerForConnection(connectionToClient, false);
+            NetworkServer.RemovePlayerForConnection(connectionToClient, RemovePlayerOptions.KeepActive);
 
             yield return null;
 

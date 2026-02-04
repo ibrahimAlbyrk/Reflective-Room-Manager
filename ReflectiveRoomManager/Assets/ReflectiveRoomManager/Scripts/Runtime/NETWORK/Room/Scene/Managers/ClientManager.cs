@@ -23,7 +23,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
 
                 if (conn?.identity == null) continue;
 
-                NetworkServer.RemovePlayerForConnection(conn.identity.connectionToClient, true);
+                NetworkServer.RemovePlayerForConnection(conn.identity.connectionToClient, RemovePlayerOptions.Destroy);
             }
         }
 

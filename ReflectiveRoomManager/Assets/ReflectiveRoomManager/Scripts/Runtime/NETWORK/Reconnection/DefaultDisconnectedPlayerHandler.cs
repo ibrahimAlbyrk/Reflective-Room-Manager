@@ -16,7 +16,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Reconnection
 
             var conn = identity.connectionToClient;
             if (conn != null)
-                NetworkServer.RemovePlayerForConnection(conn, false);
+                NetworkServer.RemovePlayerForConnection(conn, RemovePlayerOptions.KeepActive);
 
             foreach (var behaviour in playerObject.GetComponents<NetworkBehaviour>())
                 behaviour.enabled = false;
