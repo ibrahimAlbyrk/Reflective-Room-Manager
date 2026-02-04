@@ -13,6 +13,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Structs;
     using Container;
     using Utilities;
+    using Discovery;
+    using Discovery.Handlers;
     
     [AddComponentMenu("REFLECTIVE/Network Room Manager")]
     public class RoomManager : RoomManagerBase
@@ -73,12 +75,19 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             }
 
             RoomListUtility.AddRoomToList(m_rooms, room);
-            
+
+            // Notify discovery service
+            if (EnableRoomDiscovery && _discoveryService != null)
+            {
+                _discoveryService.OnRoomAdded(room);
+                BroadcastRoomDeltaUpdate(room, RoomChangeType.Added);
+            }
+
             //If it is a client, add in to the room
             if (!isServer)
             {
                 RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Created);
-                
+
                 LoadRoom(room, roomInfo, () => JoinRoom(conn, room));
             }
             else
@@ -148,6 +157,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             var isRoomCreator = room.CurrentPlayers == 0;
 
             room.AddConnection(conn);
+
+            // Notify discovery service (player count changed)
+            if (EnableRoomDiscovery && _discoveryService != null)
+            {
+                _discoveryService.OnRoomUpdated(room);
+                BroadcastRoomDeltaUpdate(room, RoomChangeType.Updated);
+            }
 
             // Notify role manager
             if (_enableRoleSystem && room.RoleManager != null)
@@ -223,6 +239,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             m_eventManager.Invoke_OnServerRoomRemoving(room.ID);
 
+            // Notify discovery service before removal
+            if (EnableRoomDiscovery && _discoveryService != null)
+            {
+                _discoveryService.OnRoomRemoved(room);
+                BroadcastRoomDeltaUpdate(room, RoomChangeType.Removed);
+            }
+
             // Cleanup role manager
             if (_enableRoleSystem && room.RoleManager != null)
             {
@@ -275,9 +298,20 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             exitedRoom.RemoveConnection(conn);
 
             if (exitedRoom.CurrentPlayers < 1 && exitedRoom.ReservedSlots < 1 && !exitedRoom.IsServer)
+            {
                 RemoveRoom(exitedRoom);
+            }
             else
+            {
+                // Notify discovery service (player count changed)
+                if (EnableRoomDiscovery && _discoveryService != null)
+                {
+                    _discoveryService.OnRoomUpdated(exitedRoom);
+                    BroadcastRoomDeltaUpdate(exitedRoom, RoomChangeType.Updated);
+                }
+
                 RoomListUtility.UpdateRoomToList(m_rooms, exitedRoom);
+            }
             
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Exited);
             
@@ -300,6 +334,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             room.UpdateCustomData(key, value);
 
+            // Notify discovery service (custom data changed)
+            if (EnableRoomDiscovery && _discoveryService != null)
+            {
+                _discoveryService.OnRoomUpdated(room);
+                BroadcastRoomDeltaUpdate(room, RoomChangeType.Updated);
+            }
+
             RoomListUtility.UpdateRoomToList(m_rooms, room);
 
             m_eventManager.Invoke_OnServerRoomDataUpdated(room);
@@ -315,9 +356,27 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             room.UpdateCustomData(data);
 
+            // Notify discovery service (custom data changed)
+            if (EnableRoomDiscovery && _discoveryService != null)
+            {
+                _discoveryService.OnRoomUpdated(room);
+                BroadcastRoomDeltaUpdate(room, RoomChangeType.Updated);
+            }
+
             RoomListUtility.UpdateRoomToList(m_rooms, room);
 
             m_eventManager.Invoke_OnServerRoomDataUpdated(room);
+        }
+
+        /// <summary>
+        /// Broadcasts a delta update to all connected clients.
+        /// </summary>
+        private void BroadcastRoomDeltaUpdate(Room room, RoomChangeType changeType)
+        {
+            if (_discoveryService == null) return;
+
+            var deltaUpdate = _discoveryService.CreateDeltaUpdate(room, changeType);
+            RoomDiscoveryNetworkHandlers.BroadcastDeltaUpdate(deltaUpdate);
         }
     }
 }

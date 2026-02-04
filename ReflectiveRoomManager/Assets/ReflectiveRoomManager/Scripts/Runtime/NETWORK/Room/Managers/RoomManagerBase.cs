@@ -15,6 +15,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Connection.Manager;
     using State.Handlers;
     using Roles.Handlers;
+    using Discovery;
+    using Discovery.Handlers;
 
     [DisallowMultipleComponent]
     public abstract partial class RoomManagerBase : MonoBehaviour
@@ -95,6 +97,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Role system initialization
             InitializeRoleSystemHandlers();
+
+            // Room discovery initialization
+            InitializeRoomDiscoveryHandlers();
         }
 
         protected virtual void Update()
@@ -105,6 +110,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (_enableStateMachine && NetworkServer.active)
             {
                 UpdateStateMachines(Time.deltaTime);
+            }
+
+            // Cleanup expired discovery cache entries
+            if (_enableRoomDiscovery && _discoveryService != null)
+            {
+                _discoveryService.QueryCache.CleanupExpired();
             }
         }
 
@@ -136,6 +147,15 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             RoomRoleNetworkHandlers.RegisterServerHandlers();
             RoomRoleNetworkHandlers.RegisterClientHandlers();
+        }
+
+        private void InitializeRoomDiscoveryHandlers()
+        {
+            if (!_enableRoomDiscovery) return;
+
+            _discoveryService = new RoomDiscoveryService(m_rooms, _discoveryCacheTTL);
+            RoomDiscoveryNetworkHandlers.RegisterServerHandlers();
+            RoomDiscoveryNetworkHandlers.RegisterClientHandlers();
         }
 
         private void UpdateStateMachines(float deltaTime)
@@ -286,6 +306,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 RoomRoleNetworkHandlers.UnregisterServerHandlers();
                 RoomRoleNetworkHandlers.UnregisterClientHandlers();
                 RoomRoleNetworkHandlers.ClearClientEvents();
+            }
+
+            // Clean up room discovery handlers
+            if (_enableRoomDiscovery)
+            {
+                RoomDiscoveryNetworkHandlers.UnregisterServerHandlers();
+                RoomDiscoveryNetworkHandlers.UnregisterClientHandlers();
+                RoomDiscoveryNetworkHandlers.ClearClientEvents();
             }
 
             CoroutineRunner.Cleanup();

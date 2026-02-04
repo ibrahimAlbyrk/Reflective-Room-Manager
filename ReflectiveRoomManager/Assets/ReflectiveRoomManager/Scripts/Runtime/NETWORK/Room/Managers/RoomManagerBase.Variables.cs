@@ -15,6 +15,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Utilities;
     using Validation;
     using Reconnection;
+    using Discovery;
     using Connection.Manager;
     
     public abstract partial class RoomManagerBase
@@ -77,6 +78,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         [SerializeField] protected bool _enableRoleSystem;
         [Tooltip("Role system configuration")]
         [SerializeField] protected RoomRoleConfig _roleConfig;
+
+        [Header("Room Discovery")]
+        [Tooltip("Enable advanced room discovery and filtering")]
+        [SerializeField] protected bool _enableRoomDiscovery;
+        [Tooltip("Cache TTL in seconds for discovery queries")]
+        [SerializeField] protected float _discoveryCacheTTL = 5f;
 
         #endregion
 
@@ -176,6 +183,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         // Role system
         public bool EnableRoleSystem => _enableRoleSystem;
         public RoomRoleConfig RoleConfig => _roleConfig;
+
+        // Room discovery
+        public bool EnableRoomDiscovery => _enableRoomDiscovery;
+        protected RoomDiscoveryService _discoveryService;
+        public RoomDiscoveryService DiscoveryService => _discoveryService;
 
         #endregion
     }
