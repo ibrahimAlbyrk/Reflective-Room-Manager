@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aa774e271a3e415bbabdd18628348aa, type: 3}
+  m_Name: ChatSettings
+  m_EditorClassIdentifier: ReflectiveRM.Runtime::REFLECTIVE.Runtime.NETWORK.Chat.ChatSettings
+  _maxMessagesPerWindow: 5
+  _rateLimitWindowSeconds: 10
+  _maxHistoryPerChannel: 100
+  _maxContentLength: 512
+  _maxNameLength: 32
+  _enableWordFilter: 1
+  _wordFilterMode: 1
+  _bannedWords: []
+  _enableLinkFilter: 1
+  _allowedDomains: []
+  _enableSpamFilter: 1
+  _maxRepeatedChars: 5
+  _duplicateTimeWindowSeconds: 5
+  _globalChatScope: 0
