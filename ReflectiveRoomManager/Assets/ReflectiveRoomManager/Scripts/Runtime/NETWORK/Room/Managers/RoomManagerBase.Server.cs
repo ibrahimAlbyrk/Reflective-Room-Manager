@@ -18,6 +18,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             if (_enableReconnection)
                 NetworkServer.RegisterHandler<PlayerIdentityMessage>(OnPlayerIdentityMessageReceived);
+
+            // Register party system handlers
+            RegisterPartyHandlers();
+
+            // Register team system server handlers
+            RegisterTeamServerHandlers();
         }
 
         protected virtual void OnStopServer()
@@ -33,6 +39,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _rateLimiter?.Clear();
             _cleanupService?.Clear();
             _reconnectionService?.ClearAll();
+
+            // Unregister party system handlers
+            UnregisterPartyHandlers();
+
+            // Unregister team system server handlers
+            UnregisterTeamServerHandlers();
+
             RemoveAllRoom(forced:true);
         }
 
@@ -40,10 +53,21 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             var useSceneManagement = RoomLoaderType != Loader.RoomLoaderType.NoneScene;
             _connectionManager.RoomConnections.AddRegistersForClient(useSceneManagement);
+
+            // Register party client handlers
+            RegisterPartyClientHandlers();
+
+            // Register team client handlers
+            RegisterTeamClientHandlers();
         }
 
         protected virtual void OnStopClient()
         {
+            // Unregister party client handlers
+            UnregisterPartyClientHandlers();
+
+            // Unregister team client handlers
+            UnregisterTeamClientHandlers();
         }
 
         protected virtual void OnServerConnect(NetworkConnection conn)
@@ -60,6 +84,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         protected virtual void OnServerDisconnect(NetworkConnectionToClient conn)
         {
             _rateLimiter?.RemoveConnection(conn);
+
+            // Handle party disconnect
+            HandlePartyDisconnect(conn);
 
             if (_reconnectionService != null && _reconnectionService.isActiveAndEnabled)
             {

@@ -100,6 +100,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Room discovery initialization
             InitializeRoomDiscoveryHandlers();
+
+            // Party system initialization
+            InitializePartySystem();
+
+            // Team system infrastructure initialization
+            InitializeTeamSystemInfrastructure();
         }
 
         protected virtual void Update()
@@ -117,6 +123,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             {
                 _discoveryService.QueryCache.CleanupExpired();
             }
+
+            // Update party system
+            UpdatePartySystem();
         }
 
         private void InitializeStateMachineHandlers()
@@ -315,6 +324,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 RoomDiscoveryNetworkHandlers.UnregisterClientHandlers();
                 RoomDiscoveryNetworkHandlers.ClearClientEvents();
             }
+
+            // Clean up party system
+            CleanupPartySystem();
+
+            // Clean up team system infrastructure
+            CleanupTeamSystemInfrastructure();
 
             CoroutineRunner.Cleanup();
         }

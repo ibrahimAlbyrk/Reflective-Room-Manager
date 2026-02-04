@@ -74,6 +74,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 room.InitializeRoleManager(_roleConfig, m_eventManager);
             }
 
+            // Initialize team system for this room
+            if (_enableTeamSystem)
+            {
+                InitializeTeamSystem(room);
+            }
+
             RoomListUtility.AddRoomToList(m_rooms, room);
 
             // Notify discovery service
@@ -191,6 +197,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             RoomMessageUtility.SendRoomMessage(conn, ClientRoomState.Joined);
 
+            // Assign player to team
+            if (_enableTeamSystem)
+            {
+                AssignPlayerToTeam(conn, room);
+            }
+
             if (conn is NetworkConnectionToClient connToClient)
                 m_eventManager.Invoke_OnServerJoinedClient(connToClient, room.ID);
         }
@@ -252,6 +264,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 room.CleanupRoleManager();
             }
 
+            // Cleanup team system for this room
+            if (_enableTeamSystem)
+            {
+                CleanupRoomTeamSystem(room);
+            }
+
             UnLoadRoom(room);
 
             removedConnections.ForEach(connection =>
@@ -292,6 +310,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (_enableRoleSystem && exitedRoom.RoleManager != null)
             {
                 exitedRoom.NotifyPlayerLeftForRoles(conn);
+            }
+
+            // Remove player from team before removing connection
+            if (_enableTeamSystem)
+            {
+                RemovePlayerFromTeam(conn, exitedRoom);
             }
 
             // Now remove the connection
