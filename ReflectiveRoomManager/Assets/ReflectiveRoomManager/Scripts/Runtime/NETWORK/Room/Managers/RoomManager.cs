@@ -80,6 +80,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 InitializeTeamSystem(room);
             }
 
+            // Initialize vote manager if enabled
+            if (_enableVotingSystem && _voteConfig != null)
+            {
+                room.InitializeVoteManager(_voteConfig);
+            }
+
             RoomListUtility.AddRoomToList(m_rooms, room);
 
             // Notify discovery service
@@ -270,6 +276,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 CleanupRoomTeamSystem(room);
             }
 
+            // Cleanup vote manager
+            if (_enableVotingSystem && room.VoteManager != null)
+            {
+                room.CleanupVoteManager();
+            }
+
             UnLoadRoom(room);
 
             removedConnections.ForEach(connection =>
@@ -310,6 +322,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (_enableRoleSystem && exitedRoom.RoleManager != null)
             {
                 exitedRoom.NotifyPlayerLeftForRoles(conn);
+            }
+
+            // Notify vote manager before removal
+            if (_enableVotingSystem && exitedRoom.VoteManager != null)
+            {
+                exitedRoom.NotifyPlayerLeftForVoting(conn);
             }
 
             // Remove player from team before removing connection

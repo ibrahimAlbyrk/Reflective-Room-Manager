@@ -15,6 +15,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
     using Connection.Manager;
     using State.Handlers;
     using Roles.Handlers;
+    using Voting.Handlers;
     using Discovery;
     using Discovery.Handlers;
 
@@ -111,6 +112,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             // Team system infrastructure initialization
             InitializeTeamSystemInfrastructure();
 
+            // Voting system initialization
+            InitializeVotingSystemHandlers();
+
             // Chat system initialization
             InitializeChatSystem();
 
@@ -133,6 +137,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (_enableRoomDiscovery && _discoveryService != null)
             {
                 _discoveryService.QueryCache.CleanupExpired();
+            }
+
+            // Update vote managers
+            if (_enableVotingSystem && NetworkServer.active)
+            {
+                UpdateVoteManagers(Time.deltaTime);
             }
 
             // Update party system
@@ -178,6 +188,25 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 #endif
         }
 
+        private void InitializeVotingSystemHandlers()
+        {
+            if (!_enableVotingSystem) return;
+
+            if (_voteConfig == null)
+            {
+                Debug.LogError("[RoomManagerBase] Voting system enabled but no config assigned!");
+                _enableVotingSystem = false;
+                return;
+            }
+
+#if REFLECTIVE_SERVER
+            VoteNetworkHandlers.RegisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
+            VoteNetworkHandlers.RegisterClientHandlers();
+#endif
+        }
+
         private void InitializeRoomDiscoveryHandlers()
         {
             if (!_enableRoomDiscovery) return;
@@ -209,6 +238,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                     _stateSyncTimer = 0f;
                     BroadcastStateSyncToAllRooms();
                 }
+            }
+        }
+
+        private void UpdateVoteManagers(float deltaTime)
+        {
+            foreach (var room in m_rooms)
+            {
+                room.UpdateVoteManager(deltaTime);
             }
         }
 
@@ -354,6 +391,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 #if REFLECTIVE_CLIENT
                 RoomRoleNetworkHandlers.UnregisterClientHandlers();
                 RoomRoleNetworkHandlers.ClearClientEvents();
+#endif
+            }
+
+            // Clean up voting system handlers
+            if (_enableVotingSystem)
+            {
+#if REFLECTIVE_SERVER
+                VoteNetworkHandlers.UnregisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
+                VoteNetworkHandlers.UnregisterClientHandlers();
+                VoteNetworkHandlers.ClearClientEvents();
 #endif
             }
 
