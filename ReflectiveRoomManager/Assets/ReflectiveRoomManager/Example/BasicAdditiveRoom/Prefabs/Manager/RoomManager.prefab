@@ -50,6 +50,8 @@ MonoBehaviour:
   _partyConfig: {fileID: 11400000, guid: bb523e0caf12a40e58cd2a03c3c5e891, type: 2}
   _enableTeamSystem: 1
   _teamConfig: {fileID: 11400000, guid: fcf72cf55960a41378b828fdd73d5898, type: 2}
+  _enableTemplates: 1
+  _templateLibrary: {fileID: 11400000, guid: 0d0f52543ffa24a34a78b571abbe275e, type: 2}
   _dontDestroyOnLoad: 1
   _physicsMode: 2
   _lobbyScene: Assets/ReflectiveRoomManager/Example/BasicAdditiveRoom/Scenes/Lobby_Scene.unity
