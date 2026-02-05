@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Build;
 using REFLECTIVE.Runtime.Configuration;
 
 namespace REFLECTIVE.Editor.Configuration
@@ -40,7 +41,7 @@ namespace REFLECTIVE.Editor.Configuration
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawHeader()
+        private new void DrawHeader()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Reflective Room Manager", EditorStyles.boldLabel);
@@ -151,14 +152,14 @@ namespace REFLECTIVE.Editor.Configuration
         private static string[] GetCurrentDefines()
         {
             var buildTarget = EditorUserBuildSettings.selectedBuildTargetGroup;
-            PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTarget, out var defines);
+            PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTarget), out var defines);
             return defines;
         }
 
         public static void ApplyBuildType(ReflectiveBuildConfig config)
         {
             var buildTarget = EditorUserBuildSettings.selectedBuildTargetGroup;
-            PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTarget, out var currentDefines);
+            PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTarget), out var currentDefines);
 
             // Remove existing reflective symbols
             var filteredDefines = currentDefines.Where(d => !REFLECTIVE_SYMBOLS.Contains(d)).ToList();
@@ -168,7 +169,7 @@ namespace REFLECTIVE.Editor.Configuration
             filteredDefines.AddRange(newSymbols);
 
             // Apply
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTarget, filteredDefines.ToArray());
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTarget), filteredDefines.ToArray());
 
             Debug.Log($"[ReflectiveBuildConfig] Applied {config.BuildType} build type. Defines: {string.Join(", ", newSymbols)}");
         }
