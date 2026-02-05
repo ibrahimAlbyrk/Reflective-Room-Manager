@@ -24,6 +24,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Register team system server handlers
             RegisterTeamServerHandlers();
+
+            // Register template system server handlers
+            RegisterTemplateServerHandlers();
         }
 
         protected virtual void OnStopServer()
@@ -46,6 +49,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             // Unregister team system server handlers
             UnregisterTeamServerHandlers();
 
+            // Unregister template system server handlers
+            UnregisterTemplateServerHandlers();
+
             RemoveAllRoom(forced:true);
         }
 
@@ -59,6 +65,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Register team client handlers
             RegisterTeamClientHandlers();
+
+            // Register template client handlers
+            RegisterTemplateClientHandlers();
         }
 
         protected virtual void OnStopClient()
@@ -68,6 +77,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Unregister team client handlers
             UnregisterTeamClientHandlers();
+
+            // Unregister template client handlers
+            UnregisterTemplateClientHandlers();
         }
 
         protected virtual void OnServerConnect(NetworkConnection conn)

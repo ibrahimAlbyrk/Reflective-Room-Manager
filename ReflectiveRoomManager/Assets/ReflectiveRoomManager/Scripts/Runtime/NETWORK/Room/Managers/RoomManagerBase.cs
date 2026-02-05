@@ -109,6 +109,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Chat system initialization
             InitializeChatSystem();
+
+            // Template system initialization
+            InitializeTemplateSystem();
         }
 
         protected virtual void Update()
@@ -336,6 +339,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Clean up chat system
             CleanupChatSystem();
+
+            // Clean up template system
+            CleanupTemplateSystem();
 
             CoroutineRunner.Cleanup();
         }
