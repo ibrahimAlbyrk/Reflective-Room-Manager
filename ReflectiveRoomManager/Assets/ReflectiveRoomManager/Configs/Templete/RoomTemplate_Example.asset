@@ -23,8 +23,8 @@ MonoBehaviour:
   _minimumPlayers: 1
   _maximumPlayers: 64
   _isPrivateByDefault: 0
-  _stateConfig: {fileID: 0}
-  _teamConfig: {fileID: 0}
+  _stateConfig: {fileID: 11400000, guid: 542ad2064202a43958e310c2af25ae07, type: 2}
+  _teamConfig: {fileID: 11400000, guid: fcf72cf55960a41378b828fdd73d5898, type: 2}
   _allowSpectators: 0
   _maxSpectators: 0
   _enableChat: 1
