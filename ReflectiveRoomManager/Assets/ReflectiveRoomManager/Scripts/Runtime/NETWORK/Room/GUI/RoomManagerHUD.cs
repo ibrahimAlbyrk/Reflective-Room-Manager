@@ -27,6 +27,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         [SerializeField] private bool _enablePartyHUD = true;
         [SerializeField] private bool _enableDiscoveryHUD = true;
         [SerializeField] private bool _enableChatHUD = true;
+        [SerializeField] private bool _enableVotingHUD = true;
 
         // Module instances
         private StateHUDModule _stateModule;
@@ -35,6 +36,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
         private PartyHUDModule _partyModule;
         private DiscoveryHUDModule _discoveryModule;
         private ChatHUDModule _chatModule;
+        private VotingHUDModule _votingModule;
 
         // Active tabs
         private List<IHUDModule> _activeTabs = new();
@@ -99,6 +101,14 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
                 _chatModule.RegisterEvents();
                 _activeTabs.Add(_chatModule);
             }
+
+            // Voting
+            if (_enableVotingHUD && rm.EnableVotingSystem)
+            {
+                _votingModule = new VotingHUDModule();
+                _votingModule.RegisterEvents();
+                _activeTabs.Add(_votingModule);
+            }
         }
 
         private void OnDestroy()
@@ -109,6 +119,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             _partyModule?.UnregisterEvents();
             _discoveryModule?.UnregisterEvents();
             _chatModule?.UnregisterEvents();
+            _votingModule?.UnregisterEvents();
         }
 
         #endregion
@@ -343,6 +354,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             _partyModule?.ClearData();
             _discoveryModule?.ClearData();
             _chatModule?.ClearData();
+            _votingModule?.ClearData();
         }
 
         #endregion

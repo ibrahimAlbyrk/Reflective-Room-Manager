@@ -55,6 +55,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.GUI
             return $"{m:D2}:{s:D2}";
         }
 
+        /// <summary>
+        /// Creates a 1x1 solid color texture for GUI drawing.
+        /// </summary>
+        public static Texture2D MakeColorTex(Color c) => MakeTex(2, 2, c);
+
         private static Texture2D MakeTex(int w, int h, Color c)
         {
             var pix = new Color[w * h];
