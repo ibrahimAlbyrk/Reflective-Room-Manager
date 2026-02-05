@@ -146,6 +146,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.State
             // Enter new state
             _currentState.OnEnter(_room, _context);
 
+            // Notify vote manager of state change
+            _room.NotifyStateChangedForVoting(_currentState);
+
             // Log transition
             if (_context.EffectiveConfig.EnableDebugLogs)
                 Debug.Log($"[RoomStateMachine] Room '{_room.Name}' transitioned: {previousState.StateName} -> {_currentState.StateName}");
