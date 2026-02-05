@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: RoomTemplate_Example
   m_EditorClassIdentifier: ReflectiveRM.Runtime::REFLECTIVE.Runtime.NETWORK.Room.Templates.RoomTemplate
   _templateID: 641559
-  _templateName: New Template
+  _templateName: Test Room
   _description: 
   _icon: {fileID: 0}
   _category: 2
   _defaultRoomNamePrefix: Room
-  _sceneName: 
+  _sceneName: GameScene
   _defaultMaxPlayers: 8
   _minimumPlayers: 1
   _maximumPlayers: 64
