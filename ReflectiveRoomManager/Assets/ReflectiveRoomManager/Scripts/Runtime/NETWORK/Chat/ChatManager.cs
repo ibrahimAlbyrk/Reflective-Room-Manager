@@ -38,6 +38,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
         private Dictionary<ChatChannel, List<ChatMessage>> _clientHistory;
 #endif
 
+        // Initialization guards
+        private bool _serverInitialized;
+        private bool _clientInitialized;
+
         // Events
         public event Action<ChatMessage> OnMessageReceived;
         public event Action<string, ChatErrorCode> OnChatError;
@@ -84,12 +88,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
             }
 
 #if REFLECTIVE_SERVER
-            if (NetworkServer.active)
+            if (NetworkServer.active && !_serverInitialized)
                 InitializeServer();
 #endif
 
 #if REFLECTIVE_CLIENT
-            if (NetworkClient.active)
+            if (NetworkClient.active && !_clientInitialized)
                 InitializeClient();
 #endif
         }
@@ -104,6 +108,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
 
             InitializeFilters();
             RegisterServerHandlers();
+            _serverInitialized = true;
 
             Debug.Log("[ChatManager] Server initialized.");
         }
@@ -134,6 +139,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
         {
             _clientHistory = new Dictionary<ChatChannel, List<ChatMessage>>();
             RegisterClientHandlers();
+            _clientInitialized = true;
 
             Debug.Log("[ChatManager] Client initialized.");
         }
@@ -177,6 +183,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
             _rateLimiter?.Clear();
             _playerNames?.Clear();
             _filters?.Clear();
+            _serverInitialized = false;
 
             Debug.Log("[ChatManager] Server cleanup complete.");
         }
@@ -189,6 +196,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
         public void CleanupClient()
         {
             _clientHistory?.Clear();
+            _clientInitialized = false;
 
             Debug.Log("[ChatManager] Client cleanup complete.");
         }

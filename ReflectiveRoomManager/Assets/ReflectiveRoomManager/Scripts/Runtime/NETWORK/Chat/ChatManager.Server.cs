@@ -8,6 +8,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
     using Structs;
     using Messages;
     using Room;
+    using REFLECTIVE.Runtime.NETWORK.Team;
 
     public partial class ChatManager
     {
@@ -214,9 +215,26 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
 
         private void BroadcastToTeam(uint senderConnectionID, ChatBroadcastMessage broadcast)
         {
-            // Team system integration stub
-            // TODO: Integrate with Team system when available
-            Debug.LogWarning("[ChatManager] Team channel not yet implemented.");
+            var roomManager = RoomManagerBase.Instance;
+            if (roomManager == null) return;
+
+            // Find sender connection
+            if (!NetworkServer.connections.TryGetValue((int)senderConnectionID, out var senderConn)) return;
+            if (senderConn is not NetworkConnectionToClient clientConn) return;
+
+            var room = roomManager.GetRoomByConnection(clientConn);
+            if (room == null) return;
+
+            var teamManager = roomManager.GetRoomTeamManager(room);
+            var senderTeam = teamManager?.GetPlayerTeam(clientConn);
+            if (senderTeam == null) return;
+
+            // Send to all team members
+            foreach (var memberConn in senderTeam.GetMemberConnections())
+            {
+                if (memberConn is NetworkConnectionToClient memberClient)
+                    memberClient.Send(broadcast);
+            }
         }
 
         private void BroadcastGlobal(ChatBroadcastMessage broadcast)
@@ -281,15 +299,27 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
             if (channel == ChatChannel.Room)
                 return IsInRoom(conn);
 
-            // Team channel requires team membership (stub)
+            // Team channel requires team membership
             if (channel == ChatChannel.Team)
-                return false; // TODO: Check team membership
+                return IsInTeam(conn);
 
             // System channel is server-only
             if (channel == ChatChannel.System)
                 return false;
 
             return true;
+        }
+
+        private bool IsInTeam(NetworkConnectionToClient conn)
+        {
+            var roomManager = RoomManagerBase.Instance;
+            if (roomManager == null) return false;
+
+            var room = roomManager.GetRoomByConnection(conn);
+            if (room == null) return false;
+
+            var teamManager = roomManager.GetRoomTeamManager(room);
+            return teamManager != null && teamManager.GetPlayerTeam(conn) != null;
         }
 
         private bool IsInRoom(NetworkConnectionToClient conn)
