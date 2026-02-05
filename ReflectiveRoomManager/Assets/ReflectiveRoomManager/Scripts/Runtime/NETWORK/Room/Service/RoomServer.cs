@@ -1,4 +1,5 @@
-﻿using Mirror;
+#if REFLECTIVE_SERVER
+using Mirror;
 using UnityEngine;
 using System.Collections.Generic;
 using REFLECTIVE.Runtime.NETWORK.Room.Scenes;
@@ -235,3 +236,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         #endregion
     }
 }
+#endif

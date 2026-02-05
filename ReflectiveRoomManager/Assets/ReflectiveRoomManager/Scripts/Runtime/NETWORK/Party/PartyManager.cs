@@ -68,6 +68,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Party
 
         #region Network Handler Registration
 
+#if REFLECTIVE_SERVER
         /// <summary>
         /// Registers network message handlers for the server.
         /// </summary>
@@ -105,7 +106,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Party
             if (Config != null && Config.EnableDebugLogs)
                 Debug.Log("[PartyManager] Server handlers unregistered");
         }
+#endif
 
+#if REFLECTIVE_CLIENT
         /// <summary>
         /// Registers client-side message handlers.
         /// </summary>
@@ -127,6 +130,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Party
             NetworkClient.UnregisterHandler<PartyLeaderChangeMessage>();
             NetworkClient.UnregisterHandler<PartyInviteNotificationMessage>();
         }
+#endif
 
         #endregion
 

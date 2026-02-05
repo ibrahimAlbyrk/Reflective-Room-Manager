@@ -1,3 +1,4 @@
+#if REFLECTIVE_CLIENT
 namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
     using Structs;
@@ -13,3 +14,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         string GetRoomCustomData(string dataName);
     }
 }
+#endif

@@ -11,15 +11,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Templates.Handlers
     /// </summary>
     public static class TemplateNetworkHandlers
     {
+#if REFLECTIVE_SERVER
         private static bool _serverHandlersRegistered;
-        private static bool _clientHandlersRegistered;
 
-        #region Server Handlers
-
-        /// <summary>
-        /// Registers server-side message handlers.
-        /// Called when server starts.
-        /// </summary>
         public static void RegisterServerHandlers()
         {
             if (_serverHandlersRegistered)
@@ -35,10 +29,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Templates.Handlers
             Debug.Log("[TemplateNetworkHandlers] Server handlers registered");
         }
 
-        /// <summary>
-        /// Unregisters server-side message handlers.
-        /// Called when server stops.
-        /// </summary>
         public static void UnregisterServerHandlers()
         {
             if (!_serverHandlersRegistered) return;
@@ -105,15 +95,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Templates.Handlers
             var templateOverride = msg.Override.ToRoomTemplateOverride();
             roomManager.CreateRoomFromTemplate(msg.TemplateID, templateOverride, conn);
         }
+#endif
 
-        #endregion
+#if REFLECTIVE_CLIENT
+        private static bool _clientHandlersRegistered;
 
-        #region Client Handlers
-
-        /// <summary>
-        /// Registers client-side message handlers.
-        /// Called when client starts.
-        /// </summary>
         public static void RegisterClientHandlers()
         {
             if (_clientHandlersRegistered)
@@ -129,10 +115,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Templates.Handlers
             Debug.Log("[TemplateNetworkHandlers] Client handlers registered");
         }
 
-        /// <summary>
-        /// Unregisters client-side message handlers.
-        /// Called when client stops.
-        /// </summary>
         public static void UnregisterClientHandlers()
         {
             if (!_clientHandlersRegistered) return;
@@ -156,19 +138,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Templates.Handlers
             TemplateEvents.InvokeRoomCreationError(msg.ErrorMessage);
         }
 
-        #endregion
-
-        #region Cleanup
-
-        /// <summary>
-        /// Clears client events.
-        /// Called during cleanup.
-        /// </summary>
         public static void ClearClientEvents()
         {
             TemplateEvents.ClearEvents();
         }
-
-        #endregion
+#endif
     }
 }

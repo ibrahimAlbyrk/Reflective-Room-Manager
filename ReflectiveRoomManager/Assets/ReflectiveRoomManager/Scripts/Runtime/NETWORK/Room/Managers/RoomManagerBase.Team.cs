@@ -124,6 +124,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             };
         }
 
+#if REFLECTIVE_SERVER
         /// <summary>
         /// Registers team system server network handlers.
         /// Called when server starts.
@@ -149,7 +150,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             _teamServerHandlersRegistered = false;
         }
+#endif
 
+#if REFLECTIVE_CLIENT
         /// <summary>
         /// Registers team system client network handlers.
         /// Called when client starts.
@@ -187,6 +190,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             if (_teamConfig != null && _teamConfig.EnableDebugLogs)
                 Debug.Log("[RoomManagerBase] Team client handlers unregistered");
         }
+#endif
 
         #endregion
 
@@ -290,6 +294,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         #endregion
 
+#if REFLECTIVE_SERVER
         #region Network Message Handlers (Server)
 
         private void OnServerTeamSwapRequest(NetworkConnectionToClient conn, TeamSwapRequestMessage msg)
@@ -312,7 +317,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
+#endif
 
+#if REFLECTIVE_CLIENT
         #region Network Message Handlers (Client)
 
         private void OnClientTeamAssignment(TeamAssignmentMessage msg)
@@ -348,6 +355,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
+#endif
 
         #region Room-TeamManager Association
 

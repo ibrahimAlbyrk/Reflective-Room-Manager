@@ -1,3 +1,4 @@
+#if REFLECTIVE_SERVER
 using System;
 using Mirror;
 using UnityEngine;
@@ -87,3 +88,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Player.Utilities
         }
     }
 }
+#endif

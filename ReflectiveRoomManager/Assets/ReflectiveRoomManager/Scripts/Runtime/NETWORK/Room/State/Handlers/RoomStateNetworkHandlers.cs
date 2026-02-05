@@ -11,8 +11,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.State.Handlers
     /// </summary>
     public static class RoomStateNetworkHandlers
     {
+#if REFLECTIVE_SERVER
         private static bool _serverHandlersRegistered;
-        private static bool _clientHandlersRegistered;
 
         public static void RegisterServerHandlers()
         {
@@ -26,34 +26,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.State.Handlers
             _serverHandlersRegistered = true;
         }
 
-        public static void RegisterClientHandlers()
-        {
-            if (_clientHandlersRegistered)
-            {
-                Debug.LogWarning("[RoomStateNetworkHandlers] Client handlers already registered");
-                return;
-            }
-
-            NetworkClient.RegisterHandler<RoomStateChangeMessage>(OnClientStateChange);
-            NetworkClient.RegisterHandler<RoomStateSyncMessage>(OnClientStateSync);
-            _clientHandlersRegistered = true;
-        }
-
         public static void UnregisterServerHandlers()
         {
             if (!_serverHandlersRegistered) return;
 
             NetworkServer.UnregisterHandler<RoomStateActionMessage>();
             _serverHandlersRegistered = false;
-        }
-
-        public static void UnregisterClientHandlers()
-        {
-            if (!_clientHandlersRegistered) return;
-
-            NetworkClient.UnregisterHandler<RoomStateChangeMessage>();
-            NetworkClient.UnregisterHandler<RoomStateSyncMessage>();
-            _clientHandlersRegistered = false;
         }
 
         private static void OnServerStateAction(NetworkConnectionToClient conn, RoomStateActionMessage msg)
@@ -173,21 +151,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.State.Handlers
             }
         }
 
-        private static void OnClientStateChange(RoomStateChangeMessage msg)
-        {
-            var roomManager = RoomManagerBase.Instance;
-            if (roomManager == null) return;
-
-            // Trigger client-side event
-            OnClientRoomStateChanged?.Invoke(msg.RoomID, msg.StateData);
-        }
-
-        private static void OnClientStateSync(RoomStateSyncMessage msg)
-        {
-            // Trigger client-side sync event
-            OnClientRoomStateSync?.Invoke(msg.RoomID, msg.StateTypeID, msg.StateElapsedTime, msg.StateData);
-        }
-
         /// <summary>
         /// Broadcasts state update to all connections in the room.
         /// </summary>
@@ -236,6 +199,47 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.State.Handlers
             var message = new RoomStateChangeMessage(room.ID, stateData);
             conn.Send(message);
         }
+#endif
+
+#if REFLECTIVE_CLIENT
+        private static bool _clientHandlersRegistered;
+
+        public static void RegisterClientHandlers()
+        {
+            if (_clientHandlersRegistered)
+            {
+                Debug.LogWarning("[RoomStateNetworkHandlers] Client handlers already registered");
+                return;
+            }
+
+            NetworkClient.RegisterHandler<RoomStateChangeMessage>(OnClientStateChange);
+            NetworkClient.RegisterHandler<RoomStateSyncMessage>(OnClientStateSync);
+            _clientHandlersRegistered = true;
+        }
+
+        public static void UnregisterClientHandlers()
+        {
+            if (!_clientHandlersRegistered) return;
+
+            NetworkClient.UnregisterHandler<RoomStateChangeMessage>();
+            NetworkClient.UnregisterHandler<RoomStateSyncMessage>();
+            _clientHandlersRegistered = false;
+        }
+
+        private static void OnClientStateChange(RoomStateChangeMessage msg)
+        {
+            var roomManager = RoomManagerBase.Instance;
+            if (roomManager == null) return;
+
+            // Trigger client-side event
+            OnClientRoomStateChanged?.Invoke(msg.RoomID, msg.StateData);
+        }
+
+        private static void OnClientStateSync(RoomStateSyncMessage msg)
+        {
+            // Trigger client-side sync event
+            OnClientRoomStateSync?.Invoke(msg.RoomID, msg.StateTypeID, msg.StateElapsedTime, msg.StateData);
+        }
 
         // Client-side events
         public delegate void ClientStateChangedHandler(uint roomID, RoomStateData stateData);
@@ -249,5 +253,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.State.Handlers
             OnClientRoomStateChanged = null;
             OnClientRoomStateSync = null;
         }
+#endif
     }
 }

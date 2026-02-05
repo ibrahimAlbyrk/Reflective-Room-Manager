@@ -1,3 +1,4 @@
+#if REFLECTIVE_SERVER
 using Mirror;
 using System.Collections.Generic;
 
@@ -24,3 +25,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         void GracefulShutdown(float warningSeconds = 10f);
     }
 }
+#endif

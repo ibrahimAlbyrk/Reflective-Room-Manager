@@ -72,8 +72,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 Debug.LogWarning("[RoomManagerBase] Party system enabled but no config assigned. Using defaults.");
             }
 
+#if REFLECTIVE_SERVER
             m_partyManager = new PartyManager(_partyConfig);
-            m_clientPartyEventManager = new PartyEventManager();
 
             // Subscribe to party events
             m_partyManager.EventManager.OnPartyCreated += OnPartyCreated;
@@ -81,10 +81,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             m_partyManager.EventManager.OnMemberJoined += OnPartyMemberJoined;
             m_partyManager.EventManager.OnMemberLeft += OnPartyMemberLeft;
             m_partyManager.EventManager.OnLeaderChanged += OnPartyLeaderChanged;
+#endif
+
+#if REFLECTIVE_CLIENT
+            m_clientPartyEventManager = new PartyEventManager();
+#endif
 
             Debug.Log("[RoomManagerBase] Party system initialized");
         }
 
+#if REFLECTIVE_SERVER
         /// <summary>
         /// Registers party system network handlers.
         /// Called when server starts.
@@ -106,7 +112,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             m_partyManager.UnregisterServerHandlers();
         }
+#endif
 
+#if REFLECTIVE_CLIENT
         /// <summary>
         /// Registers client-side party handlers.
         /// Called when client connects.
@@ -129,9 +137,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         {
             PartyManager.UnregisterClientHandlers();
         }
+#endif
 
         #endregion
 
+#if REFLECTIVE_SERVER
         #region Update
 
         /// <summary>
@@ -166,7 +176,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
+#endif
 
+#if REFLECTIVE_SERVER
         #region Party Event Handlers
 
         /// <summary>
@@ -215,6 +227,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         }
 
         #endregion
+#endif
 
         #region Cleanup
 
@@ -224,6 +237,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
         /// </summary>
         protected virtual void CleanupPartySystem()
         {
+#if REFLECTIVE_SERVER
             if (m_partyManager != null)
             {
                 m_partyManager.EventManager.OnPartyCreated -= OnPartyCreated;
@@ -235,8 +249,11 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 m_partyManager.ClearAll();
                 m_partyManager = null;
             }
+#endif
 
+#if REFLECTIVE_CLIENT
             m_clientPartyEventManager = null;
+#endif
         }
 
         #endregion

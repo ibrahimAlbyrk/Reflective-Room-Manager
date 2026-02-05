@@ -26,6 +26,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
         
         #region Start & Stop Callbacks
 
+#if REFLECTIVE_SERVER
         public override void OnStartServer()
         {
             ReflectiveConnectionManager.networkConnections.OnServerStarted.Call();
@@ -35,11 +36,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
                 spawnPrefabs = NetworkSpawnUtilities.GetSpawnablePrefabs().ToList();
             }
         }
-        
+
+        public override void OnStopServer()
+        {
+            ReflectiveConnectionManager.networkConnections.OnServerStopped.Call();
+        }
+#endif
+
+#if REFLECTIVE_CLIENT
         public override void OnStartClient()
         {
             ReflectiveConnectionManager.networkConnections.OnClientStarted.Call();
-            
+
             //If it is a host, we do not perform this operation.
             //The reason is that transactions are already being performed on the server.
             if (NetworkServer.active)
@@ -56,20 +64,17 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
             }
         }
 
-        public override void OnStopServer()
-        {
-            ReflectiveConnectionManager.networkConnections.OnServerStopped.Call();
-        }
-
         public override void OnStopClient()
         {
             ReflectiveConnectionManager.networkConnections.OnClientStopped.Call();
         }
+#endif
 
         #endregion
 
         #region Connection Callbacks
 
+#if REFLECTIVE_SERVER
         public override void OnServerConnect(NetworkConnectionToClient conn)
         {
             ReflectiveConnectionManager.networkConnections.OnServerConnected.Call(conn);
@@ -84,11 +89,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
 
             base.OnServerDisconnect(conn);
         }
+#endif
 
+#if REFLECTIVE_CLIENT
         public override void OnClientConnect()
         {
             base.OnClientConnect();
-            
+
             ReflectiveConnectionManager.networkConnections.OnClientConnected.Call();
         }
 
@@ -96,6 +103,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Manager
         {
             ReflectiveConnectionManager.networkConnections.OnClientDisconnected.Call();
         }
+#endif
 
         #endregion
 

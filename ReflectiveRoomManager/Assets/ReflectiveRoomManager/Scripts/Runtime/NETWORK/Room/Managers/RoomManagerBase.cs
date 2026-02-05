@@ -42,12 +42,13 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             m_uniqueIdentifier = new UniqueIdentifier();
 
+#if REFLECTIVE_SERVER
             //SERVER SIDE
             _connectionManager.NetworkConnections.OnServerStarted.AddListener(OnStartServer);
             _connectionManager.NetworkConnections.OnServerStopped.AddListener(OnStopServer);
             _onServerStoppedRemoveAllRoom = () => RemoveAllRoom(true);
             _connectionManager.NetworkConnections.OnServerStopped.AddListener(_onServerStoppedRemoveAllRoom);
-            
+
             _connectionManager.NetworkConnections.OnServerConnected.AddListener(OnServerConnect);
             _connectionManager.NetworkConnections.OnServerDisconnected.AddListener(OnServerDisconnect);
             _connectionManager.NetworkConnections.OnServerDisconnected.AddListener(OnServerDisconnectCleanupPendingState);
@@ -64,25 +65,28 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 m_eventManager.OnServerJoinedRoom += _sceneSynchronizer.DoSyncScene;
                 m_eventManager.OnServerRoomRemoving += _sceneSynchronizer.RemovePendingStatesForRoom;
             }
-            
+
             m_eventManager.OnServerJoinedRoom += SendRoomIDToClient;
             m_eventManager.OnServerExitedRoom += SendClientExitSceneMessage;
             m_eventManager.OnServerExitedRoom += SendRoomIDToClientForReset;
+#endif
 
+#if REFLECTIVE_CLIENT
             //CLIENT SIDE
             _connectionManager.NetworkConnections.OnClientStarted.AddListener(OnStartClient);
             _connectionManager.NetworkConnections.OnClientStopped.AddListener(OnStopClient);
-            
+
             _connectionManager.NetworkConnections.OnClientConnected.AddListener(OnClientConnect);
             _connectionManager.NetworkConnections.OnClientDisconnected.AddListener(OnClientDisconnect);
             _connectionManager.NetworkConnections.OnClientDisconnected.AddListener(RemoveAllRoomList);
             _connectionManager.NetworkConnections.OnClientStopped.AddListener(_connectionManager.RoomConnections.CleanupClientHandlers);
-            
+
             _connectionManager.RoomConnections.OnClientRoomListAdd.AddListener(AddRoomList);
             _connectionManager.RoomConnections.OnClientRoomListUpdate.AddListener(UpdateRoomList);
             _connectionManager.RoomConnections.OnClientRoomListRemove.AddListener(RemoveRoomList);
 
             _connectionManager.RoomConnections.OnClientRoomIDMessage.AddListener(GetRoomIDForClient);
+#endif
 
             // Room cleanup initialization
             if (_enableAutoCleanup)
@@ -116,6 +120,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
         protected virtual void Update()
         {
+#if REFLECTIVE_SERVER
             _cleanupService?.Update(m_rooms, room => RemoveRoom(room, forced: true));
 
             // Update state machines
@@ -132,6 +137,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
             // Update party system
             UpdatePartySystem();
+#endif
         }
 
         private void InitializeStateMachineHandlers()
@@ -145,8 +151,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
+#if REFLECTIVE_SERVER
             RoomStateNetworkHandlers.RegisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
             RoomStateNetworkHandlers.RegisterClientHandlers();
+#endif
         }
 
         private void InitializeRoleSystemHandlers()
@@ -160,19 +170,28 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
+#if REFLECTIVE_SERVER
             RoomRoleNetworkHandlers.RegisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
             RoomRoleNetworkHandlers.RegisterClientHandlers();
+#endif
         }
 
         private void InitializeRoomDiscoveryHandlers()
         {
             if (!_enableRoomDiscovery) return;
 
+#if REFLECTIVE_SERVER
             _discoveryService = new RoomDiscoveryService(m_rooms, _discoveryCacheTTL);
             RoomDiscoveryNetworkHandlers.RegisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
             RoomDiscoveryNetworkHandlers.RegisterClientHandlers();
+#endif
         }
 
+#if REFLECTIVE_SERVER
         private void UpdateStateMachines(float deltaTime)
         {
             foreach (var room in m_rooms)
@@ -203,7 +222,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 }
             }
         }
+#endif
 
+#if REFLECTIVE_SERVER
         private void InitializeReconnection()
         {
             var identityProvider = _playerIdentityProviderComponent != null
@@ -257,6 +278,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             var assignedId = identityProvider.GetOrAssignPlayerId(conn, msg.PlayerId);
             conn.Send(new PlayerIdentityResponseMessage { PlayerId = assignedId });
         }
+#endif
 
         protected virtual void OnDestroy()
         {
@@ -266,6 +288,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 return;
             }
 
+#if REFLECTIVE_SERVER
             // SERVER SIDE
             _connectionManager.NetworkConnections.OnServerStarted.RemoveListener(OnStartServer);
             _connectionManager.NetworkConnections.OnServerStopped.RemoveListener(OnStopServer);
@@ -291,7 +314,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
                 m_eventManager.OnServerExitedRoom -= SendClientExitSceneMessage;
                 m_eventManager.OnServerExitedRoom -= SendRoomIDToClientForReset;
             }
+#endif
 
+#if REFLECTIVE_CLIENT
             // CLIENT SIDE
             _connectionManager.NetworkConnections.OnClientStarted.RemoveListener(OnStartClient);
             _connectionManager.NetworkConnections.OnClientStopped.RemoveListener(OnStopClient);
@@ -306,29 +331,42 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _connectionManager.RoomConnections.OnClientRoomListRemove.RemoveListener(RemoveRoomList);
 
             _connectionManager.RoomConnections.OnClientRoomIDMessage.RemoveListener(GetRoomIDForClient);
+#endif
 
             // Clean up state machine handlers
             if (_enableStateMachine)
             {
+#if REFLECTIVE_SERVER
                 RoomStateNetworkHandlers.UnregisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
                 RoomStateNetworkHandlers.UnregisterClientHandlers();
                 RoomStateNetworkHandlers.ClearClientEvents();
+#endif
             }
 
             // Clean up role system handlers
             if (_enableRoleSystem)
             {
+#if REFLECTIVE_SERVER
                 RoomRoleNetworkHandlers.UnregisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
                 RoomRoleNetworkHandlers.UnregisterClientHandlers();
                 RoomRoleNetworkHandlers.ClearClientEvents();
+#endif
             }
 
             // Clean up room discovery handlers
             if (_enableRoomDiscovery)
             {
+#if REFLECTIVE_SERVER
                 RoomDiscoveryNetworkHandlers.UnregisterServerHandlers();
+#endif
+#if REFLECTIVE_CLIENT
                 RoomDiscoveryNetworkHandlers.UnregisterClientHandlers();
                 RoomDiscoveryNetworkHandlers.ClearClientEvents();
+#endif
             }
 
             // Clean up party system

@@ -1,3 +1,4 @@
+#if REFLECTIVE_CLIENT
 using System;
 using Mirror;
 using UnityEngine;
@@ -143,3 +144,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Scenes
         }
     }
 }
+#endif

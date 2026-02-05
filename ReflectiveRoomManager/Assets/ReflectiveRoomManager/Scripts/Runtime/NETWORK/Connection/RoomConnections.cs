@@ -13,8 +13,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
 
     public class RoomConnections
     {
+#if REFLECTIVE_SERVER
         private RateLimiter _rateLimiter;
-        private RuntimeContainerHandler _runtimeContainerHandler;
 
         internal void SetRateLimiter(RateLimiter rateLimiter)
         {
@@ -29,28 +29,57 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         public readonly ConnectionEvent<Scene> OnServerRoomSceneLoaded = new(false);
         public readonly ConnectionEvent<Scene> OnServerRoomSceneChanged = new(false);
 
+        internal void AddRegistersForServer()
+        {
+            NetworkServer.RegisterHandler<ServerRoomMessage>(OnReceivedRoomMessageViaServer);
+        }
+
+        private void OnReceivedRoomMessageViaServer(NetworkConnectionToClient conn, ServerRoomMessage msg)
+        {
+            if (_rateLimiter != null && !_rateLimiter.IsAllowed(conn))
+            {
+                Debug.LogWarning($"[RateLimiter] Connection {conn.connectionId} exceeded rate limit");
+                conn.Send(new ClientRoomMessage(ClientRoomState.Fail));
+                return;
+            }
+
+            switch (msg.ServerRoomState)
+            {
+                case ServerRoomState.Create:
+                    OnServerCreateRoom.Call(msg.RoomInfo, conn);
+                    break;
+                case ServerRoomState.Join:
+                    OnServerJoinRoom.Call(conn, msg.RoomInfo.RoomName, msg.AccessToken ?? string.Empty);
+                    break;
+                case ServerRoomState.Exit:
+                    OnServerExitRoom.Call(conn, msg.IsDisconnected);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid ServerRoomState", nameof(msg.ServerRoomState));
+            }
+        }
+#endif
+
+#if REFLECTIVE_CLIENT
+        private RuntimeContainerHandler _runtimeContainerHandler;
+
         //CLIENT SIDE
         public readonly ConnectionEvent<RoomInfo> OnClientRoomListAdd = new(false);
         public readonly ConnectionEvent<RoomInfo> OnClientRoomListUpdate = new(false);
         public readonly ConnectionEvent<RoomInfo> OnClientRoomListRemove = new(false);
-        
+
         public readonly ConnectionEvent<uint> OnClientRoomIDMessage = new(false);
-        
+
         public readonly ConnectionEvent OnClientCreatedRoom = new(false);
         public readonly ConnectionEvent OnClientJoinedRoom = new(false);
         public readonly ConnectionEvent OnClientRemovedRoom = new(false);
         public readonly ConnectionEvent OnClientExitedRoom = new(false);
         public readonly ConnectionEvent OnClientFailedRoom = new(false);
-        
+
         public readonly ConnectionEvent<SceneLoadMessage> OnClientSceneLoaded = new(false);
 
         public readonly ConnectionEvent<float> OnClientShutdownWarning = new(false);
 
-        internal void AddRegistersForServer()
-        {
-            NetworkServer.RegisterHandler<ServerRoomMessage>(OnReceivedRoomMessageViaServer);
-        }
-        
         internal void AddRegistersForClient(bool initializeContainerHandler = true)
         {
             NetworkClient.RegisterHandler<ClientRoomMessage>(OnReceivedRoomMessageViaClient);
@@ -89,11 +118,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
                     throw new ArgumentException("Invalid RoomMessageState", nameof(msg.State));
             }
         }
-        
-        /// <summary>
-        /// Gets the connection information of the client connecting to the server
-        /// </summary>
-        /// <param name="msg"></param>
+
         private void OnReceivedRoomIDViaClient(ClientRoomIDMessage msg)
         {
             OnClientRoomIDMessage.Call(msg.RoomID);
@@ -103,46 +128,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
         {
             OnClientSceneLoaded?.Call(msg);
         }
-        
-        /// <summary>
-        /// This function is triggered by an event from the "client". It performs various operations based on the incoming event.
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="msg"></param>
-        private void OnReceivedRoomMessageViaServer(NetworkConnectionToClient conn, ServerRoomMessage msg)
-        {
-            if (_rateLimiter != null && !_rateLimiter.IsAllowed(conn))
-            {
-                Debug.LogWarning($"[RateLimiter] Connection {conn.connectionId} exceeded rate limit");
-                conn.Send(new ClientRoomMessage(ClientRoomState.Fail));
-                return;
-            }
-
-            switch (msg.ServerRoomState)
-            {
-                case ServerRoomState.Create:
-                    OnServerCreateRoom.Call(msg.RoomInfo, conn);
-                    break;
-                case ServerRoomState.Join:
-                    OnServerJoinRoom.Call(conn, msg.RoomInfo.RoomName, msg.AccessToken ?? string.Empty);
-                    break;
-                case ServerRoomState.Exit:
-                    OnServerExitRoom.Call(conn, msg.IsDisconnected);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid ServerRoomState", nameof(msg.ServerRoomState));
-            }
-        }
 
         private void OnReceivedShutdownWarning(ServerShutdownWarningMessage msg)
         {
             OnClientShutdownWarning.Call(msg.SecondsRemaining);
         }
 
-        /// <summary>
-        /// This function is triggered by an event from the "server". It performs various operations based on the incoming event.
-        /// </summary>
-        /// <param name="msg"></param>
         private void OnReceivedRoomMessageViaClient(ClientRoomMessage msg)
         {
             switch (msg.ClientRoomState)
@@ -166,5 +157,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Connection
                     throw new ArgumentException("Invalid ClientRoomState", nameof(msg.ClientRoomState));
             }
         }
+#endif
     }
 }

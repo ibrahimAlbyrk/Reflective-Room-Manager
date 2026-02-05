@@ -10,8 +10,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
     /// </summary>
     public static class RoomDiscoveryNetworkHandlers
     {
+#if REFLECTIVE_SERVER
         private static bool _serverHandlersRegistered;
-        private static bool _clientHandlersRegistered;
 
         public static void RegisterServerHandlers()
         {
@@ -25,34 +25,12 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
             _serverHandlersRegistered = true;
         }
 
-        public static void RegisterClientHandlers()
-        {
-            if (_clientHandlersRegistered)
-            {
-                Debug.LogWarning("[RoomDiscoveryNetworkHandlers] Client handlers already registered");
-                return;
-            }
-
-            NetworkClient.RegisterHandler<RoomQueryResponseMessage>(OnClientRoomQueryResponse);
-            NetworkClient.RegisterHandler<RoomDeltaUpdateMessage>(OnClientRoomDeltaUpdate);
-            _clientHandlersRegistered = true;
-        }
-
         public static void UnregisterServerHandlers()
         {
             if (!_serverHandlersRegistered) return;
 
             NetworkServer.UnregisterHandler<RoomQueryRequestMessage>();
             _serverHandlersRegistered = false;
-        }
-
-        public static void UnregisterClientHandlers()
-        {
-            if (!_clientHandlersRegistered) return;
-
-            NetworkClient.UnregisterHandler<RoomQueryResponseMessage>();
-            NetworkClient.UnregisterHandler<RoomDeltaUpdateMessage>();
-            _clientHandlersRegistered = false;
         }
 
         private static void OnServerRoomQuery(NetworkConnectionToClient conn, RoomQueryRequestMessage msg)
@@ -76,19 +54,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
             conn.Send(new RoomQueryResponseMessage(response));
         }
 
-        private static void OnClientRoomQueryResponse(RoomQueryResponseMessage msg)
-        {
-            OnClientRoomQueryResponseReceived?.Invoke(msg.Response);
-        }
-
-        private static void OnClientRoomDeltaUpdate(RoomDeltaUpdateMessage msg)
-        {
-            OnClientRoomDeltaUpdateReceived?.Invoke(msg.Update);
-        }
-
-        /// <summary>
-        /// Broadcasts delta update to all connected clients.
-        /// </summary>
         public static void BroadcastDeltaUpdate(RoomDeltaUpdate update)
         {
             if (!NetworkServer.active) return;
@@ -101,10 +66,43 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
                     conn.Send(message);
             }
         }
+#endif
 
-        /// <summary>
-        /// Sends a room query request from the client.
-        /// </summary>
+#if REFLECTIVE_CLIENT
+        private static bool _clientHandlersRegistered;
+
+        public static void RegisterClientHandlers()
+        {
+            if (_clientHandlersRegistered)
+            {
+                Debug.LogWarning("[RoomDiscoveryNetworkHandlers] Client handlers already registered");
+                return;
+            }
+
+            NetworkClient.RegisterHandler<RoomQueryResponseMessage>(OnClientRoomQueryResponse);
+            NetworkClient.RegisterHandler<RoomDeltaUpdateMessage>(OnClientRoomDeltaUpdate);
+            _clientHandlersRegistered = true;
+        }
+
+        public static void UnregisterClientHandlers()
+        {
+            if (!_clientHandlersRegistered) return;
+
+            NetworkClient.UnregisterHandler<RoomQueryResponseMessage>();
+            NetworkClient.UnregisterHandler<RoomDeltaUpdateMessage>();
+            _clientHandlersRegistered = false;
+        }
+
+        private static void OnClientRoomQueryResponse(RoomQueryResponseMessage msg)
+        {
+            OnClientRoomQueryResponseReceived?.Invoke(msg.Response);
+        }
+
+        private static void OnClientRoomDeltaUpdate(RoomDeltaUpdateMessage msg)
+        {
+            OnClientRoomDeltaUpdateReceived?.Invoke(msg.Update);
+        }
+
         public static void SendQueryRequest(RoomQueryRequest request)
         {
             if (!NetworkClient.active)
@@ -116,9 +114,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
             NetworkClient.Send(new RoomQueryRequestMessage(request));
         }
 
-        /// <summary>
-        /// Sends a room query request built from a RoomFilter.
-        /// </summary>
         public static void SendQueryRequest(
             RoomFilter filter,
             RoomSortOptions sortBy = RoomSortOptions.None,
@@ -129,18 +124,10 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
             SendQueryRequest(request);
         }
 
-        // Client-side events
         public delegate void RoomQueryResponseHandler(RoomQueryResponse response);
         public delegate void RoomDeltaUpdateHandler(RoomDeltaUpdate update);
 
-        /// <summary>
-        /// Fired when client receives a room query response.
-        /// </summary>
         public static event RoomQueryResponseHandler OnClientRoomQueryResponseReceived;
-
-        /// <summary>
-        /// Fired when client receives a delta update.
-        /// </summary>
         public static event RoomDeltaUpdateHandler OnClientRoomDeltaUpdateReceived;
 
         public static void ClearClientEvents()
@@ -148,5 +135,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Discovery.Handlers
             OnClientRoomQueryResponseReceived = null;
             OnClientRoomDeltaUpdateReceived = null;
         }
+#endif
     }
 }

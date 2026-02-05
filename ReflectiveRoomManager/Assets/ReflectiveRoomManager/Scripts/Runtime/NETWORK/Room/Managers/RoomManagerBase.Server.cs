@@ -1,4 +1,4 @@
-﻿using Mirror;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +10,7 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
 
     public abstract partial class RoomManagerBase
     {
+#if REFLECTIVE_SERVER
         private readonly HashSet<NetworkConnectionToClient> _deferredDisconnects = new();
 
         protected virtual void OnStartServer()
@@ -55,33 +56,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             RemoveAllRoom(forced:true);
         }
 
-        protected virtual void OnStartClient()
-        {
-            var useSceneManagement = RoomLoaderType != Loader.RoomLoaderType.NoneScene;
-            _connectionManager.RoomConnections.AddRegistersForClient(useSceneManagement);
-
-            // Register party client handlers
-            RegisterPartyClientHandlers();
-
-            // Register team client handlers
-            RegisterTeamClientHandlers();
-
-            // Register template client handlers
-            RegisterTemplateClientHandlers();
-        }
-
-        protected virtual void OnStopClient()
-        {
-            // Unregister party client handlers
-            UnregisterPartyClientHandlers();
-
-            // Unregister team client handlers
-            UnregisterTeamClientHandlers();
-
-            // Unregister template client handlers
-            UnregisterTemplateClientHandlers();
-        }
-
         protected virtual void OnServerConnect(NetworkConnection conn)
         {
             if (_isShuttingDown)
@@ -120,14 +94,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             return _deferredDisconnects.Remove(conn);
         }
 
-        protected virtual void OnClientConnect()
-        {
-        }
-
-        protected virtual void OnClientDisconnect()
-        {
-        }
-
         public void GracefulShutdown(float warningSeconds = 10f)
         {
             if (_isShuttingDown) return;
@@ -157,5 +123,43 @@ namespace REFLECTIVE.Runtime.NETWORK.Room
             _isShuttingDown = false;
             _shutdownCoroutine = null;
         }
+#endif
+
+#if REFLECTIVE_CLIENT
+        protected virtual void OnStartClient()
+        {
+            var useSceneManagement = RoomLoaderType != Loader.RoomLoaderType.NoneScene;
+            _connectionManager.RoomConnections.AddRegistersForClient(useSceneManagement);
+
+            // Register party client handlers
+            RegisterPartyClientHandlers();
+
+            // Register team client handlers
+            RegisterTeamClientHandlers();
+
+            // Register template client handlers
+            RegisterTemplateClientHandlers();
+        }
+
+        protected virtual void OnStopClient()
+        {
+            // Unregister party client handlers
+            UnregisterPartyClientHandlers();
+
+            // Unregister team client handlers
+            UnregisterTeamClientHandlers();
+
+            // Unregister template client handlers
+            UnregisterTemplateClientHandlers();
+        }
+
+        protected virtual void OnClientConnect()
+        {
+        }
+
+        protected virtual void OnClientDisconnect()
+        {
+        }
+#endif
     }
 }

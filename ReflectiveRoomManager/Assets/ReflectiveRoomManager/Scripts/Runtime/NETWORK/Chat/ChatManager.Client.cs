@@ -1,3 +1,4 @@
+#if REFLECTIVE_CLIENT
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
@@ -217,3 +218,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
         #endregion
     }
 }
+#endif

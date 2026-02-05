@@ -1,4 +1,5 @@
-﻿using Mirror;
+#if REFLECTIVE_SERVER
+using Mirror;
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
@@ -108,3 +109,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Utilities
         }
     }
 }
+#endif

@@ -24,15 +24,19 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
         [Header("Configuration")]
         [SerializeField] private ChatSettings _settings;
 
+#if REFLECTIVE_SERVER
         // Server-side components
         private MessageHistory _serverHistory;
         private MuteManager _muteManager;
         private ChatRateLimiter _rateLimiter;
         private List<IChatFilter> _filters;
         private Dictionary<uint, string> _playerNames;
+#endif
 
+#if REFLECTIVE_CLIENT
         // Client-side components
         private Dictionary<ChatChannel, List<ChatMessage>> _clientHistory;
+#endif
 
         // Events
         public event Action<ChatMessage> OnMessageReceived;
@@ -79,13 +83,18 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
                 return;
             }
 
+#if REFLECTIVE_SERVER
             if (NetworkServer.active)
                 InitializeServer();
+#endif
 
+#if REFLECTIVE_CLIENT
             if (NetworkClient.active)
                 InitializeClient();
+#endif
         }
 
+#if REFLECTIVE_SERVER
         private void InitializeServer()
         {
             _serverHistory = new MessageHistory(_settings.MaxHistoryPerChannel);
@@ -97,14 +106,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
             RegisterServerHandlers();
 
             Debug.Log("[ChatManager] Server initialized.");
-        }
-
-        private void InitializeClient()
-        {
-            _clientHistory = new Dictionary<ChatChannel, List<ChatMessage>>();
-            RegisterClientHandlers();
-
-            Debug.Log("[ChatManager] Client initialized.");
         }
 
         private void InitializeFilters()
@@ -126,6 +127,16 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
             NetworkServer.RegisterHandler<ChatRequestMessage>(OnServerChatRequest);
             NetworkServer.RegisterHandler<ChatHistoryRequestMessage>(OnServerHistoryRequest);
         }
+#endif
+
+#if REFLECTIVE_CLIENT
+        private void InitializeClient()
+        {
+            _clientHistory = new Dictionary<ChatChannel, List<ChatMessage>>();
+            RegisterClientHandlers();
+
+            Debug.Log("[ChatManager] Client initialized.");
+        }
 
         private void RegisterClientHandlers()
         {
@@ -133,23 +144,29 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
             NetworkClient.RegisterHandler<ChatErrorMessage>(OnClientChatError);
             NetworkClient.RegisterHandler<ChatHistoryResponseMessage>(OnClientHistoryResponse);
         }
+#endif
 
         private void UnregisterHandlers()
         {
+#if REFLECTIVE_SERVER
             if (NetworkServer.active)
             {
                 NetworkServer.UnregisterHandler<ChatRequestMessage>();
                 NetworkServer.UnregisterHandler<ChatHistoryRequestMessage>();
             }
+#endif
 
+#if REFLECTIVE_CLIENT
             if (NetworkClient.active)
             {
                 NetworkClient.UnregisterHandler<ChatBroadcastMessage>();
                 NetworkClient.UnregisterHandler<ChatErrorMessage>();
                 NetworkClient.UnregisterHandler<ChatHistoryResponseMessage>();
             }
+#endif
         }
 
+#if REFLECTIVE_SERVER
         /// <summary>
         /// Cleans up server resources. Call when server stops.
         /// </summary>
@@ -163,7 +180,9 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
 
             Debug.Log("[ChatManager] Server cleanup complete.");
         }
+#endif
 
+#if REFLECTIVE_CLIENT
         /// <summary>
         /// Cleans up client resources. Call when client disconnects.
         /// </summary>
@@ -173,5 +192,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Chat
 
             Debug.Log("[ChatManager] Client cleanup complete.");
         }
+#endif
     }
 }

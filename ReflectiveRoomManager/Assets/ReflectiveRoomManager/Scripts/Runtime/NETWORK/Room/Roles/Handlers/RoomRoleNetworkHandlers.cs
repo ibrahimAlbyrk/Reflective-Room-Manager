@@ -11,10 +11,8 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
     /// </summary>
     public static class RoomRoleNetworkHandlers
     {
+#if REFLECTIVE_SERVER
         private static bool _serverHandlersRegistered;
-        private static bool _clientHandlersRegistered;
-
-        #region Handler Registration
 
         public static void RegisterServerHandlers()
         {
@@ -28,19 +26,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
             _serverHandlersRegistered = true;
         }
 
-        public static void RegisterClientHandlers()
-        {
-            if (_clientHandlersRegistered)
-            {
-                Debug.LogWarning("[RoomRoleNetworkHandlers] Client handlers already registered");
-                return;
-            }
-
-            NetworkClient.RegisterHandler<RoomRoleChangeMessage>(OnClientRoleChange);
-            NetworkClient.RegisterHandler<RoomRoleListMessage>(OnClientRoleList);
-            _clientHandlersRegistered = true;
-        }
-
         public static void UnregisterServerHandlers()
         {
             if (!_serverHandlersRegistered) return;
@@ -49,22 +34,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
             _serverHandlersRegistered = false;
         }
 
-        public static void UnregisterClientHandlers()
-        {
-            if (!_clientHandlersRegistered) return;
-
-            NetworkClient.UnregisterHandler<RoomRoleChangeMessage>();
-            NetworkClient.UnregisterHandler<RoomRoleListMessage>();
-            _clientHandlersRegistered = false;
-        }
-
-        #endregion
-
-        #region Server Handlers
-
-        /// <summary>
-        /// Server receives role assignment request from client.
-        /// </summary>
         private static void OnServerRoleAssignment(NetworkConnectionToClient conn, RoleAssignmentRequest msg)
         {
             var roomManager = RoomManagerBase.Instance;
@@ -94,33 +63,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
             }
         }
 
-        #endregion
-
-        #region Client Handlers
-
-        /// <summary>
-        /// Client receives role change notification.
-        /// </summary>
-        private static void OnClientRoleChange(RoomRoleChangeMessage msg)
-        {
-            OnClientRoomRoleChanged?.Invoke(msg.RoomID, msg.TargetConnectionID, msg.NewRole, msg.CustomPermissions);
-        }
-
-        /// <summary>
-        /// Client receives full role list (on room join).
-        /// </summary>
-        private static void OnClientRoleList(RoomRoleListMessage msg)
-        {
-            OnClientRoomRoleListReceived?.Invoke(msg.RoomID, msg.Roles);
-        }
-
-        #endregion
-
-        #region Broadcasting
-
-        /// <summary>
-        /// Broadcasts role change to all clients in room.
-        /// </summary>
         public static void BroadcastRoleChange(Room room, NetworkConnection target, RoomRole newRole)
         {
             if (room?.RoleManager == null) return;
@@ -144,9 +86,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
             }
         }
 
-        /// <summary>
-        /// Sends full role list to newly joined player.
-        /// </summary>
         public static void SendRoleListToClient(NetworkConnection conn, Room room)
         {
             if (room?.RoleManager == null) return;
@@ -177,21 +116,46 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
             conn.Send(message);
         }
 
-        #endregion
-
-        #region Helpers
-
-        /// <summary>
-        /// Helper: Gets NetworkConnection by ID.
-        /// </summary>
         private static NetworkConnection GetConnectionByID(uint connectionId)
         {
             return NetworkServer.connections.TryGetValue((int)connectionId, out var conn) ? conn : null;
         }
+#endif
 
-        #endregion
+#if REFLECTIVE_CLIENT
+        private static bool _clientHandlersRegistered;
 
-        #region Client Events
+        public static void RegisterClientHandlers()
+        {
+            if (_clientHandlersRegistered)
+            {
+                Debug.LogWarning("[RoomRoleNetworkHandlers] Client handlers already registered");
+                return;
+            }
+
+            NetworkClient.RegisterHandler<RoomRoleChangeMessage>(OnClientRoleChange);
+            NetworkClient.RegisterHandler<RoomRoleListMessage>(OnClientRoleList);
+            _clientHandlersRegistered = true;
+        }
+
+        public static void UnregisterClientHandlers()
+        {
+            if (!_clientHandlersRegistered) return;
+
+            NetworkClient.UnregisterHandler<RoomRoleChangeMessage>();
+            NetworkClient.UnregisterHandler<RoomRoleListMessage>();
+            _clientHandlersRegistered = false;
+        }
+
+        private static void OnClientRoleChange(RoomRoleChangeMessage msg)
+        {
+            OnClientRoomRoleChanged?.Invoke(msg.RoomID, msg.TargetConnectionID, msg.NewRole, msg.CustomPermissions);
+        }
+
+        private static void OnClientRoleList(RoomRoleListMessage msg)
+        {
+            OnClientRoomRoleListReceived?.Invoke(msg.RoomID, msg.Roles);
+        }
 
         public delegate void ClientRoleChangedHandler(uint roomID, uint connectionID, RoomRole newRole, int customPermissions);
         public delegate void ClientRoleListReceivedHandler(uint roomID, RoomRoleEntry[] roles);
@@ -204,7 +168,6 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Roles.Handlers
             OnClientRoomRoleChanged = null;
             OnClientRoomRoleListReceived = null;
         }
-
-        #endregion
+#endif
     }
 }

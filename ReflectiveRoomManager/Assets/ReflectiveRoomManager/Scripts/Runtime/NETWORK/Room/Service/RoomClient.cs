@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+#if REFLECTIVE_CLIENT
+using UnityEngine;
 
 namespace REFLECTIVE.Runtime.NETWORK.Room.Service
 {
@@ -75,3 +76,4 @@ namespace REFLECTIVE.Runtime.NETWORK.Room.Service
         #endregion
     }
 }
+#endif
